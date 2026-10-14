@@ -1,402 +1,216 @@
+import { useMemo } from 'react';
+import { MessageInitShape } from '@bufbuild/protobuf';
 import { useMutation } from '@tanstack/react-query';
 
 import {
-  type NetworkClass,
-  NetworkClassSchema,
-  type NetworkClassesListResponse,
-  NetworkClassesListResponseSchema,
+  type ExternalIP,
+  ExternalIPState,
+  ExternalIPs,
+  type NATGateway,
+  NATGateways,
   type SecurityGroup,
   SecurityGroupSchema,
-  type SecurityGroupsListResponse,
-  SecurityGroupsListResponseSchema,
+  SecurityGroupState,
+  SecurityGroups,
   type Subnet,
   SubnetSchema,
-  type SubnetsListResponse,
-  SubnetsListResponseSchema,
+  SubnetState,
+  Subnets,
   type VirtualNetwork,
   VirtualNetworkSchema,
-  type VirtualNetworksListResponse,
-  VirtualNetworksListResponseSchema,
+  VirtualNetworkState,
+  VirtualNetworks,
 } from '@osac/types';
+import { SecurityGroups as PrivateSecurityGroups } from '@osac/types/private';
 
 import { useApiFetch } from '../api-context';
-import { apiQueryKey } from '../types';
-import { useApiQuery, useApiQueryClient } from '../use-api-query';
-
-export type ListNetworkingParams = {
-  filter?: string;
-  limit?: number;
-  offset?: number;
-  order?: string;
-};
+import { cel } from '../cel';
+import { type ListParams, apiQueryKey } from '../types';
+import { type ApiQueryClient, useApiQuery, useApiQueryClient } from '../use-api-query';
+import { useListResource } from '../use-resource';
 
 type NetworkingQueryOptions = {
   enabled?: boolean;
 };
 
-export const useVirtualNetworks = (
-  params: ListNetworkingParams = {},
-  options: NetworkingQueryOptions = {},
-) =>
-  useApiQuery<VirtualNetworksListResponse, VirtualNetwork[]>({
-    queryKey: ['v1/virtual_networks', null, params],
-    select: (data) => data.items,
-    meta: { decode: VirtualNetworksListResponseSchema },
-    enabled: options.enabled ?? true,
-  });
+export interface NatGatewayWithAddress {
+  natGateway: NATGateway;
+  address?: string;
+}
 
-export const useSubnets = (
-  params: ListNetworkingParams = {},
+export const useVirtualNetworks = (
+  params: ListParams = {},
   options: NetworkingQueryOptions = {},
-) =>
-  useApiQuery<SubnetsListResponse, Subnet[]>({
-    queryKey: ['v1/subnets', null, params],
+) => {
+  const client = useApiFetch(VirtualNetworks);
+  return useApiQuery({
+    queryKey: apiQueryKey('v1/virtual_networks', undefined, params),
+    queryFn: () => client.list(params),
     select: (data) => data.items,
-    meta: { decode: SubnetsListResponseSchema },
     enabled: options.enabled ?? true,
   });
+};
+
+export const useSubnets = (params: ListParams = {}, options: NetworkingQueryOptions = {}) => {
+  const client = useApiFetch(Subnets);
+  return useApiQuery({
+    queryKey: apiQueryKey('v1/subnets', undefined, params),
+    queryFn: () => client.list(params),
+    select: (data) => data.items,
+    enabled: options.enabled ?? true,
+  });
+};
 
 export const useSecurityGroups = (
-  params: ListNetworkingParams = {},
+  params: ListParams = {},
   options: NetworkingQueryOptions = {},
-) =>
-  useApiQuery<SecurityGroupsListResponse, SecurityGroup[]>({
-    queryKey: ['v1/security_groups', null, params],
-    select: (data) => data.items,
-    meta: { decode: SecurityGroupsListResponseSchema },
-    enabled: options.enabled ?? true,
-  });
-
-export const useSecurityGroup = (id: string) => {
-  const trimmedId = id?.trim() ?? '';
-  return useApiQuery<SecurityGroup>({
-    queryKey: ['v1/security_groups', [trimmedId]],
-    meta: { decode: SecurityGroupSchema },
-    enabled: Boolean(trimmedId),
-  });
-};
-
-export const useVirtualNetwork = (id: string) => {
-  const trimmedId = id?.trim() ?? '';
-  return useApiQuery<VirtualNetwork>({
-    queryKey: ['v1/virtual_networks', [trimmedId]],
-    meta: { decode: VirtualNetworkSchema },
-    enabled: Boolean(trimmedId),
-  });
-};
-
-export const useNetworkClasses = (
-  params: ListNetworkingParams = {},
-  options: NetworkingQueryOptions = {},
-) =>
-  useApiQuery<NetworkClassesListResponse, NetworkClass[]>({
-    queryKey: ['v1/network_classes', null, params],
-    select: (data) => data.items,
-    meta: { decode: NetworkClassesListResponseSchema },
-    enabled: options.enabled ?? true,
-  });
-
-// ---------------------------------------------------------------------------
-// NetworkClass mutations (provider admin)
-// ---------------------------------------------------------------------------
-
-export type CreateNetworkClassInput = {
-  name: string;
-  title: string;
-  description?: string;
-  supportsIpv4: boolean;
-  supportsIpv6: boolean;
-  supportsDualStack: boolean;
-  isDefault?: boolean;
-};
-
-export const invalidateNetworkClassesQueries = async (qc: ReturnType<typeof useApiQueryClient>) => {
-  await qc.invalidateQueries({ queryKey: apiQueryKey('v1/network_classes', null) });
-};
-
-export const useCreateNetworkClass = () => {
-  const apiFetch = useApiFetch();
-  const qc = useApiQueryClient();
-  return useMutation({
-    mutationFn: ({
-      name,
-      title,
-      description,
-      supportsIpv4,
-      supportsIpv6,
-      supportsDualStack,
-      isDefault,
-    }: CreateNetworkClassInput) =>
-      apiFetch<NetworkClass>('v1/network_classes', {
-        method: 'POST',
-        body: {
-          metadata: { name },
-          title,
-          ...(description ? { description } : {}),
-          capabilities: {
-            supports_ipv4: supportsIpv4,
-            supports_ipv6: supportsIpv6,
-            supports_dual_stack: supportsDualStack,
-          },
-          ...(isDefault != null ? { is_default: isDefault } : {}),
-        },
-        decode: NetworkClassSchema,
-      }),
-    onSuccess: () => invalidateNetworkClassesQueries(qc),
-  });
-};
-
-export const useDeleteNetworkClass = () => {
-  const apiFetch = useApiFetch();
-  const qc = useApiQueryClient();
-  return useMutation({
-    mutationFn: (id: string) =>
-      apiFetch<void>('v1/network_classes', { pathParams: [id], method: 'DELETE' }),
-    onSuccess: () => invalidateNetworkClassesQueries(qc),
-  });
-};
-
-/**
- * @temp-api — price_per_hour is stored as a metadata label (REQ-BA-2 pending).
- * NetworkClass has no BillableComponent proto field yet; this is priced as an
- * infra pass-through component consumed by Cluster/VM/MaaS resources.
- */
-export const usePatchNetworkClass = () => {
-  const apiFetch = useApiFetch();
-  const qc = useApiQueryClient();
-  return useMutation({
-    mutationFn: ({ id, patch }: { id: string; patch: Partial<NetworkClass> }) =>
-      apiFetch<NetworkClass>('v1/network_classes', {
-        pathParams: [id],
-        method: 'PATCH',
-        body: patch,
-        decode: NetworkClassSchema,
-      }),
-    onSuccess: () => invalidateNetworkClassesQueries(qc),
-    retry: false,
-  });
-};
-
-// ---------------------------------------------------------------------------
-// Invalidation helpers
-// ---------------------------------------------------------------------------
-
-export const invalidateVirtualNetworksQueries = async (
-  qc: ReturnType<typeof useApiQueryClient>,
 ) => {
-  await qc.invalidateQueries({ queryKey: apiQueryKey('v1/virtual_networks', null) });
-};
-
-export const invalidateSubnetsQueries = async (qc: ReturnType<typeof useApiQueryClient>) => {
-  await qc.invalidateQueries({ queryKey: apiQueryKey('v1/subnets', null) });
-};
-
-export const invalidateSecurityGroupsQueries = async (qc: ReturnType<typeof useApiQueryClient>) => {
-  await qc.invalidateQueries({ queryKey: apiQueryKey('v1/security_groups', null) });
-};
-
-// ---------------------------------------------------------------------------
-// VirtualNetwork mutations
-// ---------------------------------------------------------------------------
-
-export type CreateVirtualNetworkInput = {
-  name: string;
-  networkClass: string;
-  ipv4Cidr?: string;
-};
-
-export const useCreateVirtualNetwork = () => {
-  const apiFetch = useApiFetch();
-  const qc = useApiQueryClient();
-  return useMutation({
-    mutationFn: ({ name, networkClass, ipv4Cidr }: CreateVirtualNetworkInput) =>
-      apiFetch<VirtualNetwork>('v1/virtual_networks', {
-        method: 'POST',
-        body: {
-          metadata: { name },
-          spec: {
-            network_class: networkClass,
-            ...(ipv4Cidr ? { ipv4_cidr: ipv4Cidr } : {}),
-          },
-        },
-        decode: VirtualNetworkSchema,
-      }),
-    onSuccess: () => invalidateVirtualNetworksQueries(qc),
+  const client = useApiFetch(SecurityGroups);
+  return useApiQuery({
+    queryKey: apiQueryKey('v1/security_groups', undefined, params),
+    queryFn: () => client.list(params),
+    select: (data) => data.items,
+    enabled: options.enabled ?? true,
   });
 };
 
-export const useDeleteVirtualNetwork = () => {
-  const apiFetch = useApiFetch();
-  const qc = useApiQueryClient();
-  return useMutation({
-    mutationFn: (id: string) =>
-      apiFetch<void>('v1/virtual_networks', { pathParams: [id], method: 'DELETE' }),
-    onSuccess: () => invalidateVirtualNetworksQueries(qc),
+// Scope + ready filter: use where only attachable subnets are valid (e.g. the VM
+// provisioning wizard). Not for the detail page — it hides non-ready subnets.
+export const virtualNetworkFilterForSubnetList = (virtualNetworkId: string) =>
+  cel<Subnet>((filter) =>
+    filter.and(
+      filter.field('spec.virtualNetwork.id').equals(virtualNetworkId),
+      filter.field('status.state').equals(SubnetState.READY),
+    ),
+  );
+
+export const securityGroupFilterForVirtualNetworkList = (virtualNetworkId: string) =>
+  cel<SecurityGroup>((filter) =>
+    filter.and(
+      filter.field('spec.virtualNetwork.id').equals(virtualNetworkId),
+      filter.field('status.state').equals(SecurityGroupState.READY),
+    ),
+  );
+
+export const VIRTUAL_NETWORK_READY_LIST_FILTER = cel<VirtualNetwork>((filter) =>
+  filter.field('status.state').equals(VirtualNetworkState.READY),
+);
+
+export const unallocatedExternalIpFilter = (project?: string) =>
+  cel<ExternalIP>((filter) =>
+    filter.and(
+      project !== undefined ? filter.field('metadata.project').equals(project) : undefined,
+      filter.field('status.state').equals(ExternalIPState.EXTERNAL_IP_STATE_ALLOCATED),
+      filter.field('status.attached').equals(false),
+    ),
+  );
+
+export const externalIpIdsFilter = (ids: readonly string[]) =>
+  cel<ExternalIP>((filter) => filter.field('id').isIn(ids));
+
+export const virtualNetworkScopeFilter = (virtualNetworkId: string) =>
+  cel<Subnet>((filter) => filter.field('spec.virtualNetwork.id').equals(virtualNetworkId));
+
+const buildExternalIpAddressById = (externalIps: readonly ExternalIP[]) => {
+  const byId: Record<string, string> = {};
+  for (const ip of externalIps) {
+    if (ip.id && ip.status?.address) {
+      byId[ip.id] = ip.status.address;
+    }
+  }
+  return byId;
+};
+
+const buildNatGatewaysByVirtualNetworkId = (
+  natGateways: readonly NATGateway[],
+  externalIps: readonly ExternalIP[],
+): Record<string, NatGatewayWithAddress> => {
+  const addressByExternalIpId = buildExternalIpAddressById(externalIps);
+  const byVirtualNetworkId: Record<string, NatGatewayWithAddress> = {};
+
+  for (const natGateway of natGateways) {
+    const virtualNetworkId = natGateway.spec?.virtualNetwork?.id;
+    if (virtualNetworkId && !byVirtualNetworkId[virtualNetworkId]) {
+      byVirtualNetworkId[virtualNetworkId] = {
+        natGateway,
+        address: natGateway.spec?.externalIp?.id
+          ? addressByExternalIpId[natGateway.spec.externalIp.id]
+          : undefined,
+      };
+    }
+  }
+
+  return byVirtualNetworkId;
+};
+
+// NAT Gateway attachments reference the External IP by ID instead of exposing its address,
+// so this hook joins the virtual-network-scoped NAT Gateway and External IP query results.
+export const useNatGateway = (virtualNetworkId: string) => {
+  const natGatewaysQuery = useListResource(NATGateways, {
+    filter: virtualNetworkScopeFilter(virtualNetworkId),
   });
+  const { data: natGatewaysResponse } = natGatewaysQuery;
+  const natGateway = natGatewaysResponse?.items?.[0];
+  const externalIpId = natGateway?.spec?.externalIp?.id;
+  // NAT Gateways expose only the External IP ID. Scope the join query to that ID
+  // and request one result so pagination cannot omit the address we need.
+  const externalIpsQuery = useListResource(
+    ExternalIPs,
+    externalIpId ? { filter: externalIpIdsFilter([externalIpId]), limit: 1 } : {},
+    { enabled: Boolean(externalIpId) },
+  );
+  const { data: externalIpsResponse } = externalIpsQuery;
+  const natAddress = externalIpsResponse?.items?.find((ip) => ip.id === externalIpId)?.status
+    ?.address;
+
+  return {
+    natGateway,
+    natAddress,
+    isLoading: natGatewaysQuery.isLoading || externalIpsQuery.isLoading,
+    error: natGatewaysQuery.error ?? externalIpsQuery.error,
+  };
 };
 
-// ---------------------------------------------------------------------------
-// Subnet mutations
-// ---------------------------------------------------------------------------
+// The list view needs a display-ready NAT Gateway and address for each virtual network.
+// Since those values come from separate backend resources, this hook joins both query results
+// and indexes the result by virtual network ID for direct component lookup.
+export const useNatGateways = () => {
+  const natGatewaysQuery = useListResource(NATGateways);
+  const { data: natGatewaysResponse } = natGatewaysQuery;
+  const externalIpIds = useMemo(
+    () =>
+      (natGatewaysResponse?.items ?? [])
+        .map((natGateway) => natGateway.spec?.externalIp?.id)
+        .filter((id): id is string => Boolean(id)),
+    [natGatewaysResponse?.items],
+  );
+  // NAT Gateways expose only External IP IDs. Fetch exactly those records and
+  // size the page to the reference count so no joined address is omitted.
+  const externalIpsQuery = useListResource(
+    ExternalIPs,
+    externalIpIds.length > 0
+      ? { filter: externalIpIdsFilter(externalIpIds), limit: externalIpIds.length }
+      : {},
+    { enabled: externalIpIds.length > 0 },
+  );
+  const { data: externalIpsResponse } = externalIpsQuery;
 
-export type CreateSubnetInput = {
-  name: string;
-  virtualNetworkId: string;
-  ipv4Cidr: string;
+  return {
+    natGatewaysByVirtualNetworkId: useMemo(
+      () =>
+        buildNatGatewaysByVirtualNetworkId(
+          natGatewaysResponse?.items ?? [],
+          externalIpsResponse?.items ?? [],
+        ),
+      [natGatewaysResponse?.items, externalIpsResponse?.items],
+    ),
+    isLoading: natGatewaysQuery.isLoading || externalIpsQuery.isLoading,
+    error: natGatewaysQuery.error ?? externalIpsQuery.error,
+  };
 };
-
-export const useCreateSubnet = () => {
-  const apiFetch = useApiFetch();
-  const qc = useApiQueryClient();
-  return useMutation({
-    mutationFn: ({ name, virtualNetworkId, ipv4Cidr }: CreateSubnetInput) =>
-      apiFetch<Subnet>('v1/subnets', {
-        method: 'POST',
-        body: {
-          metadata: { name },
-          spec: { virtual_network: virtualNetworkId, ipv4_cidr: ipv4Cidr },
-        },
-        decode: SubnetSchema,
-      }),
-    onSuccess: () => invalidateSubnetsQueries(qc),
-  });
-};
-
-export const useDeleteSubnet = () => {
-  const apiFetch = useApiFetch();
-  const qc = useApiQueryClient();
-  return useMutation({
-    mutationFn: (id: string) =>
-      apiFetch<void>('v1/subnets', { pathParams: [id], method: 'DELETE' }),
-    onSuccess: () => invalidateSubnetsQueries(qc),
-  });
-};
-
-/** Temporary PATCH hook — replace with fulfillment-service-supplied endpoint when available. */
-export type PatchSubnetInput = {
-  id: string;
-  ipv4Cidr?: string;
-  ipv6Cidr?: string;
-};
-
-export const usePatchSubnet = () => {
-  const apiFetch = useApiFetch();
-  const qc = useApiQueryClient();
-  return useMutation({
-    mutationFn: ({ id, ipv4Cidr, ipv6Cidr }: PatchSubnetInput) =>
-      apiFetch<Subnet>('v1/subnets', {
-        pathParams: [id],
-        method: 'PATCH',
-        body: {
-          spec: {
-            ...(ipv4Cidr != null ? { ipv4_cidr: ipv4Cidr } : {}),
-            ...(ipv6Cidr != null ? { ipv6_cidr: ipv6Cidr } : {}),
-          },
-        },
-        decode: SubnetSchema,
-      }),
-    onSuccess: () => invalidateSubnetsQueries(qc),
-  });
-};
-
-// ---------------------------------------------------------------------------
-// SecurityGroup mutations
-// ---------------------------------------------------------------------------
-
-export type SecurityRuleInput = {
-  protocol: number;
-  portFrom?: number;
-  portTo?: number;
-  ipv4Cidr?: string;
-};
-
-export type CreateSecurityGroupInput = {
-  name: string;
-  virtualNetworkId: string;
-  ingress: SecurityRuleInput[];
-  egress: SecurityRuleInput[];
-};
-
-export const useCreateSecurityGroup = () => {
-  const apiFetch = useApiFetch();
-  const qc = useApiQueryClient();
-  return useMutation({
-    mutationFn: ({ name, virtualNetworkId, ingress, egress }: CreateSecurityGroupInput) =>
-      apiFetch<SecurityGroup>('v1/security_groups', {
-        method: 'POST',
-        body: {
-          metadata: { name },
-          spec: {
-            virtual_network: virtualNetworkId,
-            ingress: ingress.map(({ protocol, portFrom, portTo, ipv4Cidr }) => ({
-              protocol,
-              ...(portFrom != null ? { port_from: portFrom } : {}),
-              ...(portTo != null ? { port_to: portTo } : {}),
-              ...(ipv4Cidr ? { ipv4_cidr: ipv4Cidr } : {}),
-            })),
-            egress: egress.map(({ protocol, portFrom, portTo, ipv4Cidr }) => ({
-              protocol,
-              ...(portFrom != null ? { port_from: portFrom } : {}),
-              ...(portTo != null ? { port_to: portTo } : {}),
-              ...(ipv4Cidr ? { ipv4_cidr: ipv4Cidr } : {}),
-            })),
-          },
-        },
-        decode: SecurityGroupSchema,
-      }),
-    onSuccess: () => invalidateSecurityGroupsQueries(qc),
-  });
-};
-
-/** Temporary PATCH hook — replace with fulfillment-service-supplied endpoint when available. */
-export type PatchSecurityGroupInput = {
-  id: string;
-  ingress: SecurityRuleInput[];
-  egress: SecurityRuleInput[];
-};
-
-const serializeRules = (rules: SecurityRuleInput[]) =>
-  rules.map(({ protocol, portFrom, portTo, ipv4Cidr }) => ({
-    protocol,
-    ...(portFrom != null ? { port_from: portFrom } : {}),
-    ...(portTo != null ? { port_to: portTo } : {}),
-    ...(ipv4Cidr ? { ipv4_cidr: ipv4Cidr } : {}),
-  }));
-
-export const usePatchSecurityGroup = () => {
-  const apiFetch = useApiFetch();
-  const qc = useApiQueryClient();
-  return useMutation({
-    mutationFn: ({ id, ingress, egress }: PatchSecurityGroupInput) =>
-      apiFetch<SecurityGroup>('v1/security_groups', {
-        pathParams: [id],
-        method: 'PATCH',
-        body: { spec: { ingress: serializeRules(ingress), egress: serializeRules(egress) } },
-        decode: SecurityGroupSchema,
-      }),
-    onSuccess: () => invalidateSecurityGroupsQueries(qc),
-  });
-};
-
-export const useDeleteSecurityGroup = () => {
-  const apiFetch = useApiFetch();
-  const qc = useApiQueryClient();
-  return useMutation({
-    mutationFn: (id: string) =>
-      apiFetch<void>('v1/security_groups', { pathParams: [id], method: 'DELETE' }),
-    onSuccess: () => invalidateSecurityGroupsQueries(qc),
-  });
-};
-
-// ---------------------------------------------------------------------------
-// Utilities
-// ---------------------------------------------------------------------------
-
-export const virtualNetworkFilterForSubnetList = (virtualNetworkId: string): string =>
-  `this.spec.virtual_network == "${virtualNetworkId}"`;
 
 export const resourceDisplayName = (metadata?: { name?: string }, id?: string): string =>
-  metadata?.name?.trim() || id?.trim() || '—';
+  metadata?.name?.trim() || id || '—';
 
 export const formatResourceIdsForReview = (
   ids: string[],
@@ -417,4 +231,140 @@ export const formatResourceIdsForReview = (
 export const formatResourceIdForReview = (
   id: string,
   resources: Array<{ id: string; metadata?: { name?: string } }>,
-): string => formatResourceIdsForReview(id.trim() ? [id] : [], resources);
+): string => formatResourceIdsForReview(id ? [id] : [], resources);
+
+export const useVirtualNetwork = (id: string) => {
+  const client = useApiFetch(VirtualNetworks);
+  return useApiQuery({
+    queryKey: apiQueryKey('v1/virtual_networks', [id]),
+    queryFn: () => client.get({ id }),
+    select: (data) => data.object,
+    enabled: Boolean(id),
+  });
+};
+
+export const useSubnet = (id: string) => {
+  const client = useApiFetch(Subnets);
+  return useApiQuery({
+    queryKey: apiQueryKey('v1/subnets', [id]),
+    queryFn: () => client.get({ id }),
+    select: (data) => data.object,
+    enabled: Boolean(id),
+  });
+};
+
+export const useSecurityGroup = (id: string) => {
+  const client = useApiFetch(SecurityGroups);
+  return useApiQuery({
+    queryKey: apiQueryKey('v1/security_groups', [id]),
+    queryFn: () => client.get({ id }),
+    select: (data) => data.object,
+    enabled: Boolean(id),
+  });
+};
+
+export const invalidateVirtualNetworksQueries = (qc: ApiQueryClient) =>
+  qc.invalidateQueries({ queryKey: apiQueryKey('v1/virtual_networks') });
+
+export const invalidateSubnetsQueries = (qc: ApiQueryClient) =>
+  qc.invalidateQueries({ queryKey: apiQueryKey('v1/subnets') });
+
+export const invalidateSecurityGroupsQueries = (qc: ApiQueryClient) =>
+  qc.invalidateQueries({ queryKey: apiQueryKey('v1/security_groups') });
+
+export const useCreateVirtualNetwork = () => {
+  const client = useApiFetch(VirtualNetworks);
+  const qc = useApiQueryClient();
+  return useMutation({
+    mutationFn: async (input: MessageInitShape<typeof VirtualNetworkSchema>) => {
+      const resp = await client.create({
+        object: input,
+      });
+      const vn = resp.object;
+      if (!vn?.id) {
+        throw new Error('Create response missing id');
+      }
+      return vn;
+    },
+    onSuccess: () => invalidateVirtualNetworksQueries(qc),
+  });
+};
+
+export const useDeleteVirtualNetwork = () => {
+  const client = useApiFetch(VirtualNetworks);
+  const qc = useApiQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => client.delete({ id }),
+    onSuccess: () => invalidateVirtualNetworksQueries(qc),
+  });
+};
+
+export const useCreateSubnet = () => {
+  const client = useApiFetch(Subnets);
+  const qc = useApiQueryClient();
+  return useMutation({
+    mutationFn: async (input: MessageInitShape<typeof SubnetSchema>) => {
+      const resp = await client.create({
+        object: input,
+      });
+      const subnet = resp.object;
+      if (!subnet?.id) {
+        throw new Error('Create response missing id');
+      }
+      return subnet;
+    },
+    onSuccess: () => invalidateSubnetsQueries(qc),
+  });
+};
+
+export const useDeleteSubnet = () => {
+  const client = useApiFetch(Subnets);
+  const qc = useApiQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => client.delete({ id }),
+    onSuccess: () => invalidateSubnetsQueries(qc),
+  });
+};
+
+export const securityGroupFilterForVirtualNetwork = (virtualNetworkId: string) =>
+  cel<SecurityGroup>((filter) => filter.field('spec.virtualNetwork.id').equals(virtualNetworkId));
+
+export const useCreateSecurityGroup = () => {
+  const client = useApiFetch(SecurityGroups);
+  const qc = useApiQueryClient();
+  return useMutation({
+    mutationFn: async (body: MessageInitShape<typeof SecurityGroupSchema>) => {
+      const resp = await client.create({ object: body });
+      const sg = resp.object;
+      if (!sg?.id) {
+        throw new Error('Create response missing id');
+      }
+      return sg;
+    },
+    onSuccess: () => invalidateSecurityGroupsQueries(qc),
+  });
+};
+
+export const useUpdateSecurityGroup = () => {
+  const client = useApiFetch(PrivateSecurityGroups);
+  const qc = useApiQueryClient();
+  return useMutation({
+    mutationFn: ({ object }: { object: MessageInitShape<typeof SecurityGroupSchema> }) => {
+      return client.update({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        object: object as any,
+        updateMask: { paths: ['spec.ingress', 'spec.egress'] },
+      });
+    },
+    onSuccess: () => invalidateSecurityGroupsQueries(qc),
+  });
+};
+
+export const useDeleteSecurityGroup = () => {
+  const client = useApiFetch(SecurityGroups);
+  const qc = useApiQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => client.delete({ id }),
+    onSuccess: () => invalidateSecurityGroupsQueries(qc),
+  });
+};

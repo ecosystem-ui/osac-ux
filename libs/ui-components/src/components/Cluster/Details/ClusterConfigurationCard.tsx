@@ -1,5 +1,4 @@
 import {
-  Badge,
   Card,
   CardBody,
   CardTitle,
@@ -14,114 +13,62 @@ import {
 
 import type { Cluster } from '@osac/types';
 
-import { useClusterCatalogItem } from '../../../api/v1/cluster-catalog-item';
-import { useTranslation } from '../../../hooks/useTranslation';
+import { useClusterVersion } from '../../../api/v1/cluster-versions';
 import { displayValue } from '../../../utils/detailFormatters';
 import { Timestamp } from '../../Primitives/Timestamp';
+import ClusterVersionLifecycleLabel from '../ClusterVersionLifecycleLabel';
 
 interface ClusterConfigurationCardProps {
   cluster: Cluster;
 }
 
-/** Extracts a clean version string from a release image URL.
- *  e.g. "quay.io/openshift-release-dev/ocp-release:4.17.0-x86_64" → "4.17.0" */
-function parseOcpVersion(releaseImage?: string): string | undefined {
-  if (!releaseImage) {
-    return undefined;
-  }
-  const tag = releaseImage.split(':')[1];
-  if (!tag) {
-    return undefined;
-  }
-  // Remove any arch suffix like "-x86_64" or "-multi"
-  const match = tag.match(/^(\d+\.\d+\.\d+)/);
-  return match?.[1];
-}
-
 export const ClusterConfigurationCard = ({ cluster }: ClusterConfigurationCardProps) => {
-  const { t } = useTranslation();
-  const catalogItemId = cluster.spec?.catalogItem;
-  const { data: catalogItem, isLoading: isCatalogItemLoading } =
-    useClusterCatalogItem(catalogItemId);
-
-  const ocpVersion = parseOcpVersion(cluster.spec?.releaseImage);
-
+  const catalogItem = cluster.spec?.catalogItem;
+  const { data: clusterVersion, isLoading: isVersionLoading } = useClusterVersion(
+    cluster.spec?.version?.id,
+  );
   return (
     <Card isFullHeight>
-      <CardTitle>{t('Cluster configuration')}</CardTitle>
+      <CardTitle>Cluster configuration</CardTitle>
       <CardBody>
-        <DescriptionList isCompact columnModifier={{ default: '2Col', lg: '3Col' }}>
+        <DescriptionList isCompact>
           <DescriptionListGroup>
-            <DescriptionListTerm>{t('Catalog item')}</DescriptionListTerm>
+            <DescriptionListTerm>Catalog item</DescriptionListTerm>
             <DescriptionListDescription>
-              {isCatalogItemLoading ? (
-                <Skeleton width="150px" />
-              ) : (
-                displayValue(catalogItem?.metadata?.name ?? catalogItemId)
-              )}
+              {displayValue(catalogItem?.name || catalogItem?.id)}
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
-            <DescriptionListTerm>{t('OCP version')}</DescriptionListTerm>
+            <DescriptionListTerm>Version</DescriptionListTerm>
             <DescriptionListDescription>
-              {ocpVersion ? (
+              {isVersionLoading ? (
+                <Skeleton width="150px" />
+              ) : clusterVersion ? (
                 <Flex
-                  alignItems={{ default: 'alignItemsCenter' }}
                   spaceItems={{ default: 'spaceItemsSm' }}
+                  alignItems={{ default: 'alignItemsCenter' }}
                 >
+                  <FlexItem>{displayValue(clusterVersion.spec?.version)}</FlexItem>
                   <FlexItem>
-                    <Badge isRead>{ocpVersion}</Badge>
-                  </FlexItem>
-                  <FlexItem>
-                    <span
-                      style={{
-                        fontSize: 'var(--pf-t--global--font--size--sm)',
-                        color: 'var(--pf-t--global--text--color--subtle)',
-                      }}
-                    >
-                      {cluster.spec?.releaseImage}
-                    </span>
+                    <ClusterVersionLifecycleLabel clusterVersion={clusterVersion} />
                   </FlexItem>
                 </Flex>
               ) : (
-                displayValue(cluster.spec?.releaseImage)
+                displayValue(cluster.spec?.version?.name)
               )}
             </DescriptionListDescription>
           </DescriptionListGroup>
+
           <DescriptionListGroup>
-            <DescriptionListTerm>{t('Created')}</DescriptionListTerm>
+            <DescriptionListTerm>Created</DescriptionListTerm>
             <DescriptionListDescription>
               <Timestamp value={cluster.metadata?.creationTimestamp} />
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
-            <DescriptionListTerm>{t('Creator')}</DescriptionListTerm>
+            <DescriptionListTerm>Creator</DescriptionListTerm>
             <DescriptionListDescription>
               {displayValue(cluster.metadata?.creator)}
-            </DescriptionListDescription>
-          </DescriptionListGroup>
-          <DescriptionListGroup>
-            <DescriptionListTerm>{t('API URL')}</DescriptionListTerm>
-            <DescriptionListDescription>
-              {cluster.status?.apiUrl ? (
-                <a href={cluster.status.apiUrl} target="_blank" rel="noopener noreferrer">
-                  {cluster.status.apiUrl}
-                </a>
-              ) : (
-                '—'
-              )}
-            </DescriptionListDescription>
-          </DescriptionListGroup>
-          <DescriptionListGroup>
-            <DescriptionListTerm>{t('Console URL')}</DescriptionListTerm>
-            <DescriptionListDescription>
-              {cluster.status?.consoleUrl ? (
-                <a href={cluster.status.consoleUrl} target="_blank" rel="noopener noreferrer">
-                  {cluster.status.consoleUrl}
-                </a>
-              ) : (
-                '—'
-              )}
             </DescriptionListDescription>
           </DescriptionListGroup>
         </DescriptionList>

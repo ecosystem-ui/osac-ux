@@ -4,7 +4,7 @@
 
 import { protobufValueToPlain } from './protobuf-value';
 
-export type CatalogProvisionKind = 'compute_instance' | 'cluster';
+export type CatalogProvisionKind = 'compute_instance' | 'cluster' | 'bare_metal_instance';
 
 export interface CatalogFieldDefinition {
   path: string;
@@ -12,15 +12,6 @@ export interface CatalogFieldDefinition {
   editable: boolean;
   default?: unknown;
   validationSchema?: Record<string, unknown>;
-  /** Sourced from TemplateParameterDefinition.description — shown as helper text beneath the input. */
-  description?: string;
-  /** Sourced from TemplateParameterDefinition.required — drives FormGroup isRequired + validation. */
-  required?: boolean;
-  /**
-   * When set, this field's value is chosen from a live API-backed list (see
-   * customFieldApiSources.ts) rather than typed freeform — wire: source_api_path.
-   */
-  sourceApiPath?: string;
 }
 
 const asRecord = (v: unknown): Record<string, unknown> | undefined => {
@@ -105,11 +96,6 @@ export const normalizeCatalogFieldDefinition = (raw: unknown): CatalogFieldDefin
       ? parseFieldDefinitionDefault(defaultRaw)
       : undefined;
   const validationSchema = parseValidationSchema(r.validation_schema ?? r.validationSchema);
-  const description = unknownToString(r.description ?? r.Description).trim() || undefined;
-  const requiredRaw = r.required ?? r.Required;
-  const required = typeof requiredRaw === 'boolean' ? requiredRaw : undefined;
-  const sourceApiPath =
-    unknownToString(r.source_api_path ?? r.sourceApiPath ?? r.SourceApiPath).trim() || undefined;
 
   return {
     path,
@@ -117,9 +103,6 @@ export const normalizeCatalogFieldDefinition = (raw: unknown): CatalogFieldDefin
     editable,
     ...(defaultValue !== undefined ? { default: defaultValue } : {}),
     ...(validationSchema ? { validationSchema } : {}),
-    ...(description ? { description } : {}),
-    ...(required !== undefined ? { required } : {}),
-    ...(sourceApiPath ? { sourceApiPath } : {}),
   };
 };
 
@@ -158,59 +141,6 @@ export const catalogItemFieldDefinitions = (item: unknown): CatalogFieldDefiniti
   return coerceCatalogFieldDefinitions(readCatalogItemFieldDefinitions(item));
 };
 
-/**
- * Path namespace for brand-new fields a Tenant Admin defines during catalog-item
- * authoring — distinct from `template_parameters.*`, which stays reserved for the
- * selected Template's own declared parameters.
- */
-export const CUSTOM_FIELD_PATH_PREFIX = 'custom.';
-
-/** Wire-key prefix used when writing a custom field's value into a shared parameter bag, to
- * guarantee it can never collide with a real template parameter name. */
-export const CUSTOM_FIELD_WIRE_KEY_PREFIX = 'custom__';
-
-/** Path namespace for a Template's own declared `parameters[]` (see templateParametersToFieldDefs). */
-export const TEMPLATE_PARAMETER_PATH_PREFIX = 'template_parameters.';
-
-export const isCustomFieldPath = (path: string): boolean =>
-  path.startsWith(CUSTOM_FIELD_PATH_PREFIX);
-
-export const customFieldKeyFromPath = (path: string): string =>
-  isCustomFieldPath(path) ? path.slice(CUSTOM_FIELD_PATH_PREFIX.length) : path;
-
-export const customFieldPathFromKey = (key: string): string =>
-  `${CUSTOM_FIELD_PATH_PREFIX}${key}`;
-
-export const isTemplateParameterPath = (path: string): boolean =>
-  path.startsWith(TEMPLATE_PARAMETER_PATH_PREFIX);
-
-export const templateParameterNameFromPath = (path: string): string =>
-  isTemplateParameterPath(path) ? path.slice(TEMPLATE_PARAMETER_PATH_PREFIX.length) : path;
-
-export const templateParameterPathFromName = (name: string): string =>
-  `${TEMPLATE_PARAMETER_PATH_PREFIX}${name}`;
-
-/** True for any field a provisioning wizard should render dynamically: brand-new custom
- * fields plus the Template's own declared parameters. */
-export const isDynamicFieldPath = (path: string): boolean =>
-  isCustomFieldPath(path) || isTemplateParameterPath(path);
-
-/**
- * Resolves the wire key used to write a dynamic field's value into a shared
- * `template_parameters` / `templateParameters` bag: `custom.<key>` paths get a
- * collision-safe `custom__` prefix, while `template_parameters.<name>` paths are
- * written under their bare declared name (the value the API/template expects).
- */
-export const wireKeyForDynamicFieldPath = (path: string): string => {
-  if (isCustomFieldPath(path)) {
-    return `${CUSTOM_FIELD_WIRE_KEY_PREFIX}${customFieldKeyFromPath(path)}`;
-  }
-  if (isTemplateParameterPath(path)) {
-    return templateParameterNameFromPath(path);
-  }
-  return path;
-};
-
 /** Spec paths shown on catalog cards as compute resources (CPU, memory, boot disk). */
 export const CATALOG_ITEM_RESOURCE_FIELD_PATHS = [
   'cores',
@@ -222,10 +152,13 @@ export type CatalogItemResourceFieldPath = (typeof CATALOG_ITEM_RESOURCE_FIELD_P
 
 const catalogItemResourceFieldPathSet = new Set<string>(CATALOG_ITEM_RESOURCE_FIELD_PATHS);
 
+/** Catalog field_definitions paths are often spec-relative; accept optional `spec.` prefix. */
+export const normalizeCatalogFieldPath = (path: string): string => path.replace(/^spec\./, '');
+
 export const isCatalogItemResourceFieldPath = (
   path: string,
 ): path is CatalogItemResourceFieldPath => {
-  return catalogItemResourceFieldPathSet.has(path);
+  return catalogItemResourceFieldPathSet.has(normalizeCatalogFieldPath(path));
 };
 
 /** Node-set host type and worker count paths on cluster catalog cards (node set id varies). */
@@ -233,7 +166,7 @@ export const CLUSTER_CATALOG_ITEM_RESOURCE_FIELD_PATH_PATTERN =
   /^node_sets\.[^.]+\.(host_type|size)$/;
 
 export const isClusterCatalogItemResourceFieldPath = (path: string): boolean => {
-  return CLUSTER_CATALOG_ITEM_RESOURCE_FIELD_PATH_PATTERN.test(path);
+  return CLUSTER_CATALOG_ITEM_RESOURCE_FIELD_PATH_PATTERN.test(normalizeCatalogFieldPath(path));
 };
 
 export const isCatalogCardResourceFieldPath = (path: string): boolean => {

@@ -17,16 +17,27 @@
 
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
+import { file_buf_validate_validate } from "../../../buf/validate/validate_pb";
 import { file_google_api_field_behavior } from "../../../google/api/field_behavior_pb";
 import type { Metadata } from "./metadata_type_pb";
 import { file_osac_public_v1_metadata_type } from "./metadata_type_pb";
+import type { BareMetalInstanceLocalReference } from "./baremetal_instance_type_pb";
+import { file_osac_public_v1_baremetal_instance_type } from "./baremetal_instance_type_pb";
+import type { ClusterLocalReference } from "./cluster_type_pb";
+import { file_osac_public_v1_cluster_type } from "./cluster_type_pb";
+import type { ComputeInstanceLocalReference } from "./compute_instance_type_pb";
+import { file_osac_public_v1_compute_instance_type } from "./compute_instance_type_pb";
+import type { ExternalIPLocalReference } from "./external_ip_type_pb";
+import { file_osac_public_v1_external_ip_type } from "./external_ip_type_pb";
+import type { ExternalIPAttachmentEndpoint } from "./external_ip_attribution_type_pb";
+import { file_osac_public_v1_external_ip_attribution_type } from "./external_ip_attribution_type_pb";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file osac/public/v1/external_ip_attachment_type.proto.
  */
 export const file_osac_public_v1_external_ip_attachment_type: GenFile = /*@__PURE__*/
-  fileDesc("CjBvc2FjL3B1YmxpYy92MS9leHRlcm5hbF9pcF9hdHRhY2htZW50X3R5cGUucHJvdG8SDm9zYWMucHVibGljLnYxIsIBChRFeHRlcm5hbElQQXR0YWNobWVudBIKCgJpZBgBIAEoCRIqCghtZXRhZGF0YRgCIAEoCzIYLm9zYWMucHVibGljLnYxLk1ldGFkYXRhEjYKBHNwZWMYAyABKAsyKC5vc2FjLnB1YmxpYy52MS5FeHRlcm5hbElQQXR0YWNobWVudFNwZWMSOgoGc3RhdHVzGAQgASgLMioub3NhYy5wdWJsaWMudjEuRXh0ZXJuYWxJUEF0dGFjaG1lbnRTdGF0dXMi2gEKGEV4dGVybmFsSVBBdHRhY2htZW50U3BlYxIbCgtleHRlcm5hbF9pcBgBIAEoCUIG4EEC4EEFEhoKEGNvbXB1dGVfaW5zdGFuY2UYAiABKAlIABIRCgdjbHVzdGVyGAMgASgJSAASHAoSYmFyZW1ldGFsX2luc3RhbmNlGAQgASgJSAASSgoPdGFyZ2V0X2VuZHBvaW50GAUgASgOMiwub3NhYy5wdWJsaWMudjEuRXh0ZXJuYWxJUEF0dGFjaG1lbnRFbmRwb2ludEID4EEFQggKBnRhcmdldCKkAQoaRXh0ZXJuYWxJUEF0dGFjaG1lbnRTdGF0dXMSPQoFc3RhdGUYASABKA4yKS5vc2FjLnB1YmxpYy52MS5FeHRlcm5hbElQQXR0YWNobWVudFN0YXRlQgPgQQMSIAoTZXh0ZXJuYWxfaXBfYWRkcmVzcxgCIAEoCUID4EEDEhkKB21lc3NhZ2UYAyABKAlCA+BBA0gAiAEBQgoKCF9tZXNzYWdlKqUBChxFeHRlcm5hbElQQXR0YWNobWVudEVuZHBvaW50Ei8KK0VYVEVSTkFMX0lQX0FUVEFDSE1FTlRfRU5EUE9JTlRfVU5TUEVDSUZJRUQQABInCiNFWFRFUk5BTF9JUF9BVFRBQ0hNRU5UX0VORFBPSU5UX0FQSRABEisKJ0VYVEVSTkFMX0lQX0FUVEFDSE1FTlRfRU5EUE9JTlRfSU5HUkVTUxACKu8BChlFeHRlcm5hbElQQXR0YWNobWVudFN0YXRlEiwKKEVYVEVSTkFMX0lQX0FUVEFDSE1FTlRfU1RBVEVfVU5TUEVDSUZJRUQQABIoCiRFWFRFUk5BTF9JUF9BVFRBQ0hNRU5UX1NUQVRFX1BFTkRJTkcQARImCiJFWFRFUk5BTF9JUF9BVFRBQ0hNRU5UX1NUQVRFX1JFQURZEAISJwojRVhURVJOQUxfSVBfQVRUQUNITUVOVF9TVEFURV9GQUlMRUQQAxIpCiVFWFRFUk5BTF9JUF9BVFRBQ0hNRU5UX1NUQVRFX0RFTEVUSU5HEARiBnByb3RvMw", [file_google_api_field_behavior, file_osac_public_v1_metadata_type]);
+  fileDesc("CjBvc2FjL3B1YmxpYy92MS9leHRlcm5hbF9pcF9hdHRhY2htZW50X3R5cGUucHJvdG8SDm9zYWMucHVibGljLnYxIsIBChRFeHRlcm5hbElQQXR0YWNobWVudBIKCgJpZBgBIAEoCRIqCghtZXRhZGF0YRgCIAEoCzIYLm9zYWMucHVibGljLnYxLk1ldGFkYXRhEjYKBHNwZWMYAyABKAsyKC5vc2FjLnB1YmxpYy52MS5FeHRlcm5hbElQQXR0YWNobWVudFNwZWMSOgoGc3RhdHVzGAQgASgLMioub3NhYy5wdWJsaWMudjEuRXh0ZXJuYWxJUEF0dGFjaG1lbnRTdGF0dXMi7QYKGEV4dGVybmFsSVBBdHRhY2htZW50U3BlYxJFCgtleHRlcm5hbF9pcBgBIAEoCzIoLm9zYWMucHVibGljLnYxLkV4dGVybmFsSVBMb2NhbFJlZmVyZW5jZUIG4EEC4EEFEqcBChBjb21wdXRlX2luc3RhbmNlGAIgASgLMi0ub3NhYy5wdWJsaWMudjEuQ29tcHV0ZUluc3RhbmNlTG9jYWxSZWZlcmVuY2VCXLpIWboBVgoaY29tcHV0ZV9pbnN0YW5jZV90YXJnZXRfaWQSKWNvbXB1dGVfaW5zdGFuY2UgbXVzdCBoYXZlIGEgbm9uLWVtcHR5IGlkGg10aGlzLmlkICE9ICcnSAAShAEKB2NsdXN0ZXIYAyABKAsyJS5vc2FjLnB1YmxpYy52MS5DbHVzdGVyTG9jYWxSZWZlcmVuY2VCSrpIR7oBRAoRY2x1c3Rlcl90YXJnZXRfaWQSIGNsdXN0ZXIgbXVzdCBoYXZlIGEgbm9uLWVtcHR5IGlkGg10aGlzLmlkICE9ICcnSAASrwEKEmJhcmVtZXRhbF9pbnN0YW5jZRgEIAEoCzIvLm9zYWMucHVibGljLnYxLkJhcmVNZXRhbEluc3RhbmNlTG9jYWxSZWZlcmVuY2VCYLpIXboBWgocYmFyZW1ldGFsX2luc3RhbmNlX3RhcmdldF9pZBIrYmFyZW1ldGFsX2luc3RhbmNlIG11c3QgaGF2ZSBhIG5vbi1lbXB0eSBpZBoNdGhpcy5pZCAhPSAnJ0gAElIKD3RhcmdldF9lbmRwb2ludBgFIAEoDjIsLm9zYWMucHVibGljLnYxLkV4dGVybmFsSVBBdHRhY2htZW50RW5kcG9pbnRCC+BBBbpIBYIBAhABOsEBuki9ARq6AQofZXh0ZXJuYWxfaXBfYXR0YWNobWVudF9lbmRwb2ludBItZW5kcG9pbnQgaXMgcmVxdWlyZWQgb25seSBmb3IgY2x1c3RlciB0YXJnZXRzGmhoYXModGhpcy5jbHVzdGVyKSA/ICh0aGlzLnRhcmdldF9lbmRwb2ludCA9PSAxIHx8IHRoaXMudGFyZ2V0X2VuZHBvaW50ID09IDIpIDogdGhpcy50YXJnZXRfZW5kcG9pbnQgPT0gMEIPCgZ0YXJnZXQSBbpIAggBIqQBChpFeHRlcm5hbElQQXR0YWNobWVudFN0YXR1cxI9CgVzdGF0ZRgBIAEoDjIpLm9zYWMucHVibGljLnYxLkV4dGVybmFsSVBBdHRhY2htZW50U3RhdGVCA+BBAxIgChNleHRlcm5hbF9pcF9hZGRyZXNzGAIgASgJQgPgQQMSGQoHbWVzc2FnZRgDIAEoCUID4EEDSACIAQFCCgoIX21lc3NhZ2Uq7wEKGUV4dGVybmFsSVBBdHRhY2htZW50U3RhdGUSLAooRVhURVJOQUxfSVBfQVRUQUNITUVOVF9TVEFURV9VTlNQRUNJRklFRBAAEigKJEVYVEVSTkFMX0lQX0FUVEFDSE1FTlRfU1RBVEVfUEVORElORxABEiYKIkVYVEVSTkFMX0lQX0FUVEFDSE1FTlRfU1RBVEVfUkVBRFkQAhInCiNFWFRFUk5BTF9JUF9BVFRBQ0hNRU5UX1NUQVRFX0ZBSUxFRBADEikKJUVYVEVSTkFMX0lQX0FUVEFDSE1FTlRfU1RBVEVfREVMRVRJTkcQBGIGcHJvdG8z", [file_buf_validate_validate, file_google_api_field_behavior, file_osac_public_v1_metadata_type, file_osac_public_v1_baremetal_instance_type, file_osac_public_v1_cluster_type, file_osac_public_v1_compute_instance_type, file_osac_public_v1_external_ip_type, file_osac_public_v1_external_ip_attribution_type]);
 
 /**
  * Represents a binding between an ExternalIP and a target resource.
@@ -42,9 +53,9 @@ export const file_osac_public_v1_external_ip_attachment_type: GenFile = /*@__PUR
  * external IP (API server or ingress). An ExternalIPAttachment can be created before the cluster
  * is ready and will activate automatically once the cluster's VIP is available.
  *
- * Lifecycle: PENDING (attach in progress) -> READY (attached and routing traffic).
- * FAILED is a terminal error state that retries via the standard provisioning lifecycle
- * with exponential backoff.
+ * Lifecycle: PENDING (attach in progress) -> READY (attached and routing traffic) -> DELETING
+ * (detach in progress). FAILED is a terminal error state that retries via the standard
+ * provisioning lifecycle with exponential backoff.
  *
  * @generated from message osac.public.v1.ExternalIPAttachment
  */
@@ -96,16 +107,14 @@ export const ExternalIPAttachmentSchema: GenMessage<ExternalIPAttachment> = /*@_
  */
 export type ExternalIPAttachmentSpec = Message<"osac.public.v1.ExternalIPAttachmentSpec"> & {
   /**
-   * ExternalIP ID to attach. Required and immutable after creation.
+   * ExternalIP reference to attach. Required and immutable after creation.
    *
-   * Must reference the ID of an existing ExternalIP in ALLOCATED state that is not already
+   * Must reference an existing ExternalIP in ALLOCATED state that is not already
    * attached (status.attached == false). Only one ExternalIPAttachment may exist per ExternalIP.
    *
-   * Example: "019728a4-3f5c-7def-8abc-1234567890ab"
-   *
-   * @generated from field: string external_ip = 1;
+   * @generated from field: osac.public.v1.ExternalIPLocalReference external_ip = 1;
    */
-  externalIp: string;
+  externalIp?: ExternalIPLocalReference | undefined;
 
   /**
    * Target resource to attach the external IP to. Exactly one target field must be set.
@@ -115,44 +124,38 @@ export type ExternalIPAttachmentSpec = Message<"osac.public.v1.ExternalIPAttachm
    */
   target: {
     /**
-     * ComputeInstance ID to attach this external IP to.
+     * ComputeInstance reference to attach this external IP to.
      *
-     * Must reference the ID of an existing ComputeInstance in RUNNING state. Only one
+     * Must reference an existing ComputeInstance in RUNNING state. Only one
      * ExternalIPAttachment may exist per ComputeInstance.
      *
-     * Example: "01972f1b-a4e9-7c82-9def-abcdef123456"
-     *
-     * @generated from field: string compute_instance = 2;
+     * @generated from field: osac.public.v1.ComputeInstanceLocalReference compute_instance = 2;
      */
-    value: string;
+    value: ComputeInstanceLocalReference;
     case: "computeInstance";
   } | {
     /**
-     * Cluster ID to attach this external IP to.
+     * Cluster reference to attach this external IP to.
      *
-     * Must reference the ID of an existing Cluster. The target_endpoint field is required
+     * Must reference an existing Cluster. The target_endpoint field is required
      * when targeting a cluster to specify which endpoint (API or ingress) receives the
      * external IP. The attachment can be created before the cluster is ready and will
      * activate once the cluster's VIP is available.
      *
-     * Example: "01973a2c-b5f0-7d93-8abc-def012345678"
-     *
-     * @generated from field: string cluster = 3;
+     * @generated from field: osac.public.v1.ClusterLocalReference cluster = 3;
      */
-    value: string;
+    value: ClusterLocalReference;
     case: "cluster";
   } | {
     /**
-     * BareMetalInstance ID to attach this external IP to.
+     * BareMetalInstance reference to attach this external IP to.
      *
-     * Must reference the ID of an existing BareMetalInstance. DNAT rules will be configured
+     * Must reference an existing BareMetalInstance. DNAT rules will be configured
      * to forward traffic from the external IP to the bare-metal instance's internal IP.
      *
-     * Example: "01973b3d-c6e1-7ea4-9bcd-ef0123456789"
-     *
-     * @generated from field: string baremetal_instance = 4;
+     * @generated from field: osac.public.v1.BareMetalInstanceLocalReference baremetal_instance = 4;
      */
-    value: string;
+    value: BareMetalInstanceLocalReference;
     case: "baremetalInstance";
   } | { case: undefined; value?: undefined };
 
@@ -220,49 +223,6 @@ export const ExternalIPAttachmentStatusSchema: GenMessage<ExternalIPAttachmentSt
   messageDesc(file_osac_public_v1_external_ip_attachment_type, 2);
 
 /**
- * Endpoint type for cluster-targeted ExternalIPAttachments.
- *
- * When attaching an external IP to a cluster, this enum specifies which cluster endpoint
- * receives the DNAT rule.
- *
- * @generated from enum osac.public.v1.ExternalIPAttachmentEndpoint
- */
-export enum ExternalIPAttachmentEndpoint {
-  /**
-   * Endpoint is unknown or has not been specified.
-   *
-   * @generated from enum value: EXTERNAL_IP_ATTACHMENT_ENDPOINT_UNSPECIFIED = 0;
-   */
-  EXTERNAL_IP_ATTACHMENT_ENDPOINT_UNSPECIFIED = 0,
-
-  /**
-   * The cluster's API server endpoint.
-   *
-   * The external IP will be routed to the cluster's Kubernetes API server VIP, making the
-   * cluster API reachable from outside the VirtualNetwork.
-   *
-   * @generated from enum value: EXTERNAL_IP_ATTACHMENT_ENDPOINT_API = 1;
-   */
-  EXTERNAL_IP_ATTACHMENT_ENDPOINT_API = 1,
-
-  /**
-   * The cluster's ingress endpoint.
-   *
-   * The external IP will be routed to the cluster's ingress controller VIP, making
-   * applications hosted on the cluster reachable from outside the VirtualNetwork.
-   *
-   * @generated from enum value: EXTERNAL_IP_ATTACHMENT_ENDPOINT_INGRESS = 2;
-   */
-  EXTERNAL_IP_ATTACHMENT_ENDPOINT_INGRESS = 2,
-}
-
-/**
- * Describes the enum osac.public.v1.ExternalIPAttachmentEndpoint.
- */
-export const ExternalIPAttachmentEndpointSchema: GenEnum<ExternalIPAttachmentEndpoint> = /*@__PURE__*/
-  enumDesc(file_osac_public_v1_external_ip_attachment_type, 0);
-
-/**
  * Lifecycle states for ExternalIPAttachment resources.
  *
  * State transitions: UNSPECIFIED -> PENDING -> READY. On deletion: any state -> DELETING.
@@ -281,7 +241,8 @@ export enum ExternalIPAttachmentState {
   /**
    * The attachment is being provisioned (attach workflow in progress).
    *
-   * The system is binding the ExternalIP's allocated address to the target resource.
+   * The system is binding the ExternalIP's allocated address to the target resource. This
+   * involves creating DNAT rules or MetalLB LoadBalancer Services depending on the target type.
    *
    * @generated from enum value: EXTERNAL_IP_ATTACHMENT_STATE_PENDING = 1;
    */
@@ -322,5 +283,5 @@ export enum ExternalIPAttachmentState {
  * Describes the enum osac.public.v1.ExternalIPAttachmentState.
  */
 export const ExternalIPAttachmentStateSchema: GenEnum<ExternalIPAttachmentState> = /*@__PURE__*/
-  enumDesc(file_osac_public_v1_external_ip_attachment_type, 1);
+  enumDesc(file_osac_public_v1_external_ip_attachment_type, 0);
 

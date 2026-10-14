@@ -1,24 +1,27 @@
 import * as React from 'react';
 
-import { DemoShellRole } from '@osac/ui-components/shellTypes';
+import type { UserRole } from '@osac/ui-components/shellTypes';
 import { getErrorMessage } from '@osac/ui-components/utils/error';
 
-const ROLE_MAP: Record<string, DemoShellRole> = {
-  'cloud-provider-admin': 'providerAdmin',
-  'tenant-admin': 'tenantAdmin',
-};
-
-const roleFromRoles = (roles: string[]): DemoShellRole => {
-  for (const r of roles) {
-    const mapped = ROLE_MAP[r];
-    if (mapped) {
-      return mapped;
-    }
+export const roleFromRoles = (roles: string[] = [], groups: string[] = []): UserRole => {
+  if (groups.includes('admins') || roles.includes('cloud-provider-admin')) {
+    return 'admin';
   }
-  return 'tenantUser';
+  if (roles.includes('tenant-admin')) {
+    return 'tenant-admin';
+  }
+  if (roles.includes('tenant-idp-manager')) {
+    return 'tenant-idp-manager';
+  }
+  return 'tenant-user';
 };
 
-const fetchLoginInfo = async (): Promise<{ username: string; roles: string[] } | null> => {
+const fetchLoginInfo = async (): Promise<{
+  username: string;
+  roles: string[];
+  groups: string[];
+  tenantId: string;
+} | null> => {
   try {
     const resp = await fetch('/api/login/info', { credentials: 'include' });
     if (resp.status === 401) {
@@ -27,7 +30,12 @@ const fetchLoginInfo = async (): Promise<{ username: string; roles: string[] } |
     if (!resp.ok) {
       return null;
     }
-    return (await resp.json()) as { username: string; roles: string[] };
+    return (await resp.json()) as {
+      username: string;
+      roles: string[];
+      groups: string[];
+      tenantId: string;
+    };
   } catch {
     return null;
   }
@@ -42,7 +50,8 @@ const maxTimeout = 2 ** 31 - 1;
 
 export const useOIDCLogin = (): [
   string,
-  DemoShellRole,
+  UserRole,
+  string,
   boolean,
   string | undefined,
   () => Promise<void>,
@@ -50,7 +59,8 @@ export const useOIDCLogin = (): [
   const [triggerRelogin, setTriggerRelogin] = React.useState(0);
   const [isLoading, setIsLoading] = React.useState(true);
   const [username, setUsername] = React.useState<string>('');
-  const [role, setRole] = React.useState<DemoShellRole>('tenantUser');
+  const [role, setRole] = React.useState<UserRole>('tenant-user');
+  const [tenantId, setTenantId] = React.useState<string>('');
   const [error, setError] = React.useState<string>();
 
   const refreshTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -134,7 +144,8 @@ export const useOIDCLogin = (): [
         if (result) {
           setError(undefined);
           setUsername(result.username);
-          setRole(roleFromRoles(result.roles ?? []));
+          setRole(roleFromRoles(result.roles, result.groups));
+          setTenantId(result.tenantId ?? '');
           setIsLoading(false);
           scheduleRefresh();
         } else {
@@ -181,5 +192,5 @@ export const useOIDCLogin = (): [
     }
   }, []);
 
-  return [username, role, isLoading, error, logout];
+  return [username, role, tenantId, isLoading, error, logout];
 };

@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ReactSVG } from 'react-svg';
 import {
   Alert,
   Button,
-  Divider,
   Dropdown,
   DropdownItem,
   DropdownList,
@@ -20,59 +20,49 @@ import {
   ModalFooter,
   ModalHeader,
   PageToggleButton,
-  Title,
   Toolbar,
   ToolbarContent,
   ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
-import { BarsIcon } from '@patternfly/react-icons/dist/esm/icons/bars-icon';
 import { UserIcon } from '@patternfly/react-icons/dist/esm/icons/user-icon';
 
+import osacIcon from '@osac/ui-components/assets/RH-OSAC.svg';
+import { SubtleContent } from '@osac/ui-components/components/SubtleContent/SubtleContent';
 import UserPreferencesModal from '@osac/ui-components/components/UserPreferences/UserPreferencesModal';
 import { useSession } from '@osac/ui-components/hooks/use-session';
-import type { DemoShellRole } from '@osac/ui-components/shellTypes';
+import { useTranslation } from '@osac/ui-components/hooks/useTranslation';
+import { userRoleLabels } from '@osac/ui-components/shellTypes';
+import type { UserRole } from '@osac/ui-components/shellTypes';
 import { getErrorMessage } from '@osac/ui-components/utils/error';
 
-import { operatingModeLabel } from './shellLabels';
-import { defaultRouteForRole } from './shellRoutes';
+import { MockPersonaSwitcher } from '../mock/MockPersonaSwitcher';
 
 interface ShellMastheadProps {
   onLogout: () => Promise<void>;
+  onRoleChange?: (role: UserRole) => void;
 }
 
-const DEMO_ROLES: Array<{ role: DemoShellRole; label: string }> = [
-  { role: 'tenantUser', label: 'Tenant User' },
-  { role: 'tenantAdmin', label: 'Tenant Admin' },
-  { role: 'providerAdmin', label: 'Provider Admin' },
-];
-
-export const ShellMasthead = ({ onLogout }: ShellMastheadProps) => {
+export const ShellMasthead = ({ onLogout, onRoleChange }: ShellMastheadProps) => {
+  const { t } = useTranslation();
   const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false);
   const [isPreferencesOpen, setPreferencesOpen] = React.useState(false);
   const [logoutError, setLogoutError] = React.useState<string>();
   const navigate = useNavigate();
-  const { role, username, isDemoMode, setRole } = useSession();
-
-  const displayName = isDemoMode ? `Demo (${operatingModeLabel(role)})` : username || 'User';
-
-  const handleRoleSwitch = (newRole: DemoShellRole) => {
-    setRole?.(newRole);
-    setIsUserMenuOpen(false);
-    navigate(defaultRouteForRole(newRole));
-  };
+  const { role, username, tenantId } = useSession();
+  const displayName = username || t('User');
 
   return (
     <>
       {logoutError && (
         <Modal variant="small" isOpen onClose={() => setLogoutError(undefined)}>
-          <ModalHeader title="Logout failed" titleIconVariant="danger" />
+          <ModalHeader title={t('Logout failed')} titleIconVariant="danger" />
           <ModalBody>
             <Alert variant="danger" isInline title={logoutError ?? ''} />
           </ModalBody>
           <ModalFooter>
             <Button variant="primary" onClick={() => setLogoutError(undefined)}>
-              Close
+              {t('Close')}
             </Button>
           </ModalFooter>
         </Modal>
@@ -81,17 +71,23 @@ export const ShellMasthead = ({ onLogout }: ShellMastheadProps) => {
       <Masthead display={{ default: 'inline' }}>
         <MastheadMain>
           <MastheadToggle>
-            <PageToggleButton variant="plain" aria-label="Global navigation">
-              <BarsIcon />
-            </PageToggleButton>
+            <PageToggleButton isHamburgerButton aria-label={t('Global navigation')} />
           </MastheadToggle>
-          <MastheadLogo>
+          <div>
             <MastheadBrand>
-              <Title headingLevel="h4" size="lg">
-                Red Hat OSAC{isDemoMode && ' — Demo'}
-              </Title>
+              <MastheadLogo
+                aria-label={t('Red Hat OSAC')}
+                component={(props) => <a {...props} href="#" />}
+              >
+                <ReactSVG src={osacIcon} aria-hidden className="pf-v6-c-brand" />
+              </MastheadLogo>
             </MastheadBrand>
-          </MastheadLogo>
+            {tenantId ? (
+              <SubtleContent className="pf-v6-u-mt-sm">
+                {t('Tenant: {{ tenantId }}', { tenantId })}
+              </SubtleContent>
+            ) : null}
+          </div>
         </MastheadMain>
 
         <MastheadContent>
@@ -102,6 +98,11 @@ export const ShellMasthead = ({ onLogout }: ShellMastheadProps) => {
                 align={{ default: 'alignEnd' }}
                 gap={{ default: 'gapNone', md: 'gapMd' }}
               >
+                <ToolbarItem>
+                  {import.meta.env.VITE_MOCK_MODE === 'true' && onRoleChange && (
+                    <MockPersonaSwitcher currentRole={role} onRoleChange={onRoleChange} />
+                  )}
+                </ToolbarItem>
                 <ToolbarItem>
                   <Dropdown
                     isOpen={isUserMenuOpen}
@@ -114,48 +115,31 @@ export const ShellMasthead = ({ onLogout }: ShellMastheadProps) => {
                         isExpanded={isUserMenuOpen}
                         onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                         icon={<UserIcon />}
-                        aria-label="Account menu"
+                        aria-label={t('Account menu')}
                       >
                         {displayName}{' '}
-                        <Label color={isDemoMode ? 'blue' : 'grey'} variant="outline" isCompact>
-                          {operatingModeLabel(role)}
+                        <Label color="grey" variant="outline" isCompact>
+                          {userRoleLabels(t)[role]}
                         </Label>
                       </MenuToggle>
                     )}
                   >
                     <DropdownList>
-                      {isDemoMode && (
-                        <>
-                          {DEMO_ROLES.map(({ role: r, label }) => (
-                            <DropdownItem
-                              key={r}
-                              onClick={() => handleRoleSwitch(r)}
-                              isSelected={role === r}
-                              description="Switch role"
-                            >
-                              {label}
-                            </DropdownItem>
-                          ))}
-                          <Divider component="li" />
-                        </>
-                      )}
                       <DropdownItem onClick={() => setPreferencesOpen(true)}>
-                        Preferences
+                        {t('Preferences')}
                       </DropdownItem>
-                      {!isDemoMode && (
-                        <DropdownItem
-                          onClick={async () => {
-                            try {
-                              await onLogout();
-                              navigate('/');
-                            } catch (e) {
-                              setLogoutError(getErrorMessage(e));
-                            }
-                          }}
-                        >
-                          Log out
-                        </DropdownItem>
-                      )}
+                      <DropdownItem
+                        onClick={async () => {
+                          try {
+                            await onLogout();
+                            navigate('/');
+                          } catch (e) {
+                            setLogoutError(getErrorMessage(e));
+                          }
+                        }}
+                      >
+                        {t('Log out')}
+                      </DropdownItem>
                     </DropdownList>
                   </Dropdown>
                 </ToolbarItem>

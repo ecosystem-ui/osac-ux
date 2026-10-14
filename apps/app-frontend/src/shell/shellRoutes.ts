@@ -1,11 +1,12 @@
-import type { DemoShellRole } from '@osac/ui-components/shellTypes';
+import type { UserRole } from '@osac/ui-components/shellTypes';
 
-export const defaultRouteForRole = (role: DemoShellRole): string => {
-  if (role === 'providerAdmin') {
-    return '/provider/dashboard';
+export const defaultRouteForRole = (role: UserRole): string => {
+  if (role === 'admin') {
+    return '/admin/tenants';
   }
-  if (role === 'tenantAdmin') {
-    return '/admin/dashboard';
+  if (role === 'tenant-idp-manager') {
+    return '/tenant/identity-provider';
   }
-  return '/vms';
+
+  return '/catalog';
 };

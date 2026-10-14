@@ -1,0 +1,61 @@
+.tenant-table {
+  --pf-v6-c-table--cell--PaddingBlock: var(--pf-t--global--spacer--md);
+  --pf-v6-c-table--cell--PaddingInline: var(--pf-t--global--spacer--md);
+  --pf-v6-c-table--BorderColor: var(--pf-t--global--border--color--default);
+  margin-block-start: var(--pf-t--global--spacer--md);
+  background-color: transparent;
+}
+
+.tenant-table .pf-v6-c-table__thead .pf-v6-c-table__th {
+  padding-block: var(--pf-t--global--spacer--sm) var(--pf-t--global--spacer--md);
+  border-block-end: var(--pf-t--global--border--width--divider--default) solid
+    var(--pf-t--global--border--color--default);
+  background-color: transparent;
+  color: var(--pf-t--global--text--color--regular);
+  font-weight: var(--pf-t--global--font--weight--body--bold);
+  white-space: nowrap;
+}
+
+.tenant-table .pf-v6-c-table__tbody .pf-v6-c-table__tr {
+  border-block-end: var(--pf-t--global--border--width--divider--default) solid
+    var(--pf-t--global--border--color--default);
+  background-color: transparent;
+  vertical-align: middle;
+}
+
+.tenant-table .pf-v6-c-table__tbody .pf-v6-c-table__tr:last-child {
+  border-block-end: none;
+}
+
+.tenant-table .pf-v6-c-table__tbody .pf-v6-c-table__td {
+  vertical-align: middle;
+}
+
+.tenant-table__name-link {
+  display: block;
+  max-inline-size: 100%;
+  overflow: hidden;
+  color: var(--pf-t--global--text--color--link--default);
+  font-size: var(--pf-t--global--font--size--md);
+  font-weight: var(--pf-t--global--font--weight--body--bold);
+  text-align: start;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tenant-table__name-link:hover,
+.tenant-table__name-link:focus {
+  text-decoration: underline;
+}
+
+.tenant-table__billing-account-primary.pf-v6-c-content--p,
+.tenant-table__billing-account-secondary.pf-v6-c-content--p {
+  margin: 0;
+  line-height: 1.35;
+}
+
+.tenant-table__billing-account-secondary.pf-v6-c-content--p {
+  color: var(--pf-t--global--text--color--subtle);
+  font-size: var(--pf-t--global--font--size--body--sm);
+}

@@ -25,17 +25,19 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file osac/public/v1/host_type_type.proto.
  */
 export const file_osac_public_v1_host_type_type: GenFile = /*@__PURE__*/
-  fileDesc("CiNvc2FjL3B1YmxpYy92MS9ob3N0X3R5cGVfdHlwZS5wcm90bxIOb3NhYy5wdWJsaWMudjEiZgoISG9zdFR5cGUSCgoCaWQYASABKAkSKgoIbWV0YWRhdGEYAiABKAsyGC5vc2FjLnB1YmxpYy52MS5NZXRhZGF0YRINCgV0aXRsZRgDIAEoCRITCgtkZXNjcmlwdGlvbhgEIAEoCWIGcHJvdG8z", [file_osac_public_v1_metadata_type]);
+  fileDesc("CiNvc2FjL3B1YmxpYy92MS9ob3N0X3R5cGVfdHlwZS5wcm90bxIOb3NhYy5wdWJsaWMudjEinAEKCEhvc3RUeXBlEgoKAmlkGAEgASgJEioKCG1ldGFkYXRhGAIgASgLMhgub3NhYy5wdWJsaWMudjEuTWV0YWRhdGESDQoFdGl0bGUYAyABKAkSEwoLZGVzY3JpcHRpb24YBCABKAkSNAoKaW50ZXJmYWNlcxgFIAMoCzIgLm9zYWMucHVibGljLnYxLk5ldHdvcmtJbnRlcmZhY2UiQwoQTmV0d29ya0ludGVyZmFjZRIMCgRuYW1lGAEgASgJEgwKBHJvbGUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkiTgoRSG9zdFR5cGVSZWZlcmVuY2USCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIPCgdwcm9qZWN0GAMgASgJEg4KBnNoYXJlZBgEIAEoCGIGcHJvdG8z", [file_osac_public_v1_metadata_type]);
 
 /**
  * Describes a set of hosts that share characteristics.
  *
- * For example there could be a host type `acme_1tb` to describe the set of hosts manifactured by ACME and with 1 TiB
- * of RAM, and another `ibm_mi300x` to describe the set of hosts manufactured IBM and with a MI300X GPU.
+ * For example there could be a host type `acme_1tb` to describe the set of hosts manufactured by ACME and with 1 TiB
+ * of RAM, and another `ibm_mi300x` to describe the set of hosts manufactured by IBM and with a MI300X GPU.
  *
  * This is similar to the _instance type_ concept used by many cloud providers.
  *
- * The detailed chracteristics of the host (CPU, memory, GPU, etc) will be in the `description` field.
+ * The detailed characteristics of the host (CPU, memory, GPU, etc) will be in the `description` field.
+ *
+ * buf:lint:ignore OSAC_OBJECT_SHAPE
  *
  * @generated from message osac.public.v1.HostType
  */
@@ -68,6 +70,20 @@ export type HostType = Message<"osac.public.v1.HostType"> & {
    * @generated from field: string description = 4;
    */
   description: string;
+
+  /**
+   * Physical network interfaces available on hosts of this type.
+   *
+   * This is only meaningful for bare metal host types. Virtual machine host types have an empty list because VMs
+   * receive virtual NICs from the overlay network, not physical interfaces. This also serves as the bare metal vs
+   * virtual machine discriminator: if a host type has interfaces it is bare metal, if empty it is virtual.
+   *
+   * Interfaces are ordered. When multiple interfaces share the same role, the first one in the list is the default
+   * for that role.
+   *
+   * @generated from field: repeated osac.public.v1.NetworkInterface interfaces = 5;
+   */
+  interfaces: NetworkInterface[];
 };
 
 /**
@@ -76,4 +92,78 @@ export type HostType = Message<"osac.public.v1.HostType"> & {
  */
 export const HostTypeSchema: GenMessage<HostType> = /*@__PURE__*/
   messageDesc(file_osac_public_v1_host_type_type, 0);
+
+/**
+ * Describes a physical network interface available on hosts of a given type.
+ *
+ * For example, a bare metal host type may have two data interfaces (`data-0`, `data-1`) for fabric traffic and a
+ * management interface (`mgmt-0`) for control plane traffic.
+ *
+ * @generated from message osac.public.v1.NetworkInterface
+ */
+export type NetworkInterface = Message<"osac.public.v1.NetworkInterface"> & {
+  /**
+   * Interface identifier, unique within the host type. For example `data-0`, `data-1`, `mgmt-0`.
+   *
+   * @generated from field: string name = 1;
+   */
+  name: string;
+
+  /**
+   * Role of the interface. Convention values are `fabric` (east-west tenant traffic), `management` (control plane
+   * traffic), `storage` (storage fabric traffic), and `lifecycle` (out-of-band PXE/BMC). Roles are conventions, not
+   * enforced enums.
+   *
+   * @generated from field: string role = 2;
+   */
+  role: string;
+
+  /**
+   * Human-friendly description of the interface. For example `100GbE data interface`.
+   *
+   * @generated from field: string description = 3;
+   */
+  description: string;
+};
+
+/**
+ * Describes the message osac.public.v1.NetworkInterface.
+ * Use `create(NetworkInterfaceSchema)` to create a new message.
+ */
+export const NetworkInterfaceSchema: GenMessage<NetworkInterface> = /*@__PURE__*/
+  messageDesc(file_osac_public_v1_host_type_type, 1);
+
+/**
+ * Reference to a HostType resource.
+ *
+ * @generated from message osac.public.v1.HostTypeReference
+ */
+export type HostTypeReference = Message<"osac.public.v1.HostTypeReference"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+
+  /**
+   * @generated from field: string project = 3;
+   */
+  project: string;
+
+  /**
+   * @generated from field: bool shared = 4;
+   */
+  shared: boolean;
+};
+
+/**
+ * Describes the message osac.public.v1.HostTypeReference.
+ * Use `create(HostTypeReferenceSchema)` to create a new message.
+ */
+export const HostTypeReferenceSchema: GenMessage<HostTypeReference> = /*@__PURE__*/
+  messageDesc(file_osac_public_v1_host_type_type, 2);
 

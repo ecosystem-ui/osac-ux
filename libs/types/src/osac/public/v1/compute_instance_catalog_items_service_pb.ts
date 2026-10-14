@@ -158,7 +158,7 @@ export type ComputeInstanceCatalogItemsCreateResponse = Message<"osac.public.v1.
   object?: ComputeInstanceCatalogItem | undefined;
 
   /**
-   * Deprecation or validation warnings (e.g. deprecated instance type in field_definitions).
+   * Deprecation or validation warnings for typed catalog policies.
    *
    * @generated from field: repeated string warnings = 2;
    */
@@ -213,7 +213,7 @@ export type ComputeInstanceCatalogItemsUpdateResponse = Message<"osac.public.v1.
   object?: ComputeInstanceCatalogItem | undefined;
 
   /**
-   * Deprecation or validation warnings (e.g. deprecated instance type in field_definitions).
+   * Deprecation or validation warnings for typed catalog policies.
    *
    * @generated from field: repeated string warnings = 2;
    */

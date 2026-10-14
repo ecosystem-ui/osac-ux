@@ -1,122 +1,121 @@
-import type { ComputeInstanceCatalogItem } from '@osac/types';
+import { type MessageInitShape } from '@bufbuild/protobuf';
+
+import { type ComputeInstanceCatalogItem, ComputeInstanceSchema } from '@osac/types';
+import { ComputeInstanceRunStrategy } from '@osac/types';
 
 import type { ComputeInstanceWizardValues } from './fields';
-import { VM_CREATE_RUN_STRATEGY } from './fields';
-import type { BuildComputeInstanceCreateBodyInput } from '../../../../../api/v1/compute-instance-wire';
-import { wireKeyForDynamicFieldPath } from '../../../catalogFieldDefinition';
+import {
+  type ResourceSelectValue,
+  emptyResourceSelectValue,
+} from '../../../../Form/resourceSelectValue';
+import { getCatalogFieldOverlay, readCatalogFieldDefinitions } from '../../catalogOverlay';
 
 export const createEmptyComputeInstanceValues = (): ComputeInstanceWizardValues => ({
   catalogItemId: '',
-  metadata: { name: '', labels: {} },
+  metadata: { name: '', project: '' },
   spec: {
-    sshKey: '',
-    image: { sourceRef: '' },
+    sshKey: { name: '' },
     instanceType: '',
+    userDataSource: 'inline',
     userData: '',
-    bootDisk: { sizeGib: '' },
+    userDataSecret: { name: '' },
+    bootDisk: { sizeGib: '', storageTier: emptyResourceSelectValue() },
     additionalDisks: [],
-    isWindows: false,
-    runStrategy: VM_CREATE_RUN_STRATEGY,
     networking: {
-      virtualNetworkId: '',
-      subnetId: '',
-      securityGroupIds: [],
+      useDefaultNetwork: true,
+      virtualNetwork: emptyResourceSelectValue(),
+      subnet: emptyResourceSelectValue(),
+      securityGroups: [],
+      autoExternalIpAttachment: false,
     },
-    additionalNetworkAttachments: [],
-    projectId: '',
-    dynamicParameters: {},
   },
 });
+
+const tierField = (
+  storageTier: ResourceSelectValue,
+): { storageTier?: { id?: string; name?: string } } => {
+  const id = storageTier?.id?.trim() ?? '';
+  const name = storageTier?.name?.trim() ?? '';
+  if (!id && !name) {
+    return {};
+  }
+  return {
+    storageTier: {
+      ...(id ? { id } : {}),
+      ...(name ? { name } : {}),
+    },
+  };
+};
 
 export const buildComputeInstanceCreatePayload = (
   values: ComputeInstanceWizardValues,
   catalogItem: ComputeInstanceCatalogItem,
-): BuildComputeInstanceCreateBodyInput => {
-  const instanceType = values.spec.instanceType.trim();
-
-  const spec: Record<string, unknown> = {
-    catalogItem: catalogItem.id,
-    instanceType,
-    image: {
-      sourceType: 'registry',
-      sourceRef: values.spec.image.sourceRef.trim(),
+): MessageInitShape<typeof ComputeInstanceSchema> => {
+  const spec: MessageInitShape<typeof ComputeInstanceSchema>['spec'] = {
+    catalogItem: {
+      id: catalogItem.id,
     },
-    runStrategy: values.spec.runStrategy || VM_CREATE_RUN_STRATEGY,
-    networkAttachments: [
-      {
-        subnet: values.spec.networking.subnetId,
-        securityGroups: values.spec.networking.securityGroupIds,
-      },
-      ...values.spec.additionalNetworkAttachments.map((a) => ({
-        subnet: a.subnetId,
-        securityGroups: a.securityGroupIds,
-      })),
-    ],
+    instanceType: {
+      id: values.spec.instanceType,
+    },
+    runStrategy: ComputeInstanceRunStrategy.COMPUTE_INSTANCE_RUN_STRATEGY_ALWAYS,
   };
 
-  const sshKey = values.spec.sshKey.trim();
-  if (sshKey) {
-    spec.sshKey = sshKey;
+  if (!values.spec.networking.useDefaultNetwork) {
+    const subnetId = values.spec.networking.subnet.id.trim();
+    if (subnetId) {
+      spec.networkAttachments = [
+        {
+          subnet: { id: subnetId },
+          securityGroups: values.spec.networking.securityGroups
+            .filter((sg) => sg.id.trim())
+            .map((sg) => ({ id: sg.id })),
+        },
+      ];
+    }
   }
 
-  const userData = values.spec.userData.trim();
-  if (userData) {
-    spec.userData = userData;
+  if (values.spec.networking.autoExternalIpAttachment) {
+    spec.autoExternalIpAttachment = true;
+  }
+
+  const sshKeyName = values.spec.sshKey.name.trim();
+  if (sshKeyName) {
+    spec.sshKey = { name: sshKeyName };
+  }
+
+  if (values.spec.userDataSource === 'secret') {
+    const userDataSecretName = values.spec.userDataSecret.name.trim();
+    if (userDataSecretName) {
+      spec.userDataSecret = { name: userDataSecretName };
+    }
+  } else {
+    const userData = values.spec.userData.trim();
+    if (userData) {
+      spec.userData = userData;
+    }
   }
 
   const bootDiskRaw = values.spec.bootDisk.sizeGib.trim();
   if (bootDiskRaw) {
-    spec.bootDisk = { sizeGib: Number(bootDiskRaw) };
+    spec.bootDisk = {
+      sizeGib: Number(bootDiskRaw),
+      ...tierField(values.spec.bootDisk.storageTier),
+    };
   }
 
-  // Additional disks — proto-aligned: spec.additional_disks[].size_gib
   const additionalDisks = values.spec.additionalDisks
-    .map((d) => d.sizeGib.trim())
-    .filter(Boolean)
-    .map((sizeGib) => ({ sizeGib: Number(sizeGib) }));
-  if (additionalDisks.length > 0) {
+    .filter((disk) => disk.sizeGib.trim())
+    .map((disk) => ({ sizeGib: Number(disk.sizeGib.trim()), ...tierField(disk.storageTier) }));
+  const hasAdditionalDisksDefault =
+    getCatalogFieldOverlay('spec.additional_disks', readCatalogFieldDefinitions(catalogItem), '')
+      .defaultValue !== undefined;
+  if (additionalDisks.length > 0 || hasAdditionalDisksDefault) {
     spec.additionalDisks = additionalDisks;
   }
 
-  // Windows flag — proto-aligned: spec.is_windows
-  if (values.spec.isWindows) {
-    spec.isWindows = true;
-  }
-
-  // Dynamic (custom.* and template_parameters.*) fields — proto-aligned: spec.template_parameters
-  const templateParameters: Record<string, unknown> = {};
-  for (const [path, value] of Object.entries(values.spec.dynamicParameters)) {
-    if (value.trim()) {
-      templateParameters[wireKeyForDynamicFieldPath(path)] = value;
-    }
-  }
-  if (Object.keys(templateParameters).length > 0) {
-    spec.templateParameters = templateParameters;
-  }
-
-  // Build metadata with labels
-  const cleanLabels = Object.fromEntries(
-    Object.entries(values.metadata.labels).filter(([k, v]) => k.trim() && v.trim()),
-  );
-
-  const payload: BuildComputeInstanceCreateBodyInput = {
-    metadata: {
-      name: values.metadata.name.trim(),
-      ...(Object.keys(cleanLabels).length > 0 ? { labels: cleanLabels } : {}),
-    },
+  return {
+    metadata: { name: values.metadata.name.trim(), project: values.metadata.project },
     spec,
   };
-
-  // @predicted: metadata.project — OSAC-1064
-  const projectId = values.spec.projectId?.trim();
-  if (projectId) {
-    (payload.metadata as Record<string, unknown>).project = projectId;
-  }
-
-  const publicIPPoolId = values.spec.networking.publicIPPoolId?.trim();
-  if (publicIPPoolId) {
-    payload._postProvision = { publicIPPoolId };
-  }
-
-  return payload;
 };

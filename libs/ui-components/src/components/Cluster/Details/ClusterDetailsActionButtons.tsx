@@ -1,21 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Alert,
-  Button,
-  ClipboardCopy,
-  Flex,
-  FlexItem,
-  Stack,
-  StackItem,
-} from '@patternfly/react-core';
+import { Alert, AlertActionLink, Button, Flex, Modal } from '@patternfly/react-core';
 import DownloadIcon from '@patternfly/react-icons/dist/esm/icons/download-icon';
-import DumpsterIcon from '@patternfly/react-icons/dist/esm/icons/dumpster-icon';
 import KeyIcon from '@patternfly/react-icons/dist/esm/icons/key-icon';
 
-import type { Cluster } from '@osac/types';
+import { type Cluster, ClusterState } from '@osac/types';
+import DeleteResourceButton from '@osac/ui-components/components/Resource/DeleteResourceButton';
+import { getErrorMessage } from '@osac/ui-components/utils/error';
 
-import { useDownloadClusterKubeconfig, useGetClusterPassword } from '../../../api/v1/cluster';
+import ClusterPasswordModal from './ClusterPasswordModal';
+import { useDownloadKubeconfig } from '../../../api/v1/cluster';
 import { useTranslation } from '../../../hooks/useTranslation';
 import ClusterDeleteConfirmModal from '../ClusterDeleteConfirmModal';
 
@@ -27,11 +21,14 @@ const ClusterDetailsActionButtons = ({ cluster }: ClusterDetailsActionButtonsPro
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [revealedPassword, setRevealedPassword] = useState<string | null>(null);
+  const [passwordOpen, setPasswordOpen] = useState(false);
+  const { download, isPending, error, setError } = useDownloadKubeconfig();
 
-  const { mutate: downloadKubeconfig, isPending: isDownloadingKubeconfig } =
-    useDownloadClusterKubeconfig();
-  const { mutate: getPassword, isPending: isGettingPassword } = useGetClusterPassword();
+  const isReady = cluster.status?.state === ClusterState.READY;
+  const canDelete = cluster.status?.state !== ClusterState.DELETING;
+  const clusterName = cluster.metadata?.name ?? cluster.id;
+  const kubeconfigSecretId = cluster.status?.kubeconfigSecret?.id ?? '';
+  const passwordSecretId = cluster.status?.passwordSecret?.id ?? '';
 
   return (
     <>
@@ -42,67 +39,65 @@ const ClusterDetailsActionButtons = ({ cluster }: ClusterDetailsActionButtonsPro
           onSuccess={() => navigate('/clusters', { replace: true })}
         />
       )}
-      <Stack hasGutter>
-        {revealedPassword && (
-          <StackItem>
-            <Alert
-              variant="info"
-              isInline
-              title={t('kubeadmin password')}
-              actionClose={
-                <Button
-                  variant="plain"
-                  onClick={() => setRevealedPassword(null)}
-                  aria-label={t('Close')}
-                />
-              }
-            >
-              <ClipboardCopy isReadOnly hoverTip={t('Copy')} clickTip={t('Copied')}>
-                {revealedPassword}
-              </ClipboardCopy>
-            </Alert>
-          </StackItem>
-        )}
-        <StackItem>
-          <Flex
-            justifyContent={{ default: 'justifyContentFlexEnd' }}
-            spaceItems={{ default: 'spaceItemsSm' }}
-            flexWrap={{ default: 'wrap' }}
+      {passwordOpen && (
+        <ClusterPasswordModal
+          passwordSecretId={passwordSecretId}
+          onClose={() => setPasswordOpen(false)}
+        />
+      )}
+      {error && (
+        <Modal
+          variant="small"
+          isOpen
+          onClose={() => setError(undefined)}
+          title={t('Failed to download kubeconfig')}
+        >
+          <Alert
+            variant="danger"
+            title={t('Failed to download kubeconfig')}
+            isInline
+            actionLinks={
+              <AlertActionLink onClick={() => download(kubeconfigSecretId, clusterName)}>
+                {t('Retry')}
+              </AlertActionLink>
+            }
           >
-            <FlexItem>
-              <Button
-                variant="secondary"
-                icon={<DownloadIcon />}
-                isLoading={isDownloadingKubeconfig}
-                isDisabled={isDownloadingKubeconfig}
-                onClick={() => downloadKubeconfig(cluster.id)}
-              >
-                {t('Download kubeconfig')}
-              </Button>
-            </FlexItem>
-            <FlexItem>
-              <Button
-                variant="secondary"
-                icon={<KeyIcon />}
-                isLoading={isGettingPassword}
-                isDisabled={isGettingPassword || Boolean(revealedPassword)}
-                onClick={() =>
-                  getPassword(cluster.id, {
-                    onSuccess: (pw) => setRevealedPassword(pw),
-                  })
-                }
-              >
-                {t('Reveal password')}
-              </Button>
-            </FlexItem>
-            <FlexItem>
-              <Button variant="danger" icon={<DumpsterIcon />} onClick={() => setDeleteOpen(true)}>
-                {t('Delete')}
-              </Button>
-            </FlexItem>
-          </Flex>
-        </StackItem>
-      </Stack>
+            {getErrorMessage(error)}
+          </Alert>
+        </Modal>
+      )}
+      <Flex
+        justifyContent={{ default: 'justifyContentFlexEnd' }}
+        spaceItems={{ default: 'spaceItemsSm' }}
+        flexWrap={{ default: 'wrap' }}
+      >
+        <Button
+          variant="secondary"
+          icon={<DownloadIcon />}
+          isDisabled={!isReady || !kubeconfigSecretId || isPending}
+          isLoading={isPending}
+          onClick={() => void download(kubeconfigSecretId, clusterName)}
+        >
+          {t('Download kubeconfig')}
+        </Button>
+        <Button
+          variant="secondary"
+          icon={<KeyIcon />}
+          isDisabled={!isReady || !passwordSecretId}
+          onClick={() => setPasswordOpen(true)}
+        >
+          {t('View password')}
+        </Button>
+        <DeleteResourceButton
+          showIcon
+          canDelete={canDelete}
+          onClick={() => {
+            if (canDelete) {
+              setDeleteOpen(true);
+            }
+          }}
+        />
+      </Flex>
     </>
   );
 };

@@ -17,20 +17,35 @@
 
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
+import { file_buf_validate_validate } from "../../../buf/validate/validate_pb";
 import { file_google_api_field_behavior } from "../../../google/api/field_behavior_pb";
+import type { Any } from "../../../google/protobuf/any_pb";
+import { file_google_protobuf_any } from "../../../google/protobuf/any_pb";
 import type { Timestamp } from "../../../google/protobuf/timestamp_pb";
 import { file_google_protobuf_timestamp } from "../../../google/protobuf/timestamp_pb";
+import type { BareMetalInstanceCatalogItemReference } from "./baremetal_instance_catalog_item_type_pb";
+import { file_osac_public_v1_baremetal_instance_catalog_item_type } from "./baremetal_instance_catalog_item_type_pb";
+import type { BareMetalInstanceRunStrategy, BareMetalNetworkAttachment } from "./baremetal_instance_common_type_pb";
+import { file_osac_public_v1_baremetal_instance_common_type } from "./baremetal_instance_common_type_pb";
+import type { BareMetalInstanceTemplateReference } from "./baremetal_instance_template_type_pb";
+import { file_osac_public_v1_baremetal_instance_template_type } from "./baremetal_instance_template_type_pb";
+import type { BareMetalInstanceTypeReference } from "./baremetal_instance_type_type_pb";
+import { file_osac_public_v1_baremetal_instance_type_type } from "./baremetal_instance_type_type_pb";
 import type { ConditionStatus } from "./condition_status_type_pb";
 import { file_osac_public_v1_condition_status_type } from "./condition_status_type_pb";
+import type { DiskImageReference } from "./disk_image_type_pb";
+import { file_osac_public_v1_disk_image_type } from "./disk_image_type_pb";
 import type { Metadata } from "./metadata_type_pb";
 import { file_osac_public_v1_metadata_type } from "./metadata_type_pb";
+import type { SecretLocalReference } from "./secret_type_pb";
+import { file_osac_public_v1_secret_type } from "./secret_type_pb";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file osac/public/v1/baremetal_instance_type.proto.
  */
 export const file_osac_public_v1_baremetal_instance_type: GenFile = /*@__PURE__*/
-  fileDesc("Cixvc2FjL3B1YmxpYy92MS9iYXJlbWV0YWxfaW5zdGFuY2VfdHlwZS5wcm90bxIOb3NhYy5wdWJsaWMudjEiuQEKEUJhcmVNZXRhbEluc3RhbmNlEgoKAmlkGAEgASgJEioKCG1ldGFkYXRhGAIgASgLMhgub3NhYy5wdWJsaWMudjEuTWV0YWRhdGESMwoEc3BlYxgDIAEoCzIlLm9zYWMucHVibGljLnYxLkJhcmVNZXRhbEluc3RhbmNlU3BlYxI3CgZzdGF0dXMYBCABKAsyJy5vc2FjLnB1YmxpYy52MS5CYXJlTWV0YWxJbnN0YW5jZVN0YXR1cyKFAgoVQmFyZU1ldGFsSW5zdGFuY2VTcGVjEhkKDGNhdGFsb2dfaXRlbRgBIAEoCUID4EEFEiAKDnNzaF9wdWJsaWNfa2V5GAIgASgJQgPgQQVIAIgBARIbCgl1c2VyX2RhdGEYAyABKAlCA+BBBUgBiAEBEkcKDHJ1bl9zdHJhdGVneRgEIAEoDjIsLm9zYWMucHVibGljLnYxLkJhcmVNZXRhbEluc3RhbmNlUnVuU3RyYXRlZ3lIAogBARIXCg9yZXN0YXJ0X3RyaWdnZXIYBSABKANCEQoPX3NzaF9wdWJsaWNfa2V5QgwKCl91c2VyX2RhdGFCDwoNX3J1bl9zdHJhdGVneSKpAQoXQmFyZU1ldGFsSW5zdGFuY2VTdGF0dXMSNQoFc3RhdGUYASABKA4yJi5vc2FjLnB1YmxpYy52MS5CYXJlTWV0YWxJbnN0YW5jZVN0YXRlEj4KCmNvbmRpdGlvbnMYAiADKAsyKi5vc2FjLnB1YmxpYy52MS5CYXJlTWV0YWxJbnN0YW5jZUNvbmRpdGlvbhIXCg9yZXN0YXJ0X3RyaWdnZXIYAyABKAMihwIKGkJhcmVNZXRhbEluc3RhbmNlQ29uZGl0aW9uEjwKBHR5cGUYASABKA4yLi5vc2FjLnB1YmxpYy52MS5CYXJlTWV0YWxJbnN0YW5jZUNvbmRpdGlvblR5cGUSLwoGc3RhdHVzGAIgASgOMh8ub3NhYy5wdWJsaWMudjEuQ29uZGl0aW9uU3RhdHVzEjgKFGxhc3RfdHJhbnNpdGlvbl90aW1lGAMgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBITCgZyZWFzb24YBCABKAlIAIgBARIUCgdtZXNzYWdlGAUgASgJSAGIAQFCCQoHX3JlYXNvbkIKCghfbWVzc2FnZSqqAQocQmFyZU1ldGFsSW5zdGFuY2VSdW5TdHJhdGVneRIwCixCQVJFX01FVEFMX0lOU1RBTkNFX1JVTl9TVFJBVEVHWV9VTlNQRUNJRklFRBAAEisKJ0JBUkVfTUVUQUxfSU5TVEFOQ0VfUlVOX1NUUkFURUdZX0FMV0FZUxABEisKJ0JBUkVfTUVUQUxfSU5TVEFOQ0VfUlVOX1NUUkFURUdZX0hBTFRFRBACKtsCChZCYXJlTWV0YWxJbnN0YW5jZVN0YXRlEikKJUJBUkVfTUVUQUxfSU5TVEFOQ0VfU1RBVEVfVU5TUEVDSUZJRUQQABIqCiZCQVJFX01FVEFMX0lOU1RBTkNFX1NUQVRFX1BST1ZJU0lPTklORxABEiUKIUJBUkVfTUVUQUxfSU5TVEFOQ0VfU1RBVEVfUlVOTklORxACEiQKIEJBUkVfTUVUQUxfSU5TVEFOQ0VfU1RBVEVfRkFJTEVEEAMSJgoiQkFSRV9NRVRBTF9JTlNUQU5DRV9TVEFURV9ERUxFVElORxAEEiYKIkJBUkVfTUVUQUxfSU5TVEFOQ0VfU1RBVEVfU1RBUlRJTkcQBRImCiJCQVJFX01FVEFMX0lOU1RBTkNFX1NUQVRFX1NUT1BQSU5HEAYSJQohQkFSRV9NRVRBTF9JTlNUQU5DRV9TVEFURV9TVE9QUEVEEAcqoAMKHkJhcmVNZXRhbEluc3RhbmNlQ29uZGl0aW9uVHlwZRIyCi5CQVJFX01FVEFMX0lOU1RBTkNFX0NPTkRJVElPTl9UWVBFX1VOU1BFQ0lGSUVEEAASMgouQkFSRV9NRVRBTF9JTlNUQU5DRV9DT05ESVRJT05fVFlQRV9QUk9WSVNJT05FRBABEjwKOEJBUkVfTUVUQUxfSU5TVEFOQ0VfQ09ORElUSU9OX1RZUEVfQ09ORklHVVJBVElPTl9BUFBMSUVEEAISLAooQkFSRV9NRVRBTF9JTlNUQU5DRV9DT05ESVRJT05fVFlQRV9SRUFEWRADEjoKNkJBUkVfTUVUQUxfSU5TVEFOQ0VfQ09ORElUSU9OX1RZUEVfUkVTVEFSVF9JTl9QUk9HUkVTUxAEEjUKMUJBUkVfTUVUQUxfSU5TVEFOQ0VfQ09ORElUSU9OX1RZUEVfUkVTVEFSVF9GQUlMRUQQBRI3CjNCQVJFX01FVEFMX0lOU1RBTkNFX0NPTkRJVElPTl9UWVBFX1JFU1RBUlRfUkVRVUlSRUQQBmIGcHJvdG8z", [file_google_api_field_behavior, file_google_protobuf_timestamp, file_osac_public_v1_condition_status_type, file_osac_public_v1_metadata_type]);
+  fileDesc("Cixvc2FjL3B1YmxpYy92MS9iYXJlbWV0YWxfaW5zdGFuY2VfdHlwZS5wcm90bxIOb3NhYy5wdWJsaWMudjEiuQEKEUJhcmVNZXRhbEluc3RhbmNlEgoKAmlkGAEgASgJEioKCG1ldGFkYXRhGAIgASgLMhgub3NhYy5wdWJsaWMudjEuTWV0YWRhdGESMwoEc3BlYxgDIAEoCzIlLm9zYWMucHVibGljLnYxLkJhcmVNZXRhbEluc3RhbmNlU3BlYxI3CgZzdGF0dXMYBCABKAsyJy5vc2FjLnB1YmxpYy52MS5CYXJlTWV0YWxJbnN0YW5jZVN0YXR1cyKpCQoVQmFyZU1ldGFsSW5zdGFuY2VTcGVjElAKDGNhdGFsb2dfaXRlbRgBIAEoCzI1Lm9zYWMucHVibGljLnYxLkJhcmVNZXRhbEluc3RhbmNlQ2F0YWxvZ0l0ZW1SZWZlcmVuY2VCA+BBBRIgCg5zc2hfcHVibGljX2tleRgCIAEoCUID4EEFSACIAQESGwoJdXNlcl9kYXRhGAMgASgJQgPgQQVIAYgBARJHCgxydW5fc3RyYXRlZ3kYBCABKA4yLC5vc2FjLnB1YmxpYy52MS5CYXJlTWV0YWxJbnN0YW5jZVJ1blN0cmF0ZWd5SAKIAQESFwoPcmVzdGFydF90cmlnZ2VyGAUgASgDEl8KE3RlbXBsYXRlX3BhcmFtZXRlcnMYBiADKAsyPS5vc2FjLnB1YmxpYy52MS5CYXJlTWV0YWxJbnN0YW5jZVNwZWMuVGVtcGxhdGVQYXJhbWV0ZXJzRW50cnlCA+BBBRJMChNuZXR3b3JrX2F0dGFjaG1lbnRzGAggAygLMioub3NhYy5wdWJsaWMudjEuQmFyZU1ldGFsTmV0d29ya0F0dGFjaG1lbnRCA+BBBRItChthdXRvX2V4dGVybmFsX2lwX2F0dGFjaG1lbnQYCSABKAhCA+BBBUgDiAEBEkkKCHRlbXBsYXRlGAogASgLMjIub3NhYy5wdWJsaWMudjEuQmFyZU1ldGFsSW5zdGFuY2VUZW1wbGF0ZVJlZmVyZW5jZUID4EEFEkoKDWluc3RhbmNlX3R5cGUYCyABKAsyLi5vc2FjLnB1YmxpYy52MS5CYXJlTWV0YWxJbnN0YW5jZVR5cGVSZWZlcmVuY2VCA+BBBRI7CgpkaXNrX2ltYWdlGAwgASgLMiIub3NhYy5wdWJsaWMudjEuRGlza0ltYWdlUmVmZXJlbmNlQgPgQQUSQwoQdXNlcl9kYXRhX3NlY3JldBgNIAEoCzIkLm9zYWMucHVibGljLnYxLlNlY3JldExvY2FsUmVmZXJlbmNlQgPgQQUaTwoXVGVtcGxhdGVQYXJhbWV0ZXJzRW50cnkSCwoDa2V5GAEgASgJEiMKBXZhbHVlGAIgASgLMhQuZ29vZ2xlLnByb3RvYnVmLkFueToCOAE69QG6SPEBGu4BCiViYXJlbWV0YWxfaW5zdGFuY2VfcHJpbWFyeV9hdHRhY2htZW50Elp3aGVuIG11bHRpcGxlIG5ldHdvcmsgYXR0YWNobWVudHMgYXJlIHNwZWNpZmllZCwgZXhhY3RseSBvbmUgbXVzdCBoYXZlIHByaW1hcnkgc2V0IHRvIHRydWUaaXRoaXMubmV0d29ya19hdHRhY2htZW50cy5zaXplKCkgPD0gMSB8fCB0aGlzLm5ldHdvcmtfYXR0YWNobWVudHMuZmlsdGVyKGEsIGEucHJpbWFyeSA9PSB0cnVlKS5zaXplKCkgPT0gMUIRCg9fc3NoX3B1YmxpY19rZXlCDAoKX3VzZXJfZGF0YUIPCg1fcnVuX3N0cmF0ZWd5Qh4KHF9hdXRvX2V4dGVybmFsX2lwX2F0dGFjaG1lbnRKBAgHEAhSBWltYWdlIqYDChdCYXJlTWV0YWxJbnN0YW5jZVN0YXR1cxI1CgVzdGF0ZRgBIAEoDjImLm9zYWMucHVibGljLnYxLkJhcmVNZXRhbEluc3RhbmNlU3RhdGUSPgoKY29uZGl0aW9ucxgCIAMoCzIqLm9zYWMucHVibGljLnYxLkJhcmVNZXRhbEluc3RhbmNlQ29uZGl0aW9uEhcKD3Jlc3RhcnRfdHJpZ2dlchgDIAEoAxJVChtuZXR3b3JrX2F0dGFjaG1lbnRfc3RhdHVzZXMYBCADKAsyMC5vc2FjLnB1YmxpYy52MS5CYXJlTWV0YWxOZXR3b3JrQXR0YWNobWVudFN0YXR1cxI4CghoYXJkd2FyZRgFIAEoCzIhLm9zYWMucHVibGljLnYxLkJhcmVNZXRhbEhhcmR3YXJlSACIAQESQwoVc3RhdGVfdHJhbnNpdGlvbl90aW1lGAcgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEID4EEDSAGIAQFCCwoJX2hhcmR3YXJlQhgKFl9zdGF0ZV90cmFuc2l0aW9uX3RpbWUibgogQmFyZU1ldGFsTmV0d29ya0F0dGFjaG1lbnRTdGF0dXMSEQoJaW50ZXJmYWNlGAEgASgJEhIKCnN1Ym5ldF9yZWYYAiABKAkSEgoKaXBfYWRkcmVzcxgDIAEoCRIPCgdwcmltYXJ5GAQgASgIIiEKEkJhcmVNZXRhbE5JQ1N0YXR1cxILCgNtYWMYASABKAkiRQoRQmFyZU1ldGFsSGFyZHdhcmUSMAoEbmljcxgBIAMoCzIiLm9zYWMucHVibGljLnYxLkJhcmVNZXRhbE5JQ1N0YXR1cyKHAgoaQmFyZU1ldGFsSW5zdGFuY2VDb25kaXRpb24SPAoEdHlwZRgBIAEoDjIuLm9zYWMucHVibGljLnYxLkJhcmVNZXRhbEluc3RhbmNlQ29uZGl0aW9uVHlwZRIvCgZzdGF0dXMYAiABKA4yHy5vc2FjLnB1YmxpYy52MS5Db25kaXRpb25TdGF0dXMSOAoUbGFzdF90cmFuc2l0aW9uX3RpbWUYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhMKBnJlYXNvbhgEIAEoCUgAiAEBEhQKB21lc3NhZ2UYBSABKAlIAYgBAUIJCgdfcmVhc29uQgoKCF9tZXNzYWdlIjsKH0JhcmVNZXRhbEluc3RhbmNlTG9jYWxSZWZlcmVuY2USCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCSrbAgoWQmFyZU1ldGFsSW5zdGFuY2VTdGF0ZRIpCiVCQVJFX01FVEFMX0lOU1RBTkNFX1NUQVRFX1VOU1BFQ0lGSUVEEAASKgomQkFSRV9NRVRBTF9JTlNUQU5DRV9TVEFURV9QUk9WSVNJT05JTkcQARIlCiFCQVJFX01FVEFMX0lOU1RBTkNFX1NUQVRFX1JVTk5JTkcQAhIkCiBCQVJFX01FVEFMX0lOU1RBTkNFX1NUQVRFX0ZBSUxFRBADEiYKIkJBUkVfTUVUQUxfSU5TVEFOQ0VfU1RBVEVfREVMRVRJTkcQBBImCiJCQVJFX01FVEFMX0lOU1RBTkNFX1NUQVRFX1NUQVJUSU5HEAUSJgoiQkFSRV9NRVRBTF9JTlNUQU5DRV9TVEFURV9TVE9QUElORxAGEiUKIUJBUkVfTUVUQUxfSU5TVEFOQ0VfU1RBVEVfU1RPUFBFRBAHKqADCh5CYXJlTWV0YWxJbnN0YW5jZUNvbmRpdGlvblR5cGUSMgouQkFSRV9NRVRBTF9JTlNUQU5DRV9DT05ESVRJT05fVFlQRV9VTlNQRUNJRklFRBAAEjIKLkJBUkVfTUVUQUxfSU5TVEFOQ0VfQ09ORElUSU9OX1RZUEVfUFJPVklTSU9ORUQQARI8CjhCQVJFX01FVEFMX0lOU1RBTkNFX0NPTkRJVElPTl9UWVBFX0NPTkZJR1VSQVRJT05fQVBQTElFRBACEiwKKEJBUkVfTUVUQUxfSU5TVEFOQ0VfQ09ORElUSU9OX1RZUEVfUkVBRFkQAxI6CjZCQVJFX01FVEFMX0lOU1RBTkNFX0NPTkRJVElPTl9UWVBFX1JFU1RBUlRfSU5fUFJPR1JFU1MQBBI1CjFCQVJFX01FVEFMX0lOU1RBTkNFX0NPTkRJVElPTl9UWVBFX1JFU1RBUlRfRkFJTEVEEAUSNwozQkFSRV9NRVRBTF9JTlNUQU5DRV9DT05ESVRJT05fVFlQRV9SRVNUQVJUX1JFUVVJUkVEEAZiBnByb3RvMw", [file_buf_validate_validate, file_google_api_field_behavior, file_google_protobuf_any, file_google_protobuf_timestamp, file_osac_public_v1_baremetal_instance_catalog_item_type, file_osac_public_v1_baremetal_instance_common_type, file_osac_public_v1_baremetal_instance_template_type, file_osac_public_v1_baremetal_instance_type_type, file_osac_public_v1_condition_status_type, file_osac_public_v1_disk_image_type, file_osac_public_v1_metadata_type, file_osac_public_v1_secret_type]);
 
 /**
  * Contains the details of a bare metal instance.
@@ -78,11 +93,15 @@ export const BareMetalInstanceSchema: GenMessage<BareMetalInstance> = /*@__PURE_
  */
 export type BareMetalInstanceSpec = Message<"osac.public.v1.BareMetalInstanceSpec"> & {
   /**
-   * Reference to the BareMetalInstanceCatalogItem. Required on create; immutable after creation.
+   * Reference to the BareMetalInstanceCatalogItem. Either `catalog_item` or `template` is required on create.
    *
-   * @generated from field: string catalog_item = 1;
+   * Mutually exclusive with `template`.
+   *
+   * This can't be modified after the bare metal instance is created.
+   *
+   * @generated from field: osac.public.v1.BareMetalInstanceCatalogItemReference catalog_item = 1;
    */
-  catalogItem: string;
+  catalogItem?: BareMetalInstanceCatalogItemReference | undefined;
 
   /**
    * SSH public key injected into the OS at provisioning time. Immutable after creation.
@@ -117,6 +136,107 @@ export type BareMetalInstanceSpec = Message<"osac.public.v1.BareMetalInstanceSpe
    * @generated from field: int64 restart_trigger = 5;
    */
   restartTrigger: bigint;
+
+  /**
+   * Values of the template parameters passed to the provisioning template.
+   *
+   * When using the HTTP+JSON version of the API the values must be represented as documented in the [ProtoJSON format
+   * document](https://protobuf.dev/programming-guides/json). For example, if the template has a `disk_layout`
+   * parameter of string type, the complete bare metal instance should be represented like this:
+   *
+   * ```json
+   * {
+   *   "spec": {
+   *     "catalog_item": "gpu-node",
+   *     "template_parameters": {
+   *       "disk_layout": {
+   *         "@type": "type.googleapis.com/google.protobuf.StringValue",
+   *         "value": "raid1"
+   *       }
+   *     }
+   *   }
+   * }
+   * ```
+   *
+   * The possible values of the `@type` are the same as those used by the `type_url` field of the `Any` type:
+   *
+   * | Type                           | Value                                             |
+   * |--------------------------------|---------------------------------------------------|
+   * | Boolean                        | `type.googleapis.com/google.protobuf.BoolValue`   |
+   * | Integer number, 32 bits        | `type.googleapis.com/google.protobuf.Int32Value`  |
+   * | Integer number, 64 bits        | `type.googleapis.com/google.protobuf.Int64Value`  |
+   * | Floating point number, 32 bits | `type.googleapis.com/google.protobuf.FloatValue`  |
+   * | Floating point number, 64 bits | `type.googleapis.com/google.protobuf.DoubleValue` |
+   * | String                         | `type.googleapis.com/google.protobuf.StringValue` |
+   * | Timestamp                      | `type.googleapis.com/google.protobuf.Timestamp`   |
+   * | Duration                       | `type.googleapis.com/google.protobuf.Duration`    |
+   * | Array of bytes                 | `type.googleapis.com/google.protobuf.BytesValue`  |
+   * | Any JSON value                 | `type.googleapis.com/google.protobuf.Value`       |
+   *
+   * These parameters can't be modified after the bare metal instance is created.
+   *
+   * @generated from field: map<string, google.protobuf.Any> template_parameters = 6;
+   */
+  templateParameters: { [key: string]: Any };
+
+  /**
+   * Network attachments for the bare metal instance. One entry per physical NIC.
+   * The complete attachment list, including subnet and security group references,
+   * physical interface, and primary designation, is immutable after creation.
+   *
+   * @generated from field: repeated osac.public.v1.BareMetalNetworkAttachment network_attachments = 8;
+   */
+  networkAttachments: BareMetalNetworkAttachment[];
+
+  /**
+   * When true, the system auto-selects an ExternalIPPool and creates an ExternalIP
+   * with an ExternalIPAttachment for this instance atomically during creation.
+   * Immutable after creation.
+   *
+   * @generated from field: optional bool auto_external_ip_attachment = 9;
+   */
+  autoExternalIpAttachment?: boolean | undefined;
+
+  /**
+   * Reference to the bare metal instance template. Either `template` or `catalog_item` is required on create.
+   *
+   * Mutually exclusive with `catalog_item`.
+   *
+   * This can't be modified after the bare metal instance is created.
+   *
+   * @generated from field: osac.public.v1.BareMetalInstanceTemplateReference template = 10;
+   */
+  template?: BareMetalInstanceTemplateReference | undefined;
+
+  /**
+   * Reference to a BareMetalInstanceType. Optional; immutable after creation.
+   * When set, the system resolves this to the instance type's host_label_selector and maps it
+   * to the CRD's Selector.HostSelector for host selection. When omitted, host selection falls
+   * back to the catalog item's template host_type.
+   *
+   * @generated from field: osac.public.v1.BareMetalInstanceTypeReference instance_type = 11;
+   */
+  instanceType?: BareMetalInstanceTypeReference | undefined;
+
+  /**
+   * Reference to a DiskImage resource, selected by ID or name. The reference is immutable after creation.
+   * Catalog items can provide a default when callers omit it. The reference must resolve to an image in the instance
+   * tenant or shared tenant. Available images are accepted, deprecated images are accepted with a warning, and
+   * obsolete images are rejected.
+   *
+   * @generated from field: osac.public.v1.DiskImageReference disk_image = 12;
+   */
+  diskImage?: DiskImageReference | undefined;
+
+  /**
+   * Reference to a Secret containing user data for the bare metal instance.
+   * The Secret must contain a non-empty `userdata` entry. Mutually exclusive with `user_data`.
+   * An existing inline value may be migrated by setting this field while clearing `user_data`
+   * in the same update.
+   *
+   * @generated from field: osac.public.v1.SecretLocalReference user_data_secret = 13;
+   */
+  userDataSecret?: SecretLocalReference | undefined;
 };
 
 /**
@@ -153,6 +273,33 @@ export type BareMetalInstanceStatus = Message<"osac.public.v1.BareMetalInstanceS
    * @generated from field: int64 restart_trigger = 3;
    */
   restartTrigger: bigint;
+
+  /**
+   * Runtime networking state for each network attachment.
+   * Populated by the operator after DHCP lease discovery and synced via the feedback controller.
+   *
+   * @generated from field: repeated osac.public.v1.BareMetalNetworkAttachmentStatus network_attachment_statuses = 4;
+   */
+  networkAttachmentStatuses: BareMetalNetworkAttachmentStatus[];
+
+  /**
+   * Physical hardware metadata fetched from the inventory backend at allocation time.
+   * Absent until the inventory backend provides NIC data.
+   *
+   * @generated from field: optional osac.public.v1.BareMetalHardware hardware = 5;
+   */
+  hardware?: BareMetalHardware | undefined;
+
+  /**
+   * Records when the bare metal instance entered its current state, as reported by the
+   * provisioning backend. This is the authoritative timestamp of the state transition,
+   * suitable for billing interval calculations.
+   *
+   * This will be empty if no state transition has been reported yet.
+   *
+   * @generated from field: optional google.protobuf.Timestamp state_transition_time = 7;
+   */
+  stateTransitionTime?: Timestamp | undefined;
 };
 
 /**
@@ -161,6 +308,92 @@ export type BareMetalInstanceStatus = Message<"osac.public.v1.BareMetalInstanceS
  */
 export const BareMetalInstanceStatusSchema: GenMessage<BareMetalInstanceStatus> = /*@__PURE__*/
   messageDesc(file_osac_public_v1_baremetal_instance_type, 2);
+
+/**
+ * Runtime networking state for a single bare metal network attachment.
+ *
+ * @generated from message osac.public.v1.BareMetalNetworkAttachmentStatus
+ */
+export type BareMetalNetworkAttachmentStatus = Message<"osac.public.v1.BareMetalNetworkAttachmentStatus"> & {
+  /**
+   * Physical interface name from the spec's network attachment.
+   *
+   * @generated from field: string interface = 1;
+   */
+  interface: string;
+
+  /**
+   * Reference to the Subnet associated with this attachment.
+   *
+   * @generated from field: string subnet_ref = 2;
+   */
+  subnetRef: string;
+
+  /**
+   * IP address discovered after DHCP assignment.
+   *
+   * @generated from field: string ip_address = 3;
+   */
+  ipAddress: string;
+
+  /**
+   * Whether this attachment is the primary (default gateway) attachment.
+   *
+   * @generated from field: bool primary = 4;
+   */
+  primary: boolean;
+};
+
+/**
+ * Describes the message osac.public.v1.BareMetalNetworkAttachmentStatus.
+ * Use `create(BareMetalNetworkAttachmentStatusSchema)` to create a new message.
+ */
+export const BareMetalNetworkAttachmentStatusSchema: GenMessage<BareMetalNetworkAttachmentStatus> = /*@__PURE__*/
+  messageDesc(file_osac_public_v1_baremetal_instance_type, 3);
+
+/**
+ * Physical NIC MAC address discovered from the inventory backend.
+ * buf:lint:ignore OSAC_OBJECT_SHAPE
+ *
+ * @generated from message osac.public.v1.BareMetalNICStatus
+ */
+export type BareMetalNICStatus = Message<"osac.public.v1.BareMetalNICStatus"> & {
+  /**
+   * Hardware MAC address, lowercased (e.g. "aa:bb:cc:dd:ee:ff").
+   *
+   * @generated from field: string mac = 1;
+   */
+  mac: string;
+};
+
+/**
+ * Describes the message osac.public.v1.BareMetalNICStatus.
+ * Use `create(BareMetalNICStatusSchema)` to create a new message.
+ */
+export const BareMetalNICStatusSchema: GenMessage<BareMetalNICStatus> = /*@__PURE__*/
+  messageDesc(file_osac_public_v1_baremetal_instance_type, 4);
+
+/**
+ * Physical hardware metadata fetched from the inventory backend at allocation time.
+ * buf:lint:ignore OSAC_OBJECT_SHAPE
+ *
+ * @generated from message osac.public.v1.BareMetalHardware
+ */
+export type BareMetalHardware = Message<"osac.public.v1.BareMetalHardware"> & {
+  /**
+   * Physical network interfaces reported by the inventory backend.
+   *
+   * @generated from field: repeated osac.public.v1.BareMetalNICStatus nics = 1;
+   */
+  nics: BareMetalNICStatus[];
+};
+
+/**
+ * Describes the message osac.public.v1.BareMetalHardware.
+ * Use `create(BareMetalHardwareSchema)` to create a new message.
+ */
+export const BareMetalHardwareSchema: GenMessage<BareMetalHardware> = /*@__PURE__*/
+  messageDesc(file_osac_public_v1_baremetal_instance_type, 5);
 
 /**
  * Contains the details of a condition that describes the status of a bare metal instance.
@@ -199,39 +432,31 @@ export type BareMetalInstanceCondition = Message<"osac.public.v1.BareMetalInstan
  * Use `create(BareMetalInstanceConditionSchema)` to create a new message.
  */
 export const BareMetalInstanceConditionSchema: GenMessage<BareMetalInstanceCondition> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_baremetal_instance_type, 3);
+  messageDesc(file_osac_public_v1_baremetal_instance_type, 6);
 
 /**
- * Run strategy for the bare metal instance.
+ * Local reference to a BareMetalInstance resource.
  *
- * @generated from enum osac.public.v1.BareMetalInstanceRunStrategy
+ * @generated from message osac.public.v1.BareMetalInstanceLocalReference
  */
-export enum BareMetalInstanceRunStrategy {
+export type BareMetalInstanceLocalReference = Message<"osac.public.v1.BareMetalInstanceLocalReference"> & {
   /**
-   * @generated from enum value: BARE_METAL_INSTANCE_RUN_STRATEGY_UNSPECIFIED = 0;
+   * @generated from field: string id = 1;
    */
-  UNSPECIFIED = 0,
+  id: string;
 
   /**
-   * The instance is kept powered on.
-   *
-   * @generated from enum value: BARE_METAL_INSTANCE_RUN_STRATEGY_ALWAYS = 1;
+   * @generated from field: string name = 2;
    */
-  ALWAYS = 1,
-
-  /**
-   * The instance is powered off.
-   *
-   * @generated from enum value: BARE_METAL_INSTANCE_RUN_STRATEGY_HALTED = 2;
-   */
-  HALTED = 2,
-}
+  name: string;
+};
 
 /**
- * Describes the enum osac.public.v1.BareMetalInstanceRunStrategy.
+ * Describes the message osac.public.v1.BareMetalInstanceLocalReference.
+ * Use `create(BareMetalInstanceLocalReferenceSchema)` to create a new message.
  */
-export const BareMetalInstanceRunStrategySchema: GenEnum<BareMetalInstanceRunStrategy> = /*@__PURE__*/
-  enumDesc(file_osac_public_v1_baremetal_instance_type, 0);
+export const BareMetalInstanceLocalReferenceSchema: GenMessage<BareMetalInstanceLocalReference> = /*@__PURE__*/
+  messageDesc(file_osac_public_v1_baremetal_instance_type, 7);
 
 /**
  * Represents the overall state of a bare metal instance.
@@ -284,7 +509,7 @@ export enum BareMetalInstanceState {
  * Describes the enum osac.public.v1.BareMetalInstanceState.
  */
 export const BareMetalInstanceStateSchema: GenEnum<BareMetalInstanceState> = /*@__PURE__*/
-  enumDesc(file_osac_public_v1_baremetal_instance_type, 1);
+  enumDesc(file_osac_public_v1_baremetal_instance_type, 0);
 
 /**
  * Types of conditions used to describe the status of a bare metal instance.
@@ -345,5 +570,5 @@ export enum BareMetalInstanceConditionType {
  * Describes the enum osac.public.v1.BareMetalInstanceConditionType.
  */
 export const BareMetalInstanceConditionTypeSchema: GenEnum<BareMetalInstanceConditionType> = /*@__PURE__*/
-  enumDesc(file_osac_public_v1_baremetal_instance_type, 2);
+  enumDesc(file_osac_public_v1_baremetal_instance_type, 1);
 

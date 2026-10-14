@@ -17,6 +17,7 @@ interface ResourceDetailHeaderProps {
   resourceName: string;
   description?: string;
   titleAddon?: ReactNode;
+  titleSize?: '2xl' | '3xl';
 }
 
 export const ResourceDetailHeader = ({
@@ -25,6 +26,7 @@ export const ResourceDetailHeader = ({
   resourceName,
   description,
   titleAddon,
+  titleSize = '2xl',
 }: ResourceDetailHeaderProps) => {
   return (
     <Stack hasGutter>
@@ -50,7 +52,7 @@ export const ResourceDetailHeader = ({
               flexWrap={{ default: 'wrap' }}
             >
               <FlexItem>
-                <Title headingLevel="h1" size="2xl">
+                <Title headingLevel="h1" size={titleSize}>
                   {resourceName}
                 </Title>
               </FlexItem>

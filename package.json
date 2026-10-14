@@ -5,21 +5,20 @@
   "type": "module",
   "scripts": {
     "gen-types": "pnpm --filter @osac/types run gen-types",
-    "gen:api-diff": "node scripts/gen-api-diff.mjs",
-    "gen:coverage-report": "node scripts/gen-api-diff.mjs && node scripts/gen-coverage-html.mjs",
-    "postinstall": "pnpm gen:api-diff",
     "i18n": "pnpm --filter @osac/i18n run i18n",
     "dev": "concurrently \"pnpm dev:proxy\" \"pnpm dev:frontend\"",
-    "dev:proxy": "cd proxy && nodemon --watch 'proxy/**/*' --exec 'go run' main.go --signal SIGTERM",
+    "mock": "pnpm --filter @osac/app-frontend run mock",
+    "dev:proxy": "cd proxy && BASE_UI_URL=http://localhost:5173 nodemon --watch 'proxy/**/*' --exec 'go run' main.go --signal SIGTERM",
     "dev:frontend": "pnpm --filter @osac/app-frontend run dev",
-    "dev:demo": "pnpm --filter @osac/app-frontend run dev:demo",
     "build": "pnpm --filter @osac/app-frontend run build && cd proxy && go build -o osac-proxy .",
     "lint": "eslint \"{apps,libs}/*/src/**\" && prettier --check \"{apps,libs}/*/src/**/*.{js,jsx,ts,tsx}\" && pnpm run i18n",
     "format": "eslint --fix \"{apps,libs}/*/src/**/*.{ts,tsx}\" && prettier --write \"{apps,libs}/*/src/**/*.{js,jsx,ts,tsx}\"",
-    "check:pf-primitives": "node scripts/check-pf-primitives.mjs",
     "test": "pnpm -r run test",
-    "e2e:ci": "pnpm --filter @osac/e2e run e2e:ci",
-    "graph:statecharts": "node scripts/statechart-graph.mjs --all --format both --out-dir docs/specs/graphs"
+    "typecheck": "pnpm -r run typecheck",
+    "playwright": "pnpm --filter @osac/playwright run playwright",
+    "playwright:setup": "pnpm --filter @osac/playwright run playwright:setup",
+    "playwright:run": "pnpm --filter @osac/playwright run playwright:run",
+    "playwright:report": "pnpm --filter @osac/playwright exec playwright show-report"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
@@ -38,5 +37,10 @@
   "engines": {
     "node": ">=20",
     "pnpm": ">=9"
+  },
+  "pnpm": {
+    "overrides": {
+      "@bufbuild/protobuf": "2.12.0"
+    }
   }
 }

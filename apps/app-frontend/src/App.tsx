@@ -12,29 +12,23 @@ import {
 import { SessionProvider, useSession } from '@osac/ui-components/hooks/use-session';
 
 import { useOIDCLogin } from './hooks/oidc-login';
+import { useMockLogin } from './mock/use-mock-login';
 import { AppShell } from './shell/AppShell';
 import { defaultRouteForRole } from './shell/shellRoutes';
 
-const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
-
-export const DEMO_TENANT_ID = 'tenant-001';
+const MOCK_MODE = import.meta.env.VITE_MOCK_MODE === 'true';
 
 const LoggedInHomeRedirect = () => {
   const { role } = useSession();
   return <Navigate to={defaultRouteForRole(role)} replace />;
 };
 
-const DemoApp = () => (
-  <SessionProvider role="tenantUser" username="demo-user" tenantId={DEMO_TENANT_ID} isDemoMode>
-    <Routes>
-      <Route path="/" element={<LoggedInHomeRedirect />} />
-      <Route path="/*" element={<AppShell logout={async () => undefined} />} />
-    </Routes>
-  </SessionProvider>
-);
+// ---------------------------------------------------------------------------
+// Live app (real OIDC + fulfillment-service)
+// ---------------------------------------------------------------------------
 
 const LiveApp = () => {
-  const [username, role, isLoading, error, logout] = useOIDCLogin();
+  const [username, role, tenantId, isLoading, error, logout] = useOIDCLogin();
 
   if (isLoading) {
     return (
@@ -60,7 +54,7 @@ const LiveApp = () => {
   }
 
   return (
-    <SessionProvider role={role} username={username}>
+    <SessionProvider role={role} username={username} tenantId={tenantId}>
       <Routes>
         <Route path="/" element={<LoggedInHomeRedirect />} />
         <Route path="/*" element={<AppShell logout={logout} />} />
@@ -69,6 +63,30 @@ const LiveApp = () => {
   );
 };
 
-const App = () => (DEMO_MODE ? <DemoApp /> : <LiveApp />);
+// ---------------------------------------------------------------------------
+// Mock app (no OIDC, no fulfillment-service, persona switcher in header)
+// ---------------------------------------------------------------------------
+
+const MockApp = () => {
+  const [username, role, tenantId, , , logout, setRole] = useMockLogin();
+
+  return (
+    <SessionProvider role={role} username={username} tenantId={tenantId}>
+      <Routes>
+        <Route path="/" element={<LoggedInHomeRedirect />} />
+        <Route
+          path="/*"
+          element={<AppShell logout={logout} onRoleChange={setRole} />}
+        />
+      </Routes>
+    </SessionProvider>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Root: pick the right app based on VITE_MOCK_MODE
+// ---------------------------------------------------------------------------
+
+const App = () => (MOCK_MODE ? <MockApp /> : <LiveApp />);
 
 export default App;

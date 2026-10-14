@@ -17,21 +17,39 @@
 
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
+import { file_buf_validate_validate } from "../../../buf/validate/validate_pb";
+import { file_google_api_field_behavior } from "../../../google/api/field_behavior_pb";
 import type { Any } from "../../../google/protobuf/any_pb";
 import { file_google_protobuf_any } from "../../../google/protobuf/any_pb";
 import type { Timestamp } from "../../../google/protobuf/timestamp_pb";
 import { file_google_protobuf_timestamp } from "../../../google/protobuf/timestamp_pb";
+import type { AddOnOperatorReference } from "./add_on_operator_type_pb";
+import { file_osac_public_v1_add_on_operator_type } from "./add_on_operator_type_pb";
+import type { ClusterCatalogItemReference } from "./cluster_catalog_item_type_pb";
+import { file_osac_public_v1_cluster_catalog_item_type } from "./cluster_catalog_item_type_pb";
+import type { ClusterNetwork, ClusterNetworkAttachment } from "./cluster_common_type_pb";
+import { file_osac_public_v1_cluster_common_type } from "./cluster_common_type_pb";
+import type { ClusterTemplateReference } from "./cluster_template_type_pb";
+import { file_osac_public_v1_cluster_template_type } from "./cluster_template_type_pb";
+import type { ClusterVersionReference } from "./cluster_version_type_pb";
+import { file_osac_public_v1_cluster_version_type } from "./cluster_version_type_pb";
 import type { ConditionStatus } from "./condition_status_type_pb";
 import { file_osac_public_v1_condition_status_type } from "./condition_status_type_pb";
 import type { Metadata } from "./metadata_type_pb";
 import { file_osac_public_v1_metadata_type } from "./metadata_type_pb";
+import type { BareMetalInstanceTypeLocalReference } from "./baremetal_instance_type_type_pb";
+import { file_osac_public_v1_baremetal_instance_type_type } from "./baremetal_instance_type_type_pb";
+import type { HostTypeReference } from "./host_type_type_pb";
+import { file_osac_public_v1_host_type_type } from "./host_type_type_pb";
+import type { SecretLocalReference } from "./secret_type_pb";
+import { file_osac_public_v1_secret_type } from "./secret_type_pb";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file osac/public/v1/cluster_type.proto.
  */
 export const file_osac_public_v1_cluster_type: GenFile = /*@__PURE__*/
-  fileDesc("CiFvc2FjL3B1YmxpYy92MS9jbHVzdGVyX3R5cGUucHJvdG8SDm9zYWMucHVibGljLnYxIpsBCgdDbHVzdGVyEgoKAmlkGAEgASgJEioKCG1ldGFkYXRhGAIgASgLMhgub3NhYy5wdWJsaWMudjEuTWV0YWRhdGESKQoEc3BlYxgDIAEoCzIbLm9zYWMucHVibGljLnYxLkNsdXN0ZXJTcGVjEi0KBnN0YXR1cxgEIAEoCzIdLm9zYWMucHVibGljLnYxLkNsdXN0ZXJTdGF0dXMisQQKC0NsdXN0ZXJTcGVjEhAKCHRlbXBsYXRlGAEgASgJElAKE3RlbXBsYXRlX3BhcmFtZXRlcnMYAiADKAsyMy5vc2FjLnB1YmxpYy52MS5DbHVzdGVyU3BlYy5UZW1wbGF0ZVBhcmFtZXRlcnNFbnRyeRI8Cglub2RlX3NldHMYAyADKAsyKS5vc2FjLnB1YmxpYy52MS5DbHVzdGVyU3BlYy5Ob2RlU2V0c0VudHJ5EhgKC3B1bGxfc2VjcmV0GAQgASgJSACIAQESGwoOc3NoX3B1YmxpY19rZXkYBSABKAlIAYgBARIaCg1yZWxlYXNlX2ltYWdlGAYgASgJSAKIAQESNAoHbmV0d29yaxgHIAEoCzIeLm9zYWMucHVibGljLnYxLkNsdXN0ZXJOZXR3b3JrSAOIAQESFAoMY2F0YWxvZ19pdGVtGAggASgJGk8KF1RlbXBsYXRlUGFyYW1ldGVyc0VudHJ5EgsKA2tleRgBIAEoCRIjCgV2YWx1ZRgCIAEoCzIULmdvb2dsZS5wcm90b2J1Zi5Bbnk6AjgBGk8KDU5vZGVTZXRzRW50cnkSCwoDa2V5GAEgASgJEi0KBXZhbHVlGAIgASgLMh4ub3NhYy5wdWJsaWMudjEuQ2x1c3Rlck5vZGVTZXQ6AjgBQg4KDF9wdWxsX3NlY3JldEIRCg9fc3NoX3B1YmxpY19rZXlCEAoOX3JlbGVhc2VfaW1hZ2VCCgoIX25ldHdvcmsiYAoOQ2x1c3Rlck5ldHdvcmsSFQoIcG9kX2NpZHIYASABKAlIAIgBARIZCgxzZXJ2aWNlX2NpZHIYAiABKAlIAYgBAUILCglfcG9kX2NpZHJCDwoNX3NlcnZpY2VfY2lkciKpAgoNQ2x1c3RlclN0YXR1cxIrCgVzdGF0ZRgBIAEoDjIcLm9zYWMucHVibGljLnYxLkNsdXN0ZXJTdGF0ZRI0Cgpjb25kaXRpb25zGAIgAygLMiAub3NhYy5wdWJsaWMudjEuQ2x1c3RlckNvbmRpdGlvbhIPCgdhcGlfdXJsGAMgASgJEhMKC2NvbnNvbGVfdXJsGAQgASgJEj4KCW5vZGVfc2V0cxgFIAMoCzIrLm9zYWMucHVibGljLnYxLkNsdXN0ZXJTdGF0dXMuTm9kZVNldHNFbnRyeRpPCg1Ob2RlU2V0c0VudHJ5EgsKA2tleRgBIAEoCRItCgV2YWx1ZRgCIAEoCzIeLm9zYWMucHVibGljLnYxLkNsdXN0ZXJOb2RlU2V0OgI4ASLzAQoQQ2x1c3RlckNvbmRpdGlvbhIyCgR0eXBlGAEgASgOMiQub3NhYy5wdWJsaWMudjEuQ2x1c3RlckNvbmRpdGlvblR5cGUSLwoGc3RhdHVzGAIgASgOMh8ub3NhYy5wdWJsaWMudjEuQ29uZGl0aW9uU3RhdHVzEjgKFGxhc3RfdHJhbnNpdGlvbl90aW1lGAMgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBITCgZyZWFzb24YBCABKAlIAIgBARIUCgdtZXNzYWdlGAUgASgJSAGIAQFCCQoHX3JlYXNvbkIKCghfbWVzc2FnZSIxCg5DbHVzdGVyTm9kZVNldBIRCglob3N0X3R5cGUYASABKAkSDAoEc2l6ZRgCIAEoBSp/CgxDbHVzdGVyU3RhdGUSHQoZQ0xVU1RFUl9TVEFURV9VTlNQRUNJRklFRBAAEh0KGUNMVVNURVJfU1RBVEVfUFJPR1JFU1NJTkcQARIXChNDTFVTVEVSX1NUQVRFX1JFQURZEAISGAoUQ0xVU1RFUl9TVEFURV9GQUlMRUQQAyrQAQoUQ2x1c3RlckNvbmRpdGlvblR5cGUSJgoiQ0xVU1RFUl9DT05ESVRJT05fVFlQRV9VTlNQRUNJRklFRBAAEiYKIkNMVVNURVJfQ09ORElUSU9OX1RZUEVfUFJPR1JFU1NJTkcQARIgChxDTFVTVEVSX0NPTkRJVElPTl9UWVBFX1JFQURZEAISIQodQ0xVU1RFUl9DT05ESVRJT05fVFlQRV9GQUlMRUQQAxIjCh9DTFVTVEVSX0NPTkRJVElPTl9UWVBFX0RFR1JBREVEEARiBnByb3RvMw", [file_google_protobuf_any, file_google_protobuf_timestamp, file_osac_public_v1_condition_status_type, file_osac_public_v1_metadata_type]);
+  fileDesc("CiFvc2FjL3B1YmxpYy92MS9jbHVzdGVyX3R5cGUucHJvdG8SDm9zYWMucHVibGljLnYxIpsBCgdDbHVzdGVyEgoKAmlkGAEgASgJEioKCG1ldGFkYXRhGAIgASgLMhgub3NhYy5wdWJsaWMudjEuTWV0YWRhdGESKQoEc3BlYxgDIAEoCzIbLm9zYWMucHVibGljLnYxLkNsdXN0ZXJTcGVjEi0KBnN0YXR1cxgEIAEoCzIdLm9zYWMucHVibGljLnYxLkNsdXN0ZXJTdGF0dXMiqAcKC0NsdXN0ZXJTcGVjEjoKCHRlbXBsYXRlGAEgASgLMigub3NhYy5wdWJsaWMudjEuQ2x1c3RlclRlbXBsYXRlUmVmZXJlbmNlElAKE3RlbXBsYXRlX3BhcmFtZXRlcnMYAiADKAsyMy5vc2FjLnB1YmxpYy52MS5DbHVzdGVyU3BlYy5UZW1wbGF0ZVBhcmFtZXRlcnNFbnRyeRI8Cglub2RlX3NldHMYAyADKAsyKS5vc2FjLnB1YmxpYy52MS5DbHVzdGVyU3BlYy5Ob2RlU2V0c0VudHJ5EhsKDnNzaF9wdWJsaWNfa2V5GAUgASgJSACIAQESOAoHdmVyc2lvbhgGIAEoCzInLm9zYWMucHVibGljLnYxLkNsdXN0ZXJWZXJzaW9uUmVmZXJlbmNlEjQKB25ldHdvcmsYByABKAsyHi5vc2FjLnB1YmxpYy52MS5DbHVzdGVyTmV0d29ya0gBiAEBEkEKDGNhdGFsb2dfaXRlbRgIIAEoCzIrLm9zYWMucHVibGljLnYxLkNsdXN0ZXJDYXRhbG9nSXRlbVJlZmVyZW5jZRJJChJuZXR3b3JrX2F0dGFjaG1lbnQYCSABKAsyKC5vc2FjLnB1YmxpYy52MS5DbHVzdGVyTmV0d29ya0F0dGFjaG1lbnRCA+BBBRItChthdXRvX2V4dGVybmFsX2lwX2F0dGFjaG1lbnQYCiABKAhCA+BBBUgCiAEBEkAKEnB1bGxfc2VjcmV0X3NlY3JldBgLIAEoCzIkLm9zYWMucHVibGljLnYxLlNlY3JldExvY2FsUmVmZXJlbmNlEk0KEGFkZF9vbl9vcGVyYXRvcnMYDCADKAsyJi5vc2FjLnB1YmxpYy52MS5BZGRPbk9wZXJhdG9yUmVmZXJlbmNlQgvgQQW6SAWSAQIQIBpPChdUZW1wbGF0ZVBhcmFtZXRlcnNFbnRyeRILCgNrZXkYASABKAkSIwoFdmFsdWUYAiABKAsyFC5nb29nbGUucHJvdG9idWYuQW55OgI4ARpPCg1Ob2RlU2V0c0VudHJ5EgsKA2tleRgBIAEoCRItCgV2YWx1ZRgCIAEoCzIeLm9zYWMucHVibGljLnYxLkNsdXN0ZXJOb2RlU2V0OgI4AUIRCg9fc3NoX3B1YmxpY19rZXlCCgoIX25ldHdvcmtCHgocX2F1dG9fZXh0ZXJuYWxfaXBfYXR0YWNobWVudEoECAQQBVILcHVsbF9zZWNyZXQibgoTQWRkT25PcGVyYXRvclN0YXR1cxIMCgRuYW1lGAEgASgJEjgKBXN0YXRlGAIgASgOMikub3NhYy5wdWJsaWMudjEuQWRkT25PcGVyYXRvckluc3RhbGxTdGF0ZRIPCgdtZXNzYWdlGAMgASgJIvIECg1DbHVzdGVyU3RhdHVzEisKBXN0YXRlGAEgASgOMhwub3NhYy5wdWJsaWMudjEuQ2x1c3RlclN0YXRlEjQKCmNvbmRpdGlvbnMYAiADKAsyIC5vc2FjLnB1YmxpYy52MS5DbHVzdGVyQ29uZGl0aW9uEg8KB2FwaV91cmwYAyABKAkSEwoLY29uc29sZV91cmwYBCABKAkSPgoJbm9kZV9zZXRzGAUgAygLMisub3NhYy5wdWJsaWMudjEuQ2x1c3RlclN0YXR1cy5Ob2RlU2V0c0VudHJ5EhQKDGFwaV9lbmRwb2ludBgGIAEoCRIYChBpbmdyZXNzX2VuZHBvaW50GAcgASgJEj4KFXN0YXRlX3RyYW5zaXRpb25fdGltZRgIIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBIAIgBARI/ChFrdWJlY29uZmlnX3NlY3JldBgJIAEoCzIkLm9zYWMucHVibGljLnYxLlNlY3JldExvY2FsUmVmZXJlbmNlEj0KD3Bhc3N3b3JkX3NlY3JldBgKIAEoCzIkLm9zYWMucHVibGljLnYxLlNlY3JldExvY2FsUmVmZXJlbmNlEj0KEGFkZF9vbl9vcGVyYXRvcnMYDCADKAsyIy5vc2FjLnB1YmxpYy52MS5BZGRPbk9wZXJhdG9yU3RhdHVzGk8KDU5vZGVTZXRzRW50cnkSCwoDa2V5GAEgASgJEi0KBXZhbHVlGAIgASgLMh4ub3NhYy5wdWJsaWMudjEuQ2x1c3Rlck5vZGVTZXQ6AjgBQhgKFl9zdGF0ZV90cmFuc2l0aW9uX3RpbWUi8wEKEENsdXN0ZXJDb25kaXRpb24SMgoEdHlwZRgBIAEoDjIkLm9zYWMucHVibGljLnYxLkNsdXN0ZXJDb25kaXRpb25UeXBlEi8KBnN0YXR1cxgCIAEoDjIfLm9zYWMucHVibGljLnYxLkNvbmRpdGlvblN0YXR1cxI4ChRsYXN0X3RyYW5zaXRpb25fdGltZRgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASEwoGcmVhc29uGAQgASgJSACIAQESFAoHbWVzc2FnZRgFIAEoCUgBiAEBQgkKB19yZWFzb25CCgoIX21lc3NhZ2UixQEKDkNsdXN0ZXJOb2RlU2V0EjgKCWhvc3RfdHlwZRgBIAEoCzIhLm9zYWMucHVibGljLnYxLkhvc3RUeXBlUmVmZXJlbmNlQgIYARIaCgRzaXplGAIgASgFQge6SAQaAiAASACIAQESVAoXYmFyZW1ldGFsX2luc3RhbmNlX3R5cGUYBCABKAsyMy5vc2FjLnB1YmxpYy52MS5CYXJlTWV0YWxJbnN0YW5jZVR5cGVMb2NhbFJlZmVyZW5jZUIHCgVfc2l6ZSIxChVDbHVzdGVyTG9jYWxSZWZlcmVuY2USCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCSr6AQoZQWRkT25PcGVyYXRvckluc3RhbGxTdGF0ZRItCilBRERfT05fT1BFUkFUT1JfSU5TVEFMTF9TVEFURV9VTlNQRUNJRklFRBAAEikKJUFERF9PTl9PUEVSQVRPUl9JTlNUQUxMX1NUQVRFX1BFTkRJTkcQARIsCihBRERfT05fT1BFUkFUT1JfSU5TVEFMTF9TVEFURV9JTlNUQUxMSU5HEAISKwonQUREX09OX09QRVJBVE9SX0lOU1RBTExfU1RBVEVfSU5TVEFMTEVEEAMSKAokQUREX09OX09QRVJBVE9SX0lOU1RBTExfU1RBVEVfRkFJTEVEEAQqvAEKDENsdXN0ZXJTdGF0ZRIdChlDTFVTVEVSX1NUQVRFX1VOU1BFQ0lGSUVEEAASHQoZQ0xVU1RFUl9TVEFURV9QUk9HUkVTU0lORxABEhcKE0NMVVNURVJfU1RBVEVfUkVBRFkQAhIYChRDTFVTVEVSX1NUQVRFX0ZBSUxFRBADEhoKFkNMVVNURVJfU1RBVEVfREVMRVRJTkcQBBIfChtDTFVTVEVSX1NUQVRFX0RFTEVURV9GQUlMRUQQBSrQAQoUQ2x1c3RlckNvbmRpdGlvblR5cGUSJgoiQ0xVU1RFUl9DT05ESVRJT05fVFlQRV9VTlNQRUNJRklFRBAAEiYKIkNMVVNURVJfQ09ORElUSU9OX1RZUEVfUFJPR1JFU1NJTkcQARIgChxDTFVTVEVSX0NPTkRJVElPTl9UWVBFX1JFQURZEAISIQodQ0xVU1RFUl9DT05ESVRJT05fVFlQRV9GQUlMRUQQAxIjCh9DTFVTVEVSX0NPTkRJVElPTl9UWVBFX0RFR1JBREVEEARiBnByb3RvMw", [file_buf_validate_validate, file_google_api_field_behavior, file_google_protobuf_any, file_google_protobuf_timestamp, file_osac_public_v1_add_on_operator_type, file_osac_public_v1_cluster_catalog_item_type, file_osac_public_v1_cluster_common_type, file_osac_public_v1_cluster_template_type, file_osac_public_v1_cluster_version_type, file_osac_public_v1_condition_status_type, file_osac_public_v1_metadata_type, file_osac_public_v1_baremetal_instance_type_type, file_osac_public_v1_host_type_type, file_osac_public_v1_secret_type]);
 
 /**
  * Contains the details of the cluster.
@@ -81,13 +99,14 @@ export type ClusterSpec = Message<"osac.public.v1.ClusterSpec"> & {
   /**
    * Reference to the cluster template. Either `template` or `catalog_item` is required on create.
    *
-   * Must be the value of the `id` field of one of the cluster templates. Mutually exclusive with `catalog_item`.
+   * Mutually exclusive with `catalog_item` on Create. For catalog-created clusters, the server
+   * populates this reference from the catalog item.
    *
    * This can't be modified after the cluster is created.
    *
-   * @generated from field: string template = 1;
+   * @generated from field: osac.public.v1.ClusterTemplateReference template = 1;
    */
-  template: string;
+  template?: ClusterTemplateReference | undefined;
 
   /**
    * Values of the template parameters.
@@ -191,16 +210,6 @@ export type ClusterSpec = Message<"osac.public.v1.ClusterSpec"> & {
   nodeSets: { [key: string]: ClusterNodeSet };
 
   /**
-   * Credentials for authenticating to container image repositories.
-   *
-   * This is write-only: the value is redacted in GET responses. If not provided, the provider's default pull secret
-   * is used.
-   *
-   * @generated from field: optional string pull_secret = 4;
-   */
-  pullSecret?: string | undefined;
-
-  /**
    * SSH public key installed into the `authorized_keys` file on cluster worker nodes.
    *
    * If not provided, the provider's default SSH key is used.
@@ -210,14 +219,19 @@ export type ClusterSpec = Message<"osac.public.v1.ClusterSpec"> & {
   sshPublicKey?: string | undefined;
 
   /**
-   * OCP release image URL that controls the OpenShift version.
+   * Reference to a ClusterVersion resource.
    *
-   * For example: `quay.io/openshift-release-dev/ocp-release:4.17.0-multi`.
-   * If not provided, the template's default release image is used.
+   * The version is resolved with the following precedence:
    *
-   * @generated from field: optional string release_image = 6;
+   *   1. Explicit `spec.version` provided by the user.
+   *   2. Template `spec_defaults.version` (template path) or catalog item policy default (catalog-item path).
+   *   3. System default (`is_default = true`).
+   *
+   * The referenced ClusterVersion must exist, be enabled, and not be in `OBSOLETE` state.
+   *
+   * @generated from field: osac.public.v1.ClusterVersionReference version = 6;
    */
-  releaseImage?: string | undefined;
+  version?: ClusterVersionReference | undefined;
 
   /**
    * Cluster networking configuration.
@@ -227,12 +241,56 @@ export type ClusterSpec = Message<"osac.public.v1.ClusterSpec"> & {
   network?: ClusterNetwork | undefined;
 
   /**
-   * Reference to a cluster catalog item. Mutually exclusive with template during the migration period.
-   * When set, the server fetches the catalog item and applies its field definitions.
+   * Reference to a cluster catalog item. Mutually exclusive with template on Create; retained as immutable provenance afterward.
+   * When set, the server fetches the catalog item and applies its typed field policies.
    *
-   * @generated from field: string catalog_item = 8;
+   * @generated from field: osac.public.v1.ClusterCatalogItemReference catalog_item = 8;
    */
-  catalogItem: string;
+  catalogItem?: ClusterCatalogItemReference | undefined;
+
+  /**
+   * Network attachment connecting this cluster to a tenant subnet.
+   *
+   * When provided, all node sets of the cluster will be connected to the specified subnet. Only one network attachment
+   * is supported per cluster.
+   *
+   * When not provided, the system will populate this field with the tenant's default subnet and security groups during
+   * cluster creation.
+   *
+   * The complete attachment, including subnet and security group references, is immutable after creation.
+   *
+   * @generated from field: osac.public.v1.ClusterNetworkAttachment network_attachment = 9;
+   */
+  networkAttachment?: ClusterNetworkAttachment | undefined;
+
+  /**
+   * When true, the system automatically creates two ExternalIPs and two ExternalIPAttachments
+   * (one for the API server endpoint, one for the ingress endpoint) during cluster creation.
+   * The ExternalIP pool is selected automatically based on available capacity.
+   *
+   * This field is immutable after creation — it cannot be changed on update.
+   *
+   * @generated from field: optional bool auto_external_ip_attachment = 10;
+   */
+  autoExternalIpAttachment?: boolean | undefined;
+
+  /**
+   * Reference to a Secret resource containing pull secret credentials.
+   *
+   * When set, the system resolves the referenced Secret to obtain the pull secret value. A directly referenced Secret
+   * must exist in the same tenant. When unset, a shared Secret may be inherited if the shared template provides it as
+   * the default pull secret.
+   *
+   * @generated from field: osac.public.v1.SecretLocalReference pull_secret_secret = 11;
+   */
+  pullSecretSecret?: SecretLocalReference | undefined;
+
+  /**
+   * Add-on operators requested for the cluster. The field is immutable after creation.
+   *
+   * @generated from field: repeated osac.public.v1.AddOnOperatorReference add_on_operators = 12;
+   */
+  addOnOperators: AddOnOperatorReference[];
 };
 
 /**
@@ -243,35 +301,34 @@ export const ClusterSpecSchema: GenMessage<ClusterSpec> = /*@__PURE__*/
   messageDesc(file_osac_public_v1_cluster_type, 1);
 
 /**
- * Networking configuration for a cluster.
+ * The per-operator status contains the installation state of one add-on operator.
  *
- * @generated from message osac.public.v1.ClusterNetwork
+ * @generated from message osac.public.v1.AddOnOperatorStatus
  */
-export type ClusterNetwork = Message<"osac.public.v1.ClusterNetwork"> & {
+export type AddOnOperatorStatus = Message<"osac.public.v1.AddOnOperatorStatus"> & {
   /**
-   * CIDR for the cluster's pod network.
-   *
-   * Must be valid CIDR notation. If not provided, defaults to `10.128.0.0/14`.
-   *
-   * @generated from field: optional string pod_cidr = 1;
+   * @generated from field: string name = 1;
    */
-  podCidr?: string | undefined;
+  name: string;
 
   /**
-   * CIDR for the cluster's service network.
-   *
-   * Must be valid CIDR notation. If not provided, defaults to `172.30.0.0/16`.
-   *
-   * @generated from field: optional string service_cidr = 2;
+   * @generated from field: osac.public.v1.AddOnOperatorInstallState state = 2;
    */
-  serviceCidr?: string | undefined;
+  state: AddOnOperatorInstallState;
+
+  /**
+   * Empty on success; bounded error summary on failure.
+   *
+   * @generated from field: string message = 3;
+   */
+  message: string;
 };
 
 /**
- * Describes the message osac.public.v1.ClusterNetwork.
- * Use `create(ClusterNetworkSchema)` to create a new message.
+ * Describes the message osac.public.v1.AddOnOperatorStatus.
+ * Use `create(AddOnOperatorStatusSchema)` to create a new message.
  */
-export const ClusterNetworkSchema: GenMessage<ClusterNetwork> = /*@__PURE__*/
+export const AddOnOperatorStatusSchema: GenMessage<AddOnOperatorStatus> = /*@__PURE__*/
   messageDesc(file_osac_public_v1_cluster_type, 2);
 
 /**
@@ -358,6 +415,67 @@ export type ClusterStatus = Message<"osac.public.v1.ClusterStatus"> & {
    * @generated from field: map<string, osac.public.v1.ClusterNodeSet> node_sets = 5;
    */
   nodeSets: { [key: string]: ClusterNodeSet };
+
+  /**
+   * Internal API server VIP allocated by MetalLB for the cluster.
+   *
+   * This is the cluster-internal address used as the DNAT target for external access. It differs from `api_url`, which
+   * is the external URL used by clients to reach the API server.
+   *
+   * This will be empty until the CaaS template discovers the MetalLB-allocated VIP during cluster provisioning.
+   *
+   * @generated from field: string api_endpoint = 6;
+   */
+  apiEndpoint: string;
+
+  /**
+   * Internal ingress VIP allocated by MetalLB for the cluster.
+   *
+   * This is the cluster-internal address used as the DNAT target for external access. It differs from `console_url`,
+   * which is the external URL for the cluster console.
+   *
+   * This will be empty until the CaaS template discovers the MetalLB-allocated VIP during cluster provisioning.
+   *
+   * @generated from field: string ingress_endpoint = 7;
+   */
+  ingressEndpoint: string;
+
+  /**
+   * Records when the cluster entered its current state, as reported by the provisioning backend.
+   * This is the authoritative timestamp of the state transition, suitable for billing interval
+   * calculations.
+   *
+   * This will be empty if no state transition has been reported yet.
+   *
+   * @generated from field: optional google.protobuf.Timestamp state_transition_time = 8;
+   */
+  stateTransitionTime?: Timestamp | undefined;
+
+  /**
+   * Reference to a Secret containing the cluster's kubeconfig.
+   *
+   * System-populated after cluster provisioning.
+   *
+   * @generated from field: osac.public.v1.SecretLocalReference kubeconfig_secret = 9;
+   */
+  kubeconfigSecret?: SecretLocalReference | undefined;
+
+  /**
+   * Reference to a Secret containing the cluster's kubeadmin password.
+   *
+   * System-populated after cluster provisioning.
+   *
+   * @generated from field: osac.public.v1.SecretLocalReference password_secret = 10;
+   */
+  passwordSecret?: SecretLocalReference | undefined;
+
+  /**
+   * Per-operator installation state, synced from the ClusterOrder's
+   * AddOnOperatorJobs via the feedback controller.
+   *
+   * @generated from field: repeated osac.public.v1.AddOnOperatorStatus add_on_operators = 12;
+   */
+  addOnOperators: AddOnOperatorStatus[];
 };
 
 /**
@@ -429,38 +547,33 @@ export type ClusterNodeSet = Message<"osac.public.v1.ClusterNodeSet"> & {
   /**
    * Identifier of the type of hosts that are part of the set.
    *
-   * The details of the host type can be obtained using the `List` and `Get` method of the `HostTypes` service. For
-   * example, to get the details of the `acme_1tb` host type using the HTTP+JSON version of the API:
+   * Deprecated: use baremetal_instance_type instead. Retained so the operator can fall back
+   * to host_type when a BareMetalInstanceType has not yet been assigned.
    *
-   * ```http
-   * GET /api/fulfillment/v1/host_types/acme_1tb
-   * ```
-   *
-   * Which will return something like this:
-   *
-   * ```json
-   * {
-   *   "id": "acme_1tb",
-   *   "title": "ACME server with 1 TiB of RAM and no GPU",
-   *   "description": "ACME server model XYZ with 1 TiB of RAM, 2 Xeon 6 CPUS and no GPU."
-   * }
-   * ```
-   *
-   * This will be set by the system when the cluster is initially created, according to the template selected by the
-   * user.
-   *
-   * The user will not have permission to change this field.
-   *
-   * @generated from field: string host_type = 1;
+   * @generated from field: osac.public.v1.HostTypeReference host_type = 1 [deprecated = true];
+   * @deprecated
    */
-  hostType: string;
+  hostType?: HostTypeReference | undefined;
 
   /**
    * Number of nodes of the set.
    *
-   * @generated from field: int32 size = 2;
+   * @generated from field: optional int32 size = 2;
    */
-  size: number;
+  size?: number | undefined;
+
+  /**
+   * Reference to the BareMetalInstanceType that defines the hardware for nodes in this set.
+   *
+   * The details of the instance type can be obtained using the `List` and `Get` methods of the
+   * `BareMetalInstanceTypes` service.
+   *
+   * Set by the system when the cluster is initially created, according to the template selected
+   * by the user. The user will not have permission to change this field.
+   *
+   * @generated from field: osac.public.v1.BareMetalInstanceTypeLocalReference baremetal_instance_type = 4;
+   */
+  baremetalInstanceType?: BareMetalInstanceTypeLocalReference | undefined;
 };
 
 /**
@@ -469,6 +582,68 @@ export type ClusterNodeSet = Message<"osac.public.v1.ClusterNodeSet"> & {
  */
 export const ClusterNodeSetSchema: GenMessage<ClusterNodeSet> = /*@__PURE__*/
   messageDesc(file_osac_public_v1_cluster_type, 5);
+
+/**
+ * Local reference to a Cluster resource.
+ *
+ * @generated from message osac.public.v1.ClusterLocalReference
+ */
+export type ClusterLocalReference = Message<"osac.public.v1.ClusterLocalReference"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+};
+
+/**
+ * Describes the message osac.public.v1.ClusterLocalReference.
+ * Use `create(ClusterLocalReferenceSchema)` to create a new message.
+ */
+export const ClusterLocalReferenceSchema: GenMessage<ClusterLocalReference> = /*@__PURE__*/
+  messageDesc(file_osac_public_v1_cluster_type, 6);
+
+/**
+ * States used to describe add-on operator installation.
+ *
+ * @generated from enum osac.public.v1.AddOnOperatorInstallState
+ */
+export enum AddOnOperatorInstallState {
+  /**
+   * @generated from enum value: ADD_ON_OPERATOR_INSTALL_STATE_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: ADD_ON_OPERATOR_INSTALL_STATE_PENDING = 1;
+   */
+  PENDING = 1,
+
+  /**
+   * @generated from enum value: ADD_ON_OPERATOR_INSTALL_STATE_INSTALLING = 2;
+   */
+  INSTALLING = 2,
+
+  /**
+   * @generated from enum value: ADD_ON_OPERATOR_INSTALL_STATE_INSTALLED = 3;
+   */
+  INSTALLED = 3,
+
+  /**
+   * @generated from enum value: ADD_ON_OPERATOR_INSTALL_STATE_FAILED = 4;
+   */
+  FAILED = 4,
+}
+
+/**
+ * Describes the enum osac.public.v1.AddOnOperatorInstallState.
+ */
+export const AddOnOperatorInstallStateSchema: GenEnum<AddOnOperatorInstallState> = /*@__PURE__*/
+  enumDesc(file_osac_public_v1_cluster_type, 0);
 
 /**
  * Represents the overall state of a cluster.
@@ -503,13 +678,32 @@ export enum ClusterState {
    * @generated from enum value: CLUSTER_STATE_FAILED = 3;
    */
   FAILED = 3,
+
+  /**
+   * The cluster is being deprovisioned.
+   *
+   * The cluster will be archived once deletion completes successfully.
+   *
+   * @generated from enum value: CLUSTER_STATE_DELETING = 4;
+   */
+  DELETING = 4,
+
+  /**
+   * The cluster deletion has failed.
+   *
+   * The deprovision operation encountered an error and could not complete.
+   * The status conditions will contain specific error details.
+   *
+   * @generated from enum value: CLUSTER_STATE_DELETE_FAILED = 5;
+   */
+  DELETE_FAILED = 5,
 }
 
 /**
  * Describes the enum osac.public.v1.ClusterState.
  */
 export const ClusterStateSchema: GenEnum<ClusterState> = /*@__PURE__*/
-  enumDesc(file_osac_public_v1_cluster_type, 0);
+  enumDesc(file_osac_public_v1_cluster_type, 1);
 
 /**
  * Types of conditions used to describe the status of cluster.
@@ -565,5 +759,5 @@ export enum ClusterConditionType {
  * Describes the enum osac.public.v1.ClusterConditionType.
  */
 export const ClusterConditionTypeSchema: GenEnum<ClusterConditionType> = /*@__PURE__*/
-  enumDesc(file_osac_public_v1_cluster_type, 1);
+  enumDesc(file_osac_public_v1_cluster_type, 2);
 

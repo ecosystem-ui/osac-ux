@@ -1,18 +1,26 @@
-import { FormGroup, FormSelect, FormSelectOption } from '@patternfly/react-core';
+import { type MouseEvent, type Ref, useEffect, useMemo, useState } from 'react';
+import {
+  FormGroup,
+  MenuToggle,
+  type MenuToggleElement,
+  Select,
+  SelectList,
+  SelectOption,
+} from '@patternfly/react-core';
 import { useField } from 'formik';
 
 import { getVisibleFieldError } from './fieldError';
 import { useShowFieldValidationErrors } from './FieldValidationContext';
-import { FormFieldHelper } from './FormFieldHelper';
-import { useTranslation } from '../../hooks/useTranslation';
+import { FormFieldHelper, getFormFieldHelperDescribedBy } from './FormFieldHelper';
 
 export interface SelectFieldOption {
-  value: string;
+  value: string | number;
   label: string;
   isDisabled?: boolean;
+  description?: React.ReactNode;
 }
 
-interface SelectFieldProps {
+export interface SelectFieldProps {
   name: string;
   label: string;
   fieldId: string;
@@ -22,6 +30,11 @@ interface SelectFieldProps {
   isLoading?: boolean;
   placeholder?: string;
   loadingPlaceholder?: string;
+  /** When true, commits the sole option to Formik once loading finishes and exactly one option exists. */
+  autoSelectSingleOption?: boolean;
+  helperText?: string;
+  onSelect?: (value: string | number) => void;
+  asFormGroup?: boolean;
 }
 
 export const SelectField = ({
@@ -32,46 +45,97 @@ export const SelectField = ({
   isRequired = false,
   isDisabled = false,
   isLoading = false,
-  placeholder,
-  loadingPlaceholder,
+  placeholder = '',
+  loadingPlaceholder = 'Loading...',
+  autoSelectSingleOption = false,
+  helperText,
+  onSelect: onSelectProp,
+  asFormGroup = true,
 }: SelectFieldProps) => {
-  const { t } = useTranslation();
-  const [field, meta] = useField<string>(name);
+  const [field, meta, helpers] = useField<string | number>(name);
+  const [isOpen, setIsOpen] = useState(false);
   const showValidationErrors = useShowFieldValidationErrors();
   const error = getVisibleFieldError(meta, showValidationErrors);
   const validated = error ? 'error' : 'default';
-  const effectivePlaceholder = isLoading ? (loadingPlaceholder ?? t('Loading...')) : placeholder;
+  const helperDescribedBy = getFormFieldHelperDescribedBy(fieldId, error, helperText);
+  const effectivePlaceholder = isLoading ? loadingPlaceholder : placeholder;
   const controlDisabled = isDisabled || isLoading;
 
-  return (
-    <FormGroup label={label} fieldId={fieldId} isRequired={isRequired}>
-      <FormSelect
-        id={fieldId}
-        name={name}
-        value={field.value ?? ''}
-        onChange={(_event, value) => {
-          void field.onChange({ target: { name, value } });
-        }}
-        onBlur={field.onBlur}
-        isDisabled={controlDisabled}
-        validated={validated}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? `${fieldId}-helper-error` : undefined}
-        aria-busy={isLoading || undefined}
+  useEffect(() => {
+    if (
+      !autoSelectSingleOption ||
+      isLoading ||
+      isDisabled ||
+      options.length !== 1 ||
+      field.value !== ''
+    ) {
+      return;
+    }
+    void helpers.setValue(options[0].value, false);
+  }, [autoSelectSingleOption, field.value, helpers, isDisabled, isLoading, options]);
+
+  const toggleLabel = useMemo(() => {
+    return options.find(({ value }) => value === field.value)?.label ?? effectivePlaceholder;
+  }, [effectivePlaceholder, field.value, options]);
+
+  const onSelect = (_event: MouseEvent<Element> | undefined, value: string | number) => {
+    helpers.setValue(value, true);
+    void helpers.setTouched(true, false);
+    onSelectProp?.(value);
+    setIsOpen(false);
+  };
+
+  const toggle = (toggleRef: Ref<MenuToggleElement>) => (
+    <MenuToggle
+      ref={toggleRef}
+      id={fieldId}
+      onClick={() => setIsOpen((wasOpen) => !wasOpen)}
+      isExpanded={isOpen}
+      isDisabled={controlDisabled}
+      isFullWidth
+      status={validated === 'error' ? 'danger' : undefined}
+      aria-invalid={error ? true : undefined}
+      aria-describedby={helperDescribedBy}
+      aria-busy={isLoading || undefined}
+    >
+      {toggleLabel}
+    </MenuToggle>
+  );
+
+  const select = (
+    <>
+      <Select
+        id={`${fieldId}-select`}
+        isOpen={isOpen}
+        selected={field.value}
+        onSelect={onSelect}
+        onOpenChange={setIsOpen}
+        toggle={toggle}
+        shouldFocusToggleOnSelect
+        aria-label={label}
       >
-        {effectivePlaceholder ? (
-          <FormSelectOption value="" label={effectivePlaceholder} isPlaceholder isDisabled />
-        ) : null}
-        {options.map((option) => (
-          <FormSelectOption
-            key={option.value}
-            value={option.value}
-            label={option.label}
-            isDisabled={option.isDisabled}
-          />
-        ))}
-      </FormSelect>
-      <FormFieldHelper error={error} fieldId={fieldId} />
+        <SelectList>
+          {options.map((option) => (
+            <SelectOption
+              key={option.value}
+              value={option.value}
+              isDisabled={option.isDisabled}
+              description={option.description}
+            >
+              {option.label}
+            </SelectOption>
+          ))}
+        </SelectList>
+      </Select>
+      <FormFieldHelper error={error} description={helperText} fieldId={fieldId} />
+    </>
+  );
+
+  return asFormGroup ? (
+    <FormGroup label={label} fieldId={fieldId} isRequired={isRequired}>
+      {select}
     </FormGroup>
+  ) : (
+    select
   );
 };

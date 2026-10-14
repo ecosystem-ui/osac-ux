@@ -1,42 +1,84 @@
-/**
- * flow: cluster-create
- * route: /clusters/create/:catalogItemId? (tenantUser, tenantAdmin)
- */
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { Breadcrumb, BreadcrumbItem, PageBreadcrumb } from '@patternfly/react-core';
+import { useCallback, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { type MessageInitShape } from '@bufbuild/protobuf';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  Button,
+  Content,
+  PageSection,
+  Stack,
+  Title,
+} from '@patternfly/react-core';
 
-import { ClusterProvisionWizard } from '../../components/catalogProvision/ClusterProvisionWizard';
-import { useTranslation } from '../../hooks/useTranslation';
+import { ClusterSchema } from '@osac/types';
+import { useProvisionCluster } from '@osac/ui-components/api/v1/cluster';
+import {
+  type CatalogProvisionPayload,
+  CatalogProvisionWizard,
+  type CatalogProvisionWizardCloseHandler,
+} from '@osac/ui-components/components/catalogProvision/CatalogProvisionWizard';
+import { useTranslation } from '@osac/ui-components/hooks/useTranslation';
 
 export const ClusterCreatePage = () => {
   const { t } = useTranslation();
-  const { catalogItemId } = useParams<{ catalogItemId?: string }>();
   const navigate = useNavigate();
-  const location = useLocation();
+  const { catalogItemId } = useParams<{ catalogItemId?: string }>();
+  const provisionCluster = useProvisionCluster();
+  const [closeHandler, setCloseHandler] = useState<CatalogProvisionWizardCloseHandler | null>(null);
 
-  // Determine where the "back" crumb should go.
-  // If the user arrived from /catalog (state or no catalogItemId context) → back to /catalog
-  // Otherwise (e.g. from /clusters) → back to /clusters
-  const fromCatalog =
-    (location.state as { from?: string } | null)?.from === '/catalog' || Boolean(catalogItemId);
+  const handleCloseHandlerChange = useCallback((handler: CatalogProvisionWizardCloseHandler) => {
+    setCloseHandler(handler);
+  }, []);
 
-  const parentPath = fromCatalog ? '/catalog' : '/clusters';
-  const parentLabel = fromCatalog ? t('Catalog') : t('Clusters');
+  const handleWizardClosed = useCallback(() => {
+    navigate('/clusters');
+  }, [navigate]);
+
+  const handleWizardProvision = useCallback(
+    async (payload: CatalogProvisionPayload) => {
+      const created = await provisionCluster.mutateAsync(
+        payload as MessageInitShape<typeof ClusterSchema>,
+      );
+      if (!created?.id) {
+        throw new Error('Create response missing id');
+      }
+      navigate(`/clusters/${created.id}`);
+    },
+    [navigate, provisionCluster],
+  );
 
   return (
     <>
-      <PageBreadcrumb>
-        <Breadcrumb>
-          <BreadcrumbItem onClick={() => navigate(parentPath)} style={{ cursor: 'pointer' }}>
-            {parentLabel}
-          </BreadcrumbItem>
-          <BreadcrumbItem isActive>{t('Create cluster')}</BreadcrumbItem>
-        </Breadcrumb>
-      </PageBreadcrumb>
-
-      <ClusterProvisionWizard
+      <PageSection hasBodyWrapper={false}>
+        <Stack hasGutter>
+          <Breadcrumb>
+            <BreadcrumbItem>
+              <Button
+                variant="link"
+                isInline
+                onClick={() => closeHandler?.requestClose()}
+                isDisabled={closeHandler?.pending}
+              >
+                {t('Clusters')}
+              </Button>
+            </BreadcrumbItem>
+            <BreadcrumbItem isActive>{t('Launch instance for cluster')}</BreadcrumbItem>
+          </Breadcrumb>
+          <Title headingLevel="h1" size="3xl">
+            {t('Launch instance for cluster')}
+          </Title>
+          <Content component="p">
+            {t('Select a catalog item, configure, and provision an OpenShift cluster.')}
+          </Content>
+        </Stack>
+      </PageSection>
+      <CatalogProvisionWizard
+        kind="cluster"
         initialCatalogItemId={catalogItemId}
-        onClosed={() => navigate('/clusters')}
+        onProvision={handleWizardProvision}
+        onClosed={handleWizardClosed}
+        onCloseHandlerChange={handleCloseHandlerChange}
       />
     </>
   );

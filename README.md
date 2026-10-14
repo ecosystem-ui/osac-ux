@@ -1,8 +1,3 @@
-> [!WARNING]
-> Be mindful of the content you commit to this repository. Do not commit any
-> material containing Red Hat confidential content, including information about
-> future product development plans.
-
 # OSAC UI
 
 OSAC UI is the web console for the [Open Sovereign AI Cloud (OSAC)](https://github.com/osac-project/) project — a self-service platform for deploying OpenShift clusters, virtual machines, and bare metal hosts. It is a pnpm monorepo consisting of a React 19 + PatternFly 6 single-page application and a Go chi reverse proxy that handles OIDC authentication and forwards requests to the upstream [fulfillment-service](https://github.com/osac-project/fulfillment-service).
@@ -12,13 +7,34 @@ OSAC UI is the web console for the [Open Sovereign AI Cloud (OSAC)](https://gith
 | Path | Purpose |
 |------|---------|
 | `apps/app-frontend/` | React SPA (Vite, React 19, TanStack Query, react-router-dom 7) |
-| `apps/e2e/` | Cypress end-to-end tests |
 | `libs/api-contracts/` | Shared TypeScript types and wire normalizers |
 | `libs/types/` | Generated protobuf types (do not edit) |
 | `libs/ui-components/` | Shared PatternFly 6 component library |
 | `proxy/` | Go chi reverse proxy — OIDC auth + API forwarding |
 | `deploy/chart/` | Helm chart for Kubernetes/OpenShift deployment |
 | `docs/` | Architecture and deployment documentation |
+
+## Verifying signatures
+
+Container images published to `ghcr.io/osac-project/osac-ui` and the Helm
+chart published to `oci://ghcr.io/osac-project/charts/ui` are signed
+keylessly with [cosign](https://docs.sigstore.dev/), using each workflow
+run's GitHub Actions OIDC identity via Fulcio/Rekor — no long-lived private
+key is involved. Verify by digest (`@sha256:...`), not by mutable tag:
+
+```bash
+cosign verify \
+  --certificate-identity-regexp '^https://github\.com/osac-project/osac-ui/\.github/workflows/publish-image\.yaml@refs/(heads/main|tags/v.+)$' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  ghcr.io/osac-project/osac-ui@sha256:<digest>
+
+cosign verify \
+  --certificate-identity-regexp '^https://github\.com/osac-project/osac-ui/\.github/workflows/publish-charts\.yaml@refs/heads/main$' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  ghcr.io/osac-project/charts/ui@sha256:<digest>
+```
+
+Resolve a tag to its digest with `helm pull oci://ghcr.io/osac-project/charts/ui --version <version>` (prints `Digest: sha256:...`) or `skopeo inspect docker://ghcr.io/osac-project/osac-ui:<tag>`.
 
 ## Quick start
 
@@ -33,16 +49,6 @@ Start the Go proxy (requires a running fulfillment API) and Vite dev server:
 ```bash
 FULFILLMENT_API_URL=https://fulfillment.your-env.example.com pnpm dev
 ```
-
-## Developer tools
-
-The repo includes a codegen script that introspects source files and produces a live API coverage report visible in the app under **Development > API Diff** (`/dev/api-diff`):
-
-```bash
-pnpm gen:api-diff
-```
-
-This runs automatically on `pnpm install` via the `postinstall` hook and writes `libs/ui-components/src/pages/dev/api-diff-manifest.generated.ts`. The page shows all 37 `ApiRoute` entries classified as **real** (proto-aligned hook), **temp-api** (no proto yet), or **proto-no-hook** (proto exists but no UI hook).
 
 ## Documentation
 

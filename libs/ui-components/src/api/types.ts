@@ -1,6 +1,6 @@
 import { UseQueryOptions } from '@tanstack/react-query';
 
-import type { FulfillmentDecodeSchema } from './fulfillment-decode';
+import { type CelFilter } from './cel';
 
 /**
  * All known API base routes. Adding a new resource hook requires adding its
@@ -8,66 +8,40 @@ import type { FulfillmentDecodeSchema } from './fulfillment-decode';
  * a query key is constructed or used for cache operations.
  */
 export type ApiRoute =
-  // Compute / VM
   | 'v1/compute_instances'
   | 'v1/compute_instance_templates'
   | 'v1/compute_instance_catalog_items'
-  // Cluster / CaaS
-  | 'v1/clusters'
-  | 'v1/cluster_templates'
   | 'v1/cluster_catalog_items'
-  // Bare Metal
-  | 'v1/baremetal_instances'
-  | 'v1/baremetal_instance_templates'
-  | 'v1/baremetal_instance_catalog_items'
+  | 'v1/cluster_templates'
+  | 'v1/cluster_versions'
   | 'v1/host_types'
-  // Infrastructure
   | 'v1/instance_types'
-  // Networking
+  | 'v1/disk_images'
+  | 'v1/clusters'
+  | 'v1/organizations'
+  | 'v1/users'
+  | 'v1/capabilities'
   | 'v1/virtual_networks'
   | 'v1/subnets'
   | 'v1/security_groups'
-  | 'v1/network_classes'
-  // IP Management
-  | 'v1/public_ips'
-  | 'v1/public_ip_pools'
-  | 'v1/public_ip_attachments'
+  | 'v1/baremetal_instance_catalog_items'
+  | 'v1/baremetal_instances'
   | 'v1/external_ips'
-  | 'v1/external_ip_pools'
   | 'v1/external_ip_attachments'
-  // Identity / Tenant / RBAC
-  | 'v1/tenants'
-  | 'v1/organizations'
-  | 'v1/projects'
-  | 'v1/project_memberships'
-  | 'v1/users'
+  | 'v1/external_ip_pools'
+  | 'v1/console_sessions'
+  | 'v1/storage_tiers'
+  | 'v1/volumes'
+  | 'v1/private/instance_types'
+  | 'v1/private/baremetal_instance_types'
+  | 'v1/private/tenants'
+  | 'v1/private/storage_backends'
+  | 'v1/private/storage_tiers'
+  | 'v1/identity_providers'
   | 'v1/roles'
   | 'v1/role_bindings'
-  | 'v1/identity_providers'
-  // Console
-  | 'v1/console_sessions'
-  // System
-  | 'v1/capabilities'
-  | 'v1/events'
-  // Storage (@temp-api — not yet in fulfillment-service)
-  | 'v1/storage_tiers'
-  | 'v1/block_volumes'
-  | 'v1/volume_snapshots'
-  | 'v1/object_storage_buckets'
-  | 'v1/bucket_access_keys'
-  // Load Balancer (@temp-api — not yet in fulfillment-service)
-  | 'v1/load_balancers'
-  // MaaS (@temp-api — not yet in fulfillment-service)
-  | 'v1/ai_environments'
-  | 'v1/model_catalog_items'
-  | 'v1/model_accesses'
-  | 'v1/subscriptions'
-  | 'v1/maas_token_usage'
-  // Billing (@temp-api — REQ-BA-4, gated on M360-vs-Koku decision REQ-BA-3)
-  | 'v1/price_plans'
-  // Private-only
-  | 'v1/hubs'
-  | 'v1/storage_backends';
+  | 'v1/projects'
+  | 'v1/project_memberships';
 
 /**
  * Strict 3-part tuple that encodes an API address.
@@ -76,20 +50,15 @@ export type ApiRoute =
  */
 export type ApiQueryKey = [
   baseUrl: ApiRoute,
-  pathParams?: (string | number)[] | null,
-  queryParams?: Record<string, string | number | boolean | null | undefined>,
+  pathParams?: (string | number | undefined)[] | undefined,
+  queryParams?: Record<string, unknown>,
 ];
-
-export type ApiQueryMeta = {
-  decode?: FulfillmentDecodeSchema;
-};
 
 export type UseApiQueryOptions<TQueryFnData, TError, TData> = Omit<
   UseQueryOptions<TQueryFnData, TError, TData, ApiQueryKey>,
-  'queryKey' | 'meta' | 'queryFn'
+  'queryKey' | 'meta'
 > & {
   queryKey: ApiQueryKey;
-  meta?: ApiQueryMeta;
 };
 
 /**
@@ -100,34 +69,30 @@ export type UseApiQueryOptions<TQueryFnData, TError, TData> = Omit<
  * qc.invalidateQueries({ queryKey: apiQueryKey('v1/compute_instances') });
  */
 export const apiQueryKey = (
-  baseUrl: ApiRoute,
-  pathParams?: (string | number)[] | null,
+  baseUrl: ApiQueryKey[0],
+  pathParams?: ApiQueryKey[1],
   queryParams?: ApiQueryKey[2],
-): ApiQueryKey => [baseUrl, pathParams, queryParams];
+): ApiQueryKey => {
+  const path = Array.isArray(pathParams) && pathParams.length > 0 ? pathParams : undefined;
+  const query =
+    queryParams != null && typeof queryParams === 'object' && Object.keys(queryParams).length > 0
+      ? queryParams
+      : undefined;
+
+  if (query !== undefined) {
+    return [baseUrl, path, query];
+  }
+  if (path !== undefined) {
+    return [baseUrl, path];
+  }
+  return [baseUrl];
+};
 
 export type ApiQueryParams = Record<string, string | number | boolean | null | undefined>;
 
-/**
- * Options shared by reads (queryFn) and writes (mutationFn).
- * The app's ApiProvider constructs the final URL and handles credentials /
- * error handling — callers only supply the route and what varies per call.
- */
-export type ApiFetchOptions = {
-  /** Dynamic path segments appended after the route, e.g. ['abc-123'] → /v1/compute_instances/abc-123 */
-  pathParams?: (string | number)[] | null;
-  /** Query-string parameters (GET requests / filtering). */
-  queryParams?: ApiQueryParams;
-  /** HTTP method — defaults to 'GET'. */
-  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-  /** Request body — serialised to JSON by the provider. */
-  body?: unknown;
-  /** Parse the response with protobuf `fromJson` using the given message schema. */
-  decode?: FulfillmentDecodeSchema;
+export type ListParams = {
+  filter?: CelFilter;
+  limit?: number;
+  offset?: number;
+  order?: string;
 };
-
-/**
- * Typed fetch function provided by ApiProvider.
- * The first argument must be a known ApiRoute; the provider prepends the
- * app-level base URL so callers never hard-code it.
- */
-export type ApiFetch = <T = unknown>(route: ApiRoute, options?: ApiFetchOptions) => Promise<T>;

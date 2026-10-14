@@ -1,22 +1,58 @@
+import { create } from '@bufbuild/protobuf';
 import { describe, expect, it } from 'vitest';
 import { ValidationError } from 'yup';
 
+import type { ComputeInstanceCatalogItem } from '@osac/types';
+import { ComputeInstanceTemplateReferenceSchema } from '@osac/types';
+import { tIdentity } from '@osac/ui-components/test-utils/i18n';
+
 import type { ComputeInstanceWizardValues } from './fields';
 import { buildComputeInstanceStepSchema } from './schemas';
-import { vmCatalogItem } from '../../../test/fixtures';
+import { emptyResourceSelectValue } from '../../../../Form/resourceSelectValue';
 
-const t = (key: string) => key;
+const vmCatalogItem: ComputeInstanceCatalogItem = {
+  $typeName: 'osac.public.v1.ComputeInstanceCatalogItem',
+  id: 'catalog-rhel-9',
+  metadata: {
+    $typeName: 'osac.public.v1.Metadata',
+    displayName: '',
+    description: '',
+    name: 'catalog-rhel-9',
+    annotations: {},
+    creator: 'foo',
+    labels: {},
+    project: 'foo',
+    tenant: 'foo',
+    version: 1,
+  },
+  title: 'RHEL 9 catalog',
+  description: 'RHEL 9 base image',
+  template: create(ComputeInstanceTemplateReferenceSchema, {
+    id: 'tpl-rhel-9',
+    name: 'tpl-rhel-9',
+  }),
+  published: true,
+  templateParameters: {},
+};
 
 const emptyValues: ComputeInstanceWizardValues = {
   catalogItemId: '',
-  metadata: { name: '' },
+  metadata: { name: '', project: '' },
   spec: {
-    sshKey: '',
-    image: { sourceRef: '' },
+    sshKey: { name: '' },
     instanceType: '',
+    userDataSource: 'inline',
     userData: '',
-    bootDisk: { sizeGib: '' },
-    networking: { virtualNetworkId: '', subnetId: '', securityGroupIds: [] },
+    userDataSecret: { name: '' },
+    bootDisk: { sizeGib: '', storageTier: emptyResourceSelectValue() },
+    additionalDisks: [],
+    networking: {
+      useDefaultNetwork: true,
+      virtualNetwork: emptyResourceSelectValue(),
+      subnet: emptyResourceSelectValue(),
+      securityGroups: [],
+      autoExternalIpAttachment: false,
+    },
   },
 };
 
@@ -25,7 +61,7 @@ const validateStep = async (
   values: ComputeInstanceWizardValues,
   catalogItem: unknown = null,
 ) => {
-  const schema = buildComputeInstanceStepSchema(catalogItem, stepId, t);
+  const schema = buildComputeInstanceStepSchema(catalogItem, stepId, tIdentity);
   if (!schema) {
     return {};
   }
@@ -59,30 +95,50 @@ const validateStep = async (
 describe('buildComputeInstanceStepSchema', () => {
   it('requires catalog item on catalog step', async () => {
     const errors = await validateStep('catalog', emptyValues);
-    expect(errors).toEqual({ catalogItemId: 'catalogProvision.validation.catalogItemRequired' });
+    expect(errors).toEqual({ catalogItemId: 'Select a catalog item' });
   });
 
   it('requires name on general step without validating configuration fields', async () => {
     const errors = await validateStep('general', {
       ...emptyValues,
       catalogItemId: vmCatalogItem.id,
-      metadata: { name: '   ' },
+      metadata: { name: '', project: '' },
     });
-    expect(errors).toEqual({ metadata: { name: 'catalogProvision.validation.nameRequired' } });
+    expect(errors).toEqual({ metadata: { name: 'Name is required' } });
   });
 
-  it('validates boot disk as numeric on configuration step only', async () => {
+  it('rejects invalid DNS label names on general step', async () => {
+    const errors = await validateStep('general', {
+      ...emptyValues,
+      catalogItemId: vmCatalogItem.id,
+      metadata: { name: 'MyVM', project: '' },
+    });
+    expect(errors).toEqual({
+      metadata: {
+        name: 'Name must only contain lowercase letters (a-z), digits (0-9), and hyphens (-)',
+      },
+    });
+  });
+
+  it('accepts valid DNS label name on general step', async () => {
+    const errors = await validateStep('general', {
+      ...emptyValues,
+      catalogItemId: vmCatalogItem.id,
+      metadata: { name: 'my-vm', project: '' },
+    });
+    expect(errors).toEqual({});
+  });
+
+  it('validates boot disk as numeric on storage step', async () => {
     const errors = await validateStep(
-      'configuration',
+      'storage',
       {
         ...emptyValues,
         catalogItemId: vmCatalogItem.id,
-        metadata: { name: 'web-01' },
+        metadata: { name: 'web-01', project: '' },
         spec: {
           ...emptyValues.spec,
-          image: { sourceRef: 'quay.io/example/rhel9' },
-          instanceType: 'standard-4-8',
-          bootDisk: { sizeGib: 'not-a-number' },
+          bootDisk: { sizeGib: 'not-a-number', storageTier: { id: 'id-fast', name: 'fast' } },
         },
       },
       vmCatalogItem,
@@ -92,16 +148,329 @@ describe('buildComputeInstanceStepSchema', () => {
     });
   });
 
-  it('requires networking pickers on networking step', async () => {
+  it('does not validate boot disk on configuration step', async () => {
+    const errors = await validateStep(
+      'configuration',
+      {
+        ...emptyValues,
+        catalogItemId: vmCatalogItem.id,
+        metadata: { name: 'web-01', project: '' },
+        spec: {
+          ...emptyValues.spec,
+          instanceType: 'standard-4-8',
+          bootDisk: { sizeGib: 'not-a-number', storageTier: emptyResourceSelectValue() },
+        },
+      },
+      vmCatalogItem,
+    );
+    expect(errors).toEqual({});
+  });
+
+  it('does not require networking when leaving the storage step', async () => {
+    const errors = await validateStep(
+      'storage',
+      {
+        ...emptyValues,
+        catalogItemId: vmCatalogItem.id,
+        metadata: { name: 'web-01', project: '' },
+        spec: {
+          ...emptyValues.spec,
+          bootDisk: { sizeGib: '30', storageTier: { id: 'id-fast', name: 'fast' } },
+        },
+      },
+      vmCatalogItem,
+    );
+    expect(errors).toEqual({});
+  });
+
+  it('does not require networking pickers on networking step', async () => {
     const errors = await validateStep(
       'networking',
       {
         ...emptyValues,
         catalogItemId: vmCatalogItem.id,
-        metadata: { name: 'web-01' },
+        metadata: { name: 'web-01', project: '' },
         spec: {
           ...emptyValues.spec,
-          image: { sourceRef: 'quay.io/example/rhel9' },
+        },
+      },
+      vmCatalogItem,
+    );
+    expect(errors).toEqual({});
+  });
+
+  it('requires instance type on configuration step', async () => {
+    const errors = await validateStep(
+      'configuration',
+      {
+        ...emptyValues,
+        catalogItemId: vmCatalogItem.id,
+        metadata: { name: 'web-01', project: '' },
+        spec: {
+          ...emptyValues.spec,
+        },
+      },
+      vmCatalogItem,
+    );
+    expect(errors).toEqual({
+      spec: {
+        instanceType: 'Instance type is required',
+      },
+    });
+  });
+
+  it('validates inline user data with the shared 64 KB limit', async () => {
+    const errors = await validateStep(
+      'configuration',
+      {
+        ...emptyValues,
+        catalogItemId: vmCatalogItem.id,
+        metadata: { name: 'web-01', project: '' },
+        spec: {
+          ...emptyValues.spec,
+          instanceType: 'standard-4-8',
+          userData: 'a'.repeat(65537),
+        },
+      },
+      vmCatalogItem,
+    );
+    expect(errors).toEqual({
+      spec: { userData: 'User data must not exceed 64 KB.' },
+    });
+
+    await expect(
+      validateStep(
+        'configuration',
+        {
+          ...emptyValues,
+          catalogItemId: vmCatalogItem.id,
+          metadata: { name: 'web-01', project: '' },
+          spec: {
+            ...emptyValues.spec,
+            instanceType: 'standard-4-8',
+            userData: 'a'.repeat(65536),
+          },
+        },
+        vmCatalogItem,
+      ),
+    ).resolves.toEqual({});
+
+    await expect(
+      validateStep(
+        'configuration',
+        {
+          ...emptyValues,
+          catalogItemId: vmCatalogItem.id,
+          metadata: { name: 'web-01', project: '' },
+          spec: {
+            ...emptyValues.spec,
+            instanceType: 'standard-4-8',
+            userDataSource: 'secret',
+            userData: 'a'.repeat(65537),
+            userDataSecret: { name: 'user-data-secret' },
+          },
+        },
+        vmCatalogItem,
+      ),
+    ).resolves.toEqual({});
+  });
+
+  it('requires boot disk on storage step', async () => {
+    const errors = await validateStep(
+      'storage',
+      {
+        ...emptyValues,
+        catalogItemId: vmCatalogItem.id,
+        metadata: { name: 'web-01', project: '' },
+      },
+      vmCatalogItem,
+    );
+    expect(errors).toEqual({
+      spec: {
+        bootDisk: {
+          sizeGib: 'catalogProvision.validation.required',
+          storageTier: 'Storage tier is required',
+        },
+      },
+    });
+  });
+
+  it('requires storage tier on each additional disk on storage step', async () => {
+    const errors = await validateStep(
+      'storage',
+      {
+        ...emptyValues,
+        catalogItemId: vmCatalogItem.id,
+        metadata: { name: 'web-01', project: '' },
+        spec: {
+          ...emptyValues.spec,
+          bootDisk: { sizeGib: '30', storageTier: { id: 'id-fast', name: 'fast' } },
+          additionalDisks: [{ sizeGib: '100', storageTier: emptyResourceSelectValue() }],
+        },
+      },
+      vmCatalogItem,
+    );
+    expect(errors).toEqual({
+      spec: {
+        'additionalDisks[0]': {
+          storageTier: 'Storage tier is required',
+        },
+      },
+    });
+  });
+
+  it('requires a boot disk storage tier on storage step', async () => {
+    const errors = await validateStep(
+      'storage',
+      {
+        ...emptyValues,
+        catalogItemId: vmCatalogItem.id,
+        metadata: { name: 'web-01', project: '' },
+        spec: {
+          ...emptyValues.spec,
+          bootDisk: { sizeGib: '30', storageTier: emptyResourceSelectValue() },
+        },
+      },
+      vmCatalogItem,
+    );
+    expect(errors).toEqual({
+      spec: {
+        bootDisk: { storageTier: 'Storage tier is required' },
+      },
+    });
+  });
+
+  it('accepts a name-only storage tier on additional disks', async () => {
+    const errors = await validateStep(
+      'storage',
+      {
+        ...emptyValues,
+        catalogItemId: vmCatalogItem.id,
+        metadata: { name: 'web-01', project: '' },
+        spec: {
+          ...emptyValues.spec,
+          bootDisk: { sizeGib: '30', storageTier: { id: '', name: 'fast' } },
+          additionalDisks: [{ sizeGib: '100', storageTier: { id: '', name: 'fast' } }],
+        },
+      },
+      vmCatalogItem,
+    );
+    expect(errors).toEqual({});
+  });
+
+  it.each([
+    ['blank', ''],
+    ['non-numeric', 'not-a-number'],
+    ['zero', '0'],
+    ['negative', '-5'],
+    ['fractional', '30.5'],
+    ['above the maximum', '16385'],
+  ])('rejects an additional disk size that is %s', async (_label, sizeGib) => {
+    const errors = await validateStep(
+      'storage',
+      {
+        ...emptyValues,
+        catalogItemId: vmCatalogItem.id,
+        metadata: { name: 'web-01', project: '' },
+        spec: {
+          ...emptyValues.spec,
+          bootDisk: { sizeGib: '30', storageTier: { id: 'id-fast', name: 'fast' } },
+          additionalDisks: [{ sizeGib, storageTier: { id: 'id-fast', name: 'fast' } }],
+        },
+      },
+      vmCatalogItem,
+    );
+    expect(errors).toEqual({
+      spec: {
+        'additionalDisks[0]': {
+          sizeGib: 'Additional disk size must be a number',
+        },
+      },
+    });
+  });
+
+  it.each([
+    ['the minimum', '1'],
+    ['the maximum', '16384'],
+    ['a typical value', '100'],
+  ])(
+    'accepts an additional disk size at %s with a storage tier selected',
+    async (_label, sizeGib) => {
+      const errors = await validateStep(
+        'storage',
+        {
+          ...emptyValues,
+          catalogItemId: vmCatalogItem.id,
+          metadata: { name: 'web-01', project: '' },
+          spec: {
+            ...emptyValues.spec,
+            bootDisk: { sizeGib: '30', storageTier: { id: 'id-fast', name: 'fast' } },
+            additionalDisks: [{ sizeGib, storageTier: { id: 'id-fast', name: 'fast' } }],
+          },
+        },
+        vmCatalogItem,
+      );
+      expect(errors).toEqual({});
+    },
+  );
+
+  it('does not validate additional disks on configuration step', async () => {
+    const errors = await validateStep(
+      'configuration',
+      {
+        ...emptyValues,
+        catalogItemId: vmCatalogItem.id,
+        metadata: { name: 'web-01', project: '' },
+        spec: {
+          ...emptyValues.spec,
+          instanceType: 'standard-4-8',
+          additionalDisks: [{ sizeGib: '100', storageTier: emptyResourceSelectValue() }],
+        },
+      },
+      vmCatalogItem,
+    );
+    expect(errors).toEqual({});
+  });
+
+  it('does not require networking pickers when useDefaultNetwork is true', async () => {
+    const errors = await validateStep(
+      'networking',
+      {
+        ...emptyValues,
+        catalogItemId: vmCatalogItem.id,
+        metadata: { name: 'web-01', project: '' },
+        spec: {
+          ...emptyValues.spec,
+          networking: {
+            useDefaultNetwork: true,
+            virtualNetwork: emptyResourceSelectValue(),
+            subnet: emptyResourceSelectValue(),
+            securityGroups: [],
+            autoExternalIpAttachment: false,
+          },
+        },
+      },
+      vmCatalogItem,
+    );
+    expect(errors).toEqual({});
+  });
+
+  it('requires virtual network and subnet when useDefaultNetwork is false', async () => {
+    const errors = await validateStep(
+      'networking',
+      {
+        ...emptyValues,
+        catalogItemId: vmCatalogItem.id,
+        metadata: { name: 'web-01', project: '' },
+        spec: {
+          ...emptyValues.spec,
+          networking: {
+            useDefaultNetwork: false,
+            virtualNetwork: emptyResourceSelectValue(),
+            subnet: emptyResourceSelectValue(),
+            securityGroups: [],
+            autoExternalIpAttachment: false,
+          },
         },
       },
       vmCatalogItem,
@@ -109,63 +478,37 @@ describe('buildComputeInstanceStepSchema', () => {
     expect(errors).toEqual({
       spec: {
         networking: {
-          virtualNetworkId: 'catalogProvision.validation.virtualNetworkRequired',
-          subnetId: 'catalogProvision.validation.subnetRequired',
-          securityGroupIds: 'catalogProvision.validation.securityGroupRequired',
+          virtualNetwork: { id: 'Virtual network is required' },
+          subnet: { id: 'Subnet is required' },
         },
       },
     });
   });
 
-  it('requires instance type and boot disk on configuration step', async () => {
+  it('accepts valid custom networking when useDefaultNetwork is false', async () => {
     const errors = await validateStep(
-      'configuration',
+      'networking',
       {
         ...emptyValues,
         catalogItemId: vmCatalogItem.id,
-        metadata: { name: 'web-01' },
+        metadata: { name: 'web-01', project: '' },
         spec: {
           ...emptyValues.spec,
-          image: { sourceRef: 'quay.io/example/rhel9' },
+          networking: {
+            useDefaultNetwork: false,
+            virtualNetwork: { id: 'vn-1', name: 'vn-1' },
+            subnet: { id: 'subnet-1', name: 'subnet-1' },
+            securityGroups: [],
+            autoExternalIpAttachment: false,
+          },
         },
       },
       vmCatalogItem,
     );
-    expect(errors).toEqual({
-      spec: {
-        instanceType: 'catalogProvision.validation.instanceTypeRequired',
-        bootDisk: { sizeGib: 'catalogProvision.validation.required' },
-      },
-    });
-  });
-
-  it('requires ssh key on general step when defined in catalog field_definitions', async () => {
-    const catalogItem = {
-      ...vmCatalogItem,
-      fieldDefinitions: [
-        ...(vmCatalogItem.fieldDefinitions ?? []),
-        {
-          path: 'ssh_key',
-          displayName: 'SSH key',
-          editable: true,
-        },
-      ],
-    };
-    const errors = await validateStep(
-      'general',
-      {
-        ...emptyValues,
-        catalogItemId: vmCatalogItem.id,
-        metadata: { name: 'web-01' },
-      },
-      catalogItem,
-    );
-    expect(errors).toEqual({
-      spec: { sshKey: 'catalogProvision.validation.required' },
-    });
+    expect(errors).toEqual({});
   });
 
   it('returns undefined for review step', () => {
-    expect(buildComputeInstanceStepSchema(vmCatalogItem, 'review', t)).toBeUndefined();
+    expect(buildComputeInstanceStepSchema(vmCatalogItem, 'review', tIdentity)).toBeUndefined();
   });
 });

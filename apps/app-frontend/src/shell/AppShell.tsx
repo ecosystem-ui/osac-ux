@@ -1,753 +1,277 @@
-import { type ReactElement } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
-import { Page } from '@patternfly/react-core';
+import { type ReactNode } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Page, SkipToContent } from '@patternfly/react-core';
 
-import { BareMetalDetailsPage } from '@osac/ui-components/components/Baremetal/BareMetalDetailsPage';
+import { ServiceTier } from '@osac/types';
+import { CatalogItemDetailPage } from '@osac/ui-components/components/catalog/details/CatalogItemDetailPage.tsx';
 import ErrorBoundary from '@osac/ui-components/components/ErrorBoundary/ErrorBoundary';
-import { MaaSDetailsPage } from '@osac/ui-components/components/maas/MaaSDetailsPage';
+import ExternalIpRoutes from '@osac/ui-components/components/ExternalIp/ExternalIpRoutes';
+import { ExternalIpPoolRoutes } from '@osac/ui-components/components/ExternalIpPool/ExternalIpPoolRoutes';
+import IdentityProviderRoutes from '@osac/ui-components/components/IdentityProvider/IdentityProviderRoutes';
+import ProjectRoutes from '@osac/ui-components/components/Project/ProjectRoutes';
+import ProjectMembershipRoutes from '@osac/ui-components/components/ProjectMembership/ProjectMembershipRoutes';
+import RoleBindingRoutes from '@osac/ui-components/components/RoleBinding/RoleBindingRoutes';
+import SecretRoutes from '@osac/ui-components/components/Secret/SecretRoutes';
 import { useSession } from '@osac/ui-components/hooks/use-session';
-import { AdminDashboardPage } from '@osac/ui-components/pages/admin/AdminDashboardPage';
-import { AdminIdentityProviderEditPage } from '@osac/ui-components/pages/admin/AdminIdentityProviderEditPage';
-import { AdminIdentityProviderNewPage } from '@osac/ui-components/pages/admin/AdminIdentityProviderNewPage';
-import { AdminIdentityProvidersPage } from '@osac/ui-components/pages/admin/AdminIdentityProvidersPage';
-import { AdminMaaSEnvironmentPage } from '@osac/ui-components/pages/admin/AdminMaaSEnvironmentPage';
-import { AdminMaaSSubscriptionFormPage } from '@osac/ui-components/pages/admin/AdminMaaSSubscriptionFormPage';
-import { AdminMaaSSubscriptionsPage } from '@osac/ui-components/pages/admin/AdminMaaSSubscriptionsPage';
-import { AdminRoleBindingAssignPage } from '@osac/ui-components/pages/admin/AdminRoleBindingAssignPage';
-import { AdminRoleBindingEditPage } from '@osac/ui-components/pages/admin/AdminRoleBindingEditPage';
-import { AdminRoleBindingsPage } from '@osac/ui-components/pages/admin/AdminRoleBindingsPage';
-import { AdminUsagePage } from '@osac/ui-components/pages/admin/AdminUsagePage';
-import { AdminUserNewPage } from '@osac/ui-components/pages/admin/AdminUserNewPage';
-import { AdminUsersPage } from '@osac/ui-components/pages/admin/AdminUsersPage';
-import { ApiDiffPage } from '@osac/ui-components/pages/dev/ApiDiffPage';
-import { ProviderAdminDashboardPage } from '@osac/ui-components/pages/provider/ProviderAdminDashboardPage';
-import { ProviderAiSetupPage } from '@osac/ui-components/pages/provider/ProviderAiSetupPage';
-import { ProviderAuditLogPage } from '@osac/ui-components/pages/provider/ProviderAuditLogPage';
-import { ProviderBillingDashboardPage } from '@osac/ui-components/pages/provider/ProviderBillingDashboardPage';
-import { ProviderBillingPlanFormPage } from '@osac/ui-components/pages/provider/ProviderBillingPlanFormPage';
-import { ProviderBillingPlansPage } from '@osac/ui-components/pages/provider/ProviderBillingPlansPage';
-import { ProviderBmTemplateFormPage } from '@osac/ui-components/pages/provider/ProviderBmTemplateFormPage';
-import { ProviderClusterTemplateFormPage } from '@osac/ui-components/pages/provider/ProviderClusterTemplateFormPage';
-import { ProviderCompliancePostureDashboardPage } from '@osac/ui-components/pages/provider/ProviderCompliancePostureDashboardPage';
-import { ProviderHostTypeNewPage } from '@osac/ui-components/pages/provider/ProviderHostTypeNewPage';
-import { ProviderHostTypesPage } from '@osac/ui-components/pages/provider/ProviderHostTypesPage';
-import { ProviderInfraTopologyPage } from '@osac/ui-components/pages/provider/ProviderInfraTopologyPage';
-import { ProviderInstanceTypeNewPage } from '@osac/ui-components/pages/provider/ProviderInstanceTypeNewPage';
-import { ProviderInstanceTypesPage } from '@osac/ui-components/pages/provider/ProviderInstanceTypesPage';
-import { ProviderIPPoolDetailPage } from '@osac/ui-components/pages/provider/ProviderIPPoolDetailPage';
-import { ProviderIPPoolNewPage } from '@osac/ui-components/pages/provider/ProviderIPPoolNewPage';
-import { ProviderIPPoolsPage } from '@osac/ui-components/pages/provider/ProviderIPPoolsPage';
-import { ProviderNetworkClassesPage } from '@osac/ui-components/pages/provider/ProviderNetworkClassesPage';
-import { ProviderNetworkClassNewPage } from '@osac/ui-components/pages/provider/ProviderNetworkClassNewPage';
-import { ProviderStorageBackendFormPage } from '@osac/ui-components/pages/provider/ProviderStorageBackendFormPage';
-import { ProviderStorageBackendsPage } from '@osac/ui-components/pages/provider/ProviderStorageBackendsPage';
-import { ProviderStorageTierFormPage } from '@osac/ui-components/pages/provider/ProviderStorageTierFormPage';
-import { ProviderStorageTiersPage } from '@osac/ui-components/pages/provider/ProviderStorageTiersPage';
-import { ProviderTemplatesPage } from '@osac/ui-components/pages/provider/ProviderTemplatesPage';
-import { ProviderTenantBillingPage } from '@osac/ui-components/pages/provider/ProviderTenantBillingPage';
-import { ProviderTenantEditPage } from '@osac/ui-components/pages/provider/ProviderTenantEditPage';
-import { ProviderTenantNewPage } from '@osac/ui-components/pages/provider/ProviderTenantNewPage';
-import { ProviderTenantOrgsPage } from '@osac/ui-components/pages/provider/ProviderTenantOrgsPage';
-import { ProviderUsageReportsPage } from '@osac/ui-components/pages/provider/ProviderUsageReportsPage';
-import { ProviderVmTemplateFormPage } from '@osac/ui-components/pages/provider/ProviderVmTemplateFormPage';
-import { BareMetalCreatePage } from '@osac/ui-components/pages/tenant/BareMetalCreatePage';
-import { BareMetalListPage } from '@osac/ui-components/pages/tenant/BareMetalListPage';
-import { BlockVolumeNewPage } from '@osac/ui-components/pages/tenant/BlockVolumeNewPage';
-import { BlockVolumesPage } from '@osac/ui-components/pages/tenant/BlockVolumesPage';
-import { CatalogPage } from '@osac/ui-components/pages/tenant/CatalogPage';
-import { ClusterCreatePage } from '@osac/ui-components/pages/tenant/ClusterCreatePage';
+import { useTranslation } from '@osac/ui-components/hooks/useTranslation';
+import BillingPage from '@osac/ui-components/pages/admin/BillingPage';
+import AttachNatGatewayWizardPage from '@osac/ui-components/pages/networking/AttachNatGatewayWizardPage';
+import { SecurityGroupDetailPage } from '@osac/ui-components/pages/networking/SecurityGroupDetailPage';
+import { SecurityGroupsListPage } from '@osac/ui-components/pages/networking/SecurityGroupsListPage';
+import { VirtualNetworkDetailPage } from '@osac/ui-components/pages/networking/VirtualNetworkDetailPage';
+import { VirtualNetworksListPage } from '@osac/ui-components/pages/networking/VirtualNetworksListPage';
+import { BareMetalRoutes } from '@osac/ui-components/pages/tenant/BareMetalRoutes';
+import CatalogPage from '@osac/ui-components/pages/tenant/CatalogPage';
 import { ClusterRoutes } from '@osac/ui-components/pages/tenant/ClusterRoutes';
-import { LoadBalancerFormPage } from '@osac/ui-components/pages/tenant/LoadBalancerFormPage';
-import { LoadBalancersPage } from '@osac/ui-components/pages/tenant/LoadBalancersPage';
-import { MaaSCreatePage } from '@osac/ui-components/pages/tenant/MaaSCreatePage';
-import { MaaSListPage } from '@osac/ui-components/pages/tenant/MaaSListPage';
-import { NetworkRoutes } from '@osac/ui-components/pages/tenant/NetworkRoutes';
-import { ObjectStorageDetailPage } from '@osac/ui-components/pages/tenant/ObjectStorageDetailPage';
-import { ObjectStorageEditPage } from '@osac/ui-components/pages/tenant/ObjectStorageEditPage';
-import { ObjectStorageNewPage } from '@osac/ui-components/pages/tenant/ObjectStorageNewPage';
-import { ObjectStoragePage } from '@osac/ui-components/pages/tenant/ObjectStoragePage';
-import { ProjectCreatePage } from '@osac/ui-components/pages/tenant/ProjectCreatePage';
-import { ProjectDetailPage } from '@osac/ui-components/pages/tenant/ProjectDetailPage';
-import { ProjectsListPage } from '@osac/ui-components/pages/tenant/ProjectsListPage';
-import { SnapshotsPage } from '@osac/ui-components/pages/tenant/SnapshotsPage';
-import { StorageTiersPage } from '@osac/ui-components/pages/tenant/StorageTiersPage';
-import { TenantCombineTemplatePage } from '@osac/ui-components/pages/tenant/TenantCombineTemplatePage';
-import { TenantPublicIPsPage } from '@osac/ui-components/pages/tenant/TenantPublicIPsPage';
-import { UsagePage } from '@osac/ui-components/pages/tenant/UsagePage';
-import { VmCreatePage } from '@osac/ui-components/pages/tenant/VmCreatePage';
-import { VmDetailsPage } from '@osac/ui-components/pages/tenant/VmDetailsPage';
-import { VmListPage } from '@osac/ui-components/pages/tenant/VmListPage';
-import type { DemoShellRole } from '@osac/ui-components/shellTypes';
+import { VmRoutes } from '@osac/ui-components/pages/tenant/VmRoutes';
+import { VolumeRoutes } from '@osac/ui-components/pages/tenant/VolumeRoutes';
+import type { UserRole } from '@osac/ui-components/shellTypes';
 
+import { BareMetalInstanceTypeRoutes } from './BareMetalInstanceTypeRoutes';
+import { DiskImageRoutes } from './DiskImageRoutes';
+import { InstanceTypeRoutes } from './InstanceTypeRoutes';
+import { ServiceRoute } from './ServiceRoute';
 import { ShellMasthead } from './ShellMasthead';
 import { defaultRouteForRole } from './shellRoutes';
 import { ShellSidebar } from './ShellSidebar';
+import { StorageRoutes } from './StorageRoutes';
+import { TenantRoutes } from './TenantRoutes';
 
-const RoleRoute = ({
-  allow,
-  fallback,
-  children,
-}: {
-  allow: DemoShellRole[];
-  fallback: string;
-  children: ReactElement;
-}) => {
-  const { role } = useSession();
-  return allow.includes(role) ? (
-    <ErrorBoundary>{children}</ErrorBoundary>
-  ) : (
-    <Navigate to={fallback} replace />
-  );
+const MAIN_CONTENT_ID = 'osac-main-content';
+
+const ShellRoute = ({ children }: { children: ReactNode }) => {
+  const { pathname } = useLocation();
+
+  return <ErrorBoundary key={pathname}>{children}</ErrorBoundary>;
 };
 
-export const AppShell = ({ logout }: { logout: () => Promise<void> }) => {
+export const AppShell = ({
+  logout,
+  onRoleChange,
+}: {
+  logout: () => Promise<void>;
+  onRoleChange?: (role: UserRole) => void;
+}) => {
   const { role } = useSession();
+  const { t } = useTranslation();
 
   const defaultRoute = defaultRouteForRole(role);
 
   return (
     <Page
-      masthead={<ShellMasthead onLogout={logout} />}
+      masthead={<ShellMasthead onLogout={logout} onRoleChange={onRoleChange} />}
       sidebar={<ShellSidebar />}
       isManagedSidebar
+      mainContainerId={MAIN_CONTENT_ID}
+      skipToContent={
+        <SkipToContent href={`#${MAIN_CONTENT_ID}`}>{t('Skip to content')}</SkipToContent>
+      }
     >
       <Routes>
         <Route
-          path="/vms"
-          element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <VmListPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/vms/create/:catalogItemId?"
-          element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <VmCreatePage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/vms/:id"
-          element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <VmDetailsPage />
-            </RoleRoute>
-          }
-        />
-        <Route
           path="/catalog"
           element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
+            <ShellRoute>
               <CatalogPage />
-            </RoleRoute>
+            </ShellRoute>
           }
         />
         <Route
-          path="/usage"
+          path="/catalog/:kind/:id"
           element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <UsagePage />
-            </RoleRoute>
+            <ShellRoute>
+              <CatalogItemDetailPage />
+            </ShellRoute>
           }
         />
         <Route
-          path="/admin/catalog"
+          path="/projects/*"
           element={
-            <RoleRoute allow={['tenantAdmin']} fallback={defaultRoute}>
-              <CatalogPage isAdminMode />
-            </RoleRoute>
+            <ShellRoute>
+              <ProjectRoutes />
+            </ShellRoute>
           }
         />
         <Route
-          path="/admin/catalog/combine"
+          path="/project-membership/*"
           element={
-            <RoleRoute allow={['tenantAdmin']} fallback={defaultRoute}>
-              <TenantCombineTemplatePage />
-            </RoleRoute>
+            <ShellRoute>
+              <ProjectMembershipRoutes />
+            </ShellRoute>
           }
         />
         <Route
-          path="/clusters/*"
+          path="/admin/tenants/*"
           element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <ClusterRoutes />
-            </RoleRoute>
+            <ShellRoute>
+              <TenantRoutes />
+            </ShellRoute>
           }
         />
         <Route
-          path="/networks/*"
+          path="/admin/billing"
           element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <NetworkRoutes />
-            </RoleRoute>
+            <ShellRoute>
+              <BillingPage />
+            </ShellRoute>
           }
         />
         <Route
-          path="/bare-metal"
+          path="/admin/infrastructure/storage/*"
           element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <BareMetalListPage />
-            </RoleRoute>
+            <ShellRoute>
+              <StorageRoutes />
+            </ShellRoute>
           }
         />
         <Route
-          path="/bare-metal/create/:catalogItemId?"
+          path="/admin/infrastructure/instance-types/*"
           element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <BareMetalCreatePage />
-            </RoleRoute>
+            <ShellRoute>
+              <ServiceRoute service={ServiceTier.VMAAS}>
+                <InstanceTypeRoutes />
+              </ServiceRoute>
+            </ShellRoute>
           }
         />
         <Route
-          path="/bare-metal/:id"
+          path="/admin/infrastructure/baremetal-instance-types/*"
           element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <BareMetalDetailsPage />
-            </RoleRoute>
+            <ShellRoute>
+              <ServiceRoute service={ServiceTier.BMAAS}>
+                <BareMetalInstanceTypeRoutes />
+              </ServiceRoute>
+            </ShellRoute>
           }
         />
         <Route
-          path="/bucket-storage"
+          path="/admin/infrastructure/disk-images/*"
           element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <ObjectStoragePage />
-            </RoleRoute>
+            <ShellRoute>
+              <DiskImageRoutes />
+            </ShellRoute>
           }
         />
         <Route
-          path="/bucket-storage/new"
+          path="/admin/infrastructure/external-ip-pools/*"
           element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <ObjectStorageNewPage />
-            </RoleRoute>
+            <ShellRoute>
+              <ExternalIpPoolRoutes />
+            </ShellRoute>
           }
         />
         <Route
-          path="/bucket-storage/:id/edit"
+          path="/tenant/identity-provider/*"
           element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <ObjectStorageEditPage />
-            </RoleRoute>
+            <ShellRoute>
+              <IdentityProviderRoutes />
+            </ShellRoute>
           }
         />
         <Route
-          path="/bucket-storage/:id"
+          path="/tenant/role-binding/*"
           element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <ObjectStorageDetailPage />
-            </RoleRoute>
+            <ShellRoute>
+              <RoleBindingRoutes />
+            </ShellRoute>
           }
         />
+        {role !== 'admin' && (
+          <>
+            <Route
+              path="/vms/*"
+              element={
+                <ShellRoute>
+                  <ServiceRoute service={ServiceTier.VMAAS}>
+                    <VmRoutes />
+                  </ServiceRoute>
+                </ShellRoute>
+              }
+            />
+            <Route
+              path="/clusters/*"
+              element={
+                <ShellRoute>
+                  <ServiceRoute service={ServiceTier.CAAS}>
+                    <ClusterRoutes />
+                  </ServiceRoute>
+                </ShellRoute>
+              }
+            />
+            <Route
+              path="/bare-metal/*"
+              element={
+                <ShellRoute>
+                  <ServiceRoute service={ServiceTier.BMAAS}>
+                    <BareMetalRoutes />
+                  </ServiceRoute>
+                </ShellRoute>
+              }
+            />
+            <Route
+              path="/storage/volumes/*"
+              element={
+                <ShellRoute>
+                  <VolumeRoutes />
+                </ShellRoute>
+              }
+            />
+          </>
+        )}
         <Route
-          path="/storage/volumes"
+          path="/networking/virtual-networks"
           element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <BlockVolumesPage />
-            </RoleRoute>
+            <ShellRoute>
+              <VirtualNetworksListPage />
+            </ShellRoute>
           }
         />
         <Route
-          path="/storage/volumes/new"
+          path="/networking/virtual-networks/:id/nat-gateway/attach"
           element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <BlockVolumeNewPage />
-            </RoleRoute>
+            <ShellRoute>
+              <AttachNatGatewayWizardPage />
+            </ShellRoute>
           }
         />
         <Route
-          path="/storage/snapshots"
+          path="/networking/virtual-networks/:id"
           element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <SnapshotsPage />
-            </RoleRoute>
+            <ShellRoute>
+              <VirtualNetworkDetailPage />
+            </ShellRoute>
           }
         />
         <Route
-          path="/storage/tiers"
+          path="/networking/security-groups"
           element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <StorageTiersPage />
-            </RoleRoute>
+            <ShellRoute>
+              <SecurityGroupsListPage />
+            </ShellRoute>
           }
         />
         <Route
-          path="/projects"
+          path="/networking/security-groups/:id"
           element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <ProjectsListPage />
-            </RoleRoute>
+            <ShellRoute>
+              <SecurityGroupDetailPage />
+            </ShellRoute>
           }
         />
         <Route
-          path="/projects/new"
+          path="/networking/external-ips/*"
           element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <ProjectCreatePage />
-            </RoleRoute>
+            <ShellRoute>
+              <ExternalIpRoutes />
+            </ShellRoute>
           }
         />
         <Route
-          path="/projects/:id"
+          path="/secrets/*"
           element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <ProjectDetailPage />
-            </RoleRoute>
-          }
-        />
-
-        <Route
-          path="/admin/dashboard"
-          element={
-            <RoleRoute allow={['tenantAdmin']} fallback={defaultRoute}>
-              <AdminDashboardPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/admin/usage"
-          element={
-            <RoleRoute allow={['tenantAdmin']} fallback={defaultRoute}>
-              <AdminUsagePage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/admin/users"
-          element={
-            <RoleRoute allow={['tenantAdmin']} fallback={defaultRoute}>
-              <AdminUsersPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/admin/users/new"
-          element={
-            <RoleRoute allow={['tenantAdmin']} fallback={defaultRoute}>
-              <AdminUserNewPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/admin/identity-providers"
-          element={
-            <RoleRoute allow={['tenantAdmin']} fallback={defaultRoute}>
-              <AdminIdentityProvidersPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/admin/identity-providers/new"
-          element={
-            <RoleRoute allow={['tenantAdmin']} fallback={defaultRoute}>
-              <AdminIdentityProviderNewPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/admin/identity-providers/:id/edit"
-          element={
-            <RoleRoute allow={['tenantAdmin']} fallback={defaultRoute}>
-              <AdminIdentityProviderEditPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/admin/ai-environment"
-          element={
-            <RoleRoute allow={['tenantAdmin']} fallback={defaultRoute}>
-              <AdminMaaSEnvironmentPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/admin/ai-subscriptions"
-          element={
-            <RoleRoute allow={['tenantAdmin']} fallback={defaultRoute}>
-              <AdminMaaSSubscriptionsPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/admin/ai-subscriptions/new"
-          element={
-            <RoleRoute allow={['tenantAdmin']} fallback={defaultRoute}>
-              <AdminMaaSSubscriptionFormPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/admin/ai-subscriptions/:id/edit"
-          element={
-            <RoleRoute allow={['tenantAdmin']} fallback={defaultRoute}>
-              <AdminMaaSSubscriptionFormPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/admin/role-bindings"
-          element={
-            <RoleRoute allow={['tenantAdmin']} fallback={defaultRoute}>
-              <AdminRoleBindingsPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/admin/role-bindings/assign"
-          element={
-            <RoleRoute allow={['tenantAdmin']} fallback={defaultRoute}>
-              <AdminRoleBindingAssignPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/admin/role-bindings/:id"
-          element={
-            <RoleRoute allow={['tenantAdmin']} fallback={defaultRoute}>
-              <AdminRoleBindingEditPage />
-            </RoleRoute>
-          }
-        />
-
-        <Route
-          path="/provider/dashboard"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderAdminDashboardPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/organizations"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderTenantOrgsPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/organizations/new"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderTenantNewPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/organizations/:id/edit"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderTenantEditPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/compliance"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderCompliancePostureDashboardPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/audit-log"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderAuditLogPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/billing"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderBillingDashboardPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/billing/plans"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderBillingPlansPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/billing/plans/new"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderBillingPlanFormPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/billing/plans/:id/edit"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderBillingPlanFormPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/billing/tenants"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderTenantBillingPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/billing/usage"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderUsageReportsPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/templates"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderTemplatesPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/templates/vm/:id/edit"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderVmTemplateFormPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/templates/cluster/:id/edit"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderClusterTemplateFormPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/templates/bm/:id/edit"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderBmTemplateFormPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/ai-setup"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderAiSetupPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/network-classes"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderNetworkClassesPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/network-classes/new"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderNetworkClassNewPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/ip-pools"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderIPPoolsPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/ip-pools/new"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderIPPoolNewPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/ip-pools/:poolType/:id"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderIPPoolDetailPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/infra-topology"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderInfraTopologyPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/storage-backends"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderStorageBackendsPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/storage-backends/new"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderStorageBackendFormPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/storage-backends/:id/edit"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderStorageBackendFormPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/storage-tiers"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderStorageTiersPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/storage-tiers/new"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderStorageTierFormPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/storage-tiers/:id/edit"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderStorageTierFormPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/host-types"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderHostTypesPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/host-types/new"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderHostTypeNewPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/instance-types"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderInstanceTypesPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/provider/instance-types/new"
-          element={
-            <RoleRoute allow={['providerAdmin']} fallback={defaultRoute}>
-              <ProviderInstanceTypeNewPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/clusters/create/:catalogItemId?"
-          element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <ClusterCreatePage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/models"
-          element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <MaaSListPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/models/create/:catalogItemId?"
-          element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <MaaSCreatePage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/models/:id"
-          element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <MaaSDetailsPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/load-balancers"
-          element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <LoadBalancersPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/load-balancers/new"
-          element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <LoadBalancerFormPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/load-balancers/:id/edit"
-          element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <LoadBalancerFormPage />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/ips"
-          element={
-            <RoleRoute allow={['tenantUser', 'tenantAdmin']} fallback={defaultRoute}>
-              <TenantPublicIPsPage />
-            </RoleRoute>
-          }
-        />
-
-        <Route
-          path="/dev/api-diff"
-          element={
-            <RoleRoute
-              allow={['tenantUser', 'tenantAdmin', 'providerAdmin']}
-              fallback={defaultRoute}
-            >
-              <ApiDiffPage />
-            </RoleRoute>
+            <ShellRoute>
+              <SecretRoutes />
+            </ShellRoute>
           }
         />
         <Route path="*" element={<Navigate to={defaultRoute} replace />} />

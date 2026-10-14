@@ -20,13 +20,15 @@ import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
 import { file_google_api_field_behavior } from "../../../google/api/field_behavior_pb";
 import type { Metadata } from "./metadata_type_pb";
 import { file_osac_public_v1_metadata_type } from "./metadata_type_pb";
+import type { ExternalIPPoolReference } from "./external_ip_pool_type_pb";
+import { file_osac_public_v1_external_ip_pool_type } from "./external_ip_pool_type_pb";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file osac/public/v1/external_ip_type.proto.
  */
 export const file_osac_public_v1_external_ip_type: GenFile = /*@__PURE__*/
-  fileDesc("CiVvc2FjL3B1YmxpYy92MS9leHRlcm5hbF9pcF90eXBlLnByb3RvEg5vc2FjLnB1YmxpYy52MSKkAQoKRXh0ZXJuYWxJUBIKCgJpZBgBIAEoCRIqCghtZXRhZGF0YRgCIAEoCzIYLm9zYWMucHVibGljLnYxLk1ldGFkYXRhEiwKBHNwZWMYAyABKAsyHi5vc2FjLnB1YmxpYy52MS5FeHRlcm5hbElQU3BlYxIwCgZzdGF0dXMYBCABKAsyIC5vc2FjLnB1YmxpYy52MS5FeHRlcm5hbElQU3RhdHVzIiYKDkV4dGVybmFsSVBTcGVjEhQKBHBvb2wYASABKAlCBuBBAuBBBSKuAQoQRXh0ZXJuYWxJUFN0YXR1cxIzCgVzdGF0ZRgBIAEoDjIfLm9zYWMucHVibGljLnYxLkV4dGVybmFsSVBTdGF0ZUID4EEDEhkKB21lc3NhZ2UYAiABKAlCA+BBA0gAiAEBEhQKB2FkZHJlc3MYAyABKAlCA+BBAxIRCgRwb29sGAQgASgJQgPgQQMSFQoIYXR0YWNoZWQYBSABKAhCA+BBA0IKCghfbWVzc2FnZSqyAQoPRXh0ZXJuYWxJUFN0YXRlEiEKHUVYVEVSTkFMX0lQX1NUQVRFX1VOU1BFQ0lGSUVEEAASHQoZRVhURVJOQUxfSVBfU1RBVEVfUEVORElORxABEh8KG0VYVEVSTkFMX0lQX1NUQVRFX0FMTE9DQVRFRBACEhwKGEVYVEVSTkFMX0lQX1NUQVRFX0ZBSUxFRBADEh4KGkVYVEVSTkFMX0lQX1NUQVRFX0RFTEVUSU5HEARiBnByb3RvMw", [file_google_api_field_behavior, file_osac_public_v1_metadata_type]);
+  fileDesc("CiVvc2FjL3B1YmxpYy92MS9leHRlcm5hbF9pcF90eXBlLnByb3RvEg5vc2FjLnB1YmxpYy52MSKkAQoKRXh0ZXJuYWxJUBIKCgJpZBgBIAEoCRIqCghtZXRhZGF0YRgCIAEoCzIYLm9zYWMucHVibGljLnYxLk1ldGFkYXRhEiwKBHNwZWMYAyABKAsyHi5vc2FjLnB1YmxpYy52MS5FeHRlcm5hbElQU3BlYxIwCgZzdGF0dXMYBCABKAsyIC5vc2FjLnB1YmxpYy52MS5FeHRlcm5hbElQU3RhdHVzIk8KDkV4dGVybmFsSVBTcGVjEj0KBHBvb2wYASABKAsyJy5vc2FjLnB1YmxpYy52MS5FeHRlcm5hbElQUG9vbFJlZmVyZW5jZUIG4EEC4EEFIq4BChBFeHRlcm5hbElQU3RhdHVzEjMKBXN0YXRlGAEgASgOMh8ub3NhYy5wdWJsaWMudjEuRXh0ZXJuYWxJUFN0YXRlQgPgQQMSGQoHbWVzc2FnZRgCIAEoCUID4EEDSACIAQESFAoHYWRkcmVzcxgDIAEoCUID4EEDEhEKBHBvb2wYBCABKAlCA+BBAxIVCghhdHRhY2hlZBgFIAEoCEID4EEDQgoKCF9tZXNzYWdlIjQKGEV4dGVybmFsSVBMb2NhbFJlZmVyZW5jZRIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJKrIBCg9FeHRlcm5hbElQU3RhdGUSIQodRVhURVJOQUxfSVBfU1RBVEVfVU5TUEVDSUZJRUQQABIdChlFWFRFUk5BTF9JUF9TVEFURV9QRU5ESU5HEAESHwobRVhURVJOQUxfSVBfU1RBVEVfQUxMT0NBVEVEEAISHAoYRVhURVJOQUxfSVBfU1RBVEVfRkFJTEVEEAMSHgoaRVhURVJOQUxfSVBfU1RBVEVfREVMRVRJTkcQBGIGcHJvdG8z", [file_google_api_field_behavior, file_osac_public_v1_metadata_type, file_osac_public_v1_external_ip_pool_type]);
 
 /**
  * Represents an external IP address allocated from an ExternalIPPool.
@@ -41,7 +43,7 @@ export const file_osac_public_v1_external_ip_type: GenFile = /*@__PURE__*/
  * ExternalIPAttachment currently exists for this ExternalIP.
  *
  * The lifecycle follows: PENDING (awaiting allocation) -> ALLOCATED (IP assigned).
- * FAILED is a terminal error state for provisioning failures.
+ * FAILED is a terminal error state for provisioning failures. DELETING is set during deprovisioning.
  *
  * @generated from message osac.public.v1.ExternalIP
  */
@@ -92,16 +94,14 @@ export const ExternalIPSchema: GenMessage<ExternalIP> = /*@__PURE__*/
  */
 export type ExternalIPSpec = Message<"osac.public.v1.ExternalIPSpec"> & {
   /**
-   * Parent ExternalIPPool ID. Required and immutable after creation.
+   * Parent ExternalIPPool reference. Required and immutable after creation.
    *
-   * Must reference the ID of an existing ExternalIPPool in READY state. The system allocates an
+   * Must reference an existing ExternalIPPool in READY state. The system allocates an
    * available IP address from this pool's CIDR ranges during provisioning.
    *
-   * Example: "pool-abc123"
-   *
-   * @generated from field: string pool = 1;
+   * @generated from field: osac.public.v1.ExternalIPPoolReference pool = 1;
    */
-  pool: string;
+  pool?: ExternalIPPoolReference | undefined;
 };
 
 /**
@@ -176,9 +176,33 @@ export const ExternalIPStatusSchema: GenMessage<ExternalIPStatus> = /*@__PURE__*
   messageDesc(file_osac_public_v1_external_ip_type, 2);
 
 /**
+ * Local reference to an ExternalIP resource.
+ *
+ * @generated from message osac.public.v1.ExternalIPLocalReference
+ */
+export type ExternalIPLocalReference = Message<"osac.public.v1.ExternalIPLocalReference"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+};
+
+/**
+ * Describes the message osac.public.v1.ExternalIPLocalReference.
+ * Use `create(ExternalIPLocalReferenceSchema)` to create a new message.
+ */
+export const ExternalIPLocalReferenceSchema: GenMessage<ExternalIPLocalReference> = /*@__PURE__*/
+  messageDesc(file_osac_public_v1_external_ip_type, 3);
+
+/**
  * Lifecycle states for ExternalIP resources.
  *
- * State transitions: UNSPECIFIED -> PENDING -> ALLOCATED.
+ * State transitions: UNSPECIFIED -> PENDING -> ALLOCATED. On deletion: ALLOCATED -> DELETING.
  * FAILED is a terminal error state for provisioning failures.
  *
  * @generated from enum osac.public.v1.ExternalIPState
@@ -215,8 +239,8 @@ export enum ExternalIPState {
   /**
    * Provisioning failed. Check status.message for error details.
    *
-   * This is a terminal error state. The ExternalIP may require deletion and recreation,
-   * or an administrator can retry via the private API Signal RPC.
+   * This is a terminal error state. The ExternalIP may require manual intervention
+   * (e.g., deleting and recreating) or a Signal RPC to retry the operation.
    *
    * @generated from enum value: EXTERNAL_IP_STATE_FAILED = 3;
    */

@@ -17,6 +17,7 @@
 
 import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
+import { file_buf_validate_validate } from "../../../buf/validate/validate_pb";
 import type { Timestamp } from "../../../google/protobuf/timestamp_pb";
 import { file_google_protobuf_timestamp } from "../../../google/protobuf/timestamp_pb";
 import type { Message } from "@bufbuild/protobuf";
@@ -25,7 +26,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file osac/public/v1/metadata_type.proto.
  */
 export const file_osac_public_v1_metadata_type: GenFile = /*@__PURE__*/
-  fileDesc("CiJvc2FjL3B1YmxpYy92MS9tZXRhZGF0YV90eXBlLnByb3RvEg5vc2FjLnB1YmxpYy52MSKTAwoITWV0YWRhdGESNgoSY3JlYXRpb25fdGltZXN0YW1wGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBI2ChJkZWxldGlvbl90aW1lc3RhbXAYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEg8KB2NyZWF0b3IYAyABKAkSDAoEbmFtZRgEIAEoCRIOCgZ0ZW5hbnQYBSABKAkSNAoGbGFiZWxzGAcgAygLMiQub3NhYy5wdWJsaWMudjEuTWV0YWRhdGEuTGFiZWxzRW50cnkSPgoLYW5ub3RhdGlvbnMYCCADKAsyKS5vc2FjLnB1YmxpYy52MS5NZXRhZGF0YS5Bbm5vdGF0aW9uc0VudHJ5Eg8KB3ZlcnNpb24YCSABKAUaLQoLTGFiZWxzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ARoyChBBbm5vdGF0aW9uc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAFiBnByb3RvMw", [file_google_protobuf_timestamp]);
+  fileDesc("CiJvc2FjL3B1YmxpYy92MS9tZXRhZGF0YV90eXBlLnByb3RvEg5vc2FjLnB1YmxpYy52MSKTBAoITWV0YWRhdGESNgoSY3JlYXRpb25fdGltZXN0YW1wGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBI2ChJkZWxldGlvbl90aW1lc3RhbXAYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEg8KB2NyZWF0b3IYAyABKAkSDgoGdGVuYW50GAQgASgJEj0KBG5hbWUYBSABKAlCL7pILHIqEAEYPzIkXlthLXowLTldKFthLXowLTktXXswLDYxfVthLXowLTldKT8kEjQKBmxhYmVscxgGIAMoCzIkLm9zYWMucHVibGljLnYxLk1ldGFkYXRhLkxhYmVsc0VudHJ5Ej4KC2Fubm90YXRpb25zGAcgAygLMikub3NhYy5wdWJsaWMudjEuTWV0YWRhdGEuQW5ub3RhdGlvbnNFbnRyeRIPCgd2ZXJzaW9uGAggASgFEg8KB3Byb2plY3QYCSABKAkSHQoMZGlzcGxheV9uYW1lGAogASgJQge6SARyAhg/Eh0KC2Rlc2NyaXB0aW9uGAsgASgJQgi6SAVyAxiAAhotCgtMYWJlbHNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBGjIKEEFubm90YXRpb25zRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4AWIGcHJvdG8z", [file_buf_validate_validate, file_google_protobuf_timestamp]);
 
 /**
  * Metadata common to all kinds of objects.
@@ -48,33 +49,31 @@ export type Metadata = Message<"osac.public.v1.Metadata"> & {
   deletionTimestamp?: Timestamp | undefined;
 
   /**
-   * Name of the creator of the object.
+   * Creator contains the identifier of the user or group that created the object.
    *
    * @generated from field: string creator = 3;
    */
   creator: string;
 
   /**
-   * Human friendly name of the object.
+   * Tenant contains the identifier of the tenant that the object belongs to.
    *
-   * Has the same restrictions than DNS labels, as described in RFC 1035:
-   *
-   * - Must be between 1 and 63 characters long.
-   * - Must only contain letters (a-z), digits (0-9) and hyphens (-).
-   * - It isn't case sensitive.
-   *
-   * It is optional and not unique, so multiple objecs, even created by the same user or tenant, can have the same name.
-   *
-   * @generated from field: string name = 4;
-   */
-  name: string;
-
-  /**
-   * Identifier of the tenant that the object is assigned to.
-   *
-   * @generated from field: string tenant = 5;
+   * @generated from field: string tenant = 4;
    */
   tenant: string;
+
+  /**
+   * Mandatory, immutable, and unique within scope. Must be a valid RFC 1123 DNS label.
+   *
+   * Has the same restrictions as DNS labels, as described in RFC 1123:
+   *
+   * - Must be between 1 and 63 characters long.
+   * - Must only contain lowercase letters (a-z), digits (0-9) and hyphens (-).
+   * - Must start and end with an alphanumeric character.
+   *
+   * @generated from field: string name = 5;
+   */
+  name: string;
 
   /**
    * Labels contains key-value pairs for organizing and selecting objects.
@@ -90,7 +89,7 @@ export type Metadata = Message<"osac.public.v1.Metadata"> & {
    *
    * Labels are indexed and searchable.
    *
-   * @generated from field: map<string, string> labels = 7;
+   * @generated from field: map<string, string> labels = 6;
    */
   labels: { [key: string]: string };
 
@@ -100,16 +99,55 @@ export type Metadata = Message<"osac.public.v1.Metadata"> & {
    * Keys follow the same rules as label keys, including the optional DNS subdomain prefix and the 1-63 character name
    * restrictions. Values can be any string.
    *
-   * @generated from field: map<string, string> annotations = 8;
+   * @generated from field: map<string, string> annotations = 7;
    */
   annotations: { [key: string]: string };
 
   /**
    * Version is a numeric field that is automatically incremented with every change to the object.
    *
-   * @generated from field: int32 version = 9;
+   * @generated from field: int32 version = 8;
    */
   version: number;
+
+  /**
+   * Full name of the project that the object is assigned to. It can be empty, which means the object belongs to
+   * the default project of the tenant.
+   *
+   * When not empty, the value is a dot-separated path of labels representing a hierarchy of projects. For example,
+   * `team-a.frontend.staging` represents a project nested three levels deep.
+   *
+   * Each label in the path has the same restrictions as DNS labels, as described in RFC 1035:
+   *
+   * - Must be between 1 and 63 characters long.
+   * - Must only contain letters (a-z), digits (0-9) and hyphens (-).
+   * - It isn't case sensitive.
+   *
+   * For project objects this field represents the parent project. For example, if a project named `frontend` has
+   * this field set to `team-a`, it means that `frontend` is a child of the `team-a` project, and its full name is
+   * `team-a.frontend`.
+   *
+   * For organization objects this field is always empty, as organizations don't belong to a project.
+   *
+   * @generated from field: string project = 9;
+   */
+  project: string;
+
+  /**
+   * Human-friendly display name. Optional, not unique, mutable.
+   * Not constrained to DNS-label format.
+   *
+   * @generated from field: string display_name = 10;
+   */
+  displayName: string;
+
+  /**
+   * Optional human-friendly description. Opaque string; clients may
+   * treat content as Markdown. Not unique, mutable.
+   *
+   * @generated from field: string description = 11;
+   */
+  description: string;
 };
 
 /**

@@ -1,15 +1,45 @@
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { createRegistry } from '@bufbuild/protobuf';
+import {
+  file_google_protobuf_duration,
+  file_google_protobuf_struct,
+  file_google_protobuf_timestamp,
+  file_google_protobuf_wrappers,
+} from '@bufbuild/protobuf/wkt';
+import { createConnectTransport } from '@connectrpc/connect-web';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot } from 'react-dom/client';
 
-import { ApiProvider } from '@osac/ui-components/api/api-context';
-import type { ApiQueryKey, ApiQueryMeta } from '@osac/ui-components/api/types';
+import { ApiProvider, connectErrorInterceptor } from '@osac/ui-components/api/api-context';
+import ToastProvider from '@osac/ui-components/components/Toast/ToastProvider';
 
-import { fulfillmentFetch } from './api/fulfillmentFetch';
+import { createMockConnectTransport } from '@osac/ui-components/test-utils/createMockConnectTransport';
+
 import App from './App';
-import { demoFetch } from './demo/demo-fetch';
+import { mockFixtures } from './mock/mock-data';
 import './i18n';
+
+const MOCK_MODE = import.meta.env.VITE_MOCK_MODE === 'true';
+
+// Transport type cast bridges the dual @bufbuild/protobuf resolutions (2.12 vs 2.16)
+// in this pnpm workspace. At runtime the structures are identical.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const connectTransport = (MOCK_MODE
+  ? createMockConnectTransport(mockFixtures)
+  : createConnectTransport({
+      baseUrl: '/api/fulfillment',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      interceptors: [connectErrorInterceptor as any],
+      jsonOptions: {
+        registry: createRegistry(
+          file_google_protobuf_wrappers,
+          file_google_protobuf_timestamp,
+          file_google_protobuf_duration,
+          file_google_protobuf_struct,
+        ),
+      },
+    })) as ReturnType<typeof createMockConnectTransport>;
 
 // CSS load order is intentional: base → addons → local overrides
 /* eslint-disable import/order */
@@ -17,9 +47,6 @@ import '@patternfly/patternfly/patternfly.css';
 import '@patternfly/patternfly/patternfly-addons.css';
 import './global.css';
 /* eslint-enable import/order */
-
-const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
-const apiFetch = DEMO_MODE ? demoFetch : fulfillmentFetch;
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,26 +56,23 @@ const queryClient = new QueryClient({
       // mounting on the same page request the same query simultaneously.
       staleTime: 5_000,
       refetchOnMount: true,
-      refetchInterval: DEMO_MODE ? false : 30_000,
-      queryFn: (ctx) => {
-        const [route, pathParams, queryParams] = ctx.queryKey as ApiQueryKey;
-        const { decode } = (ctx.meta ?? {}) as ApiQueryMeta;
-        return apiFetch(route, { pathParams, queryParams, decode });
-      },
+      refetchInterval: 10_000,
     },
   },
 });
+
+const router = createBrowserRouter([{ path: '*', element: <App /> }]);
 
 const rootElement = document.getElementById('root');
 
 if (rootElement) {
   createRoot(rootElement).render(
     <React.StrictMode>
-      <ApiProvider fetch={apiFetch}>
+      <ApiProvider transport={connectTransport}>
         <QueryClientProvider client={queryClient}>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
+          <ToastProvider>
+            <RouterProvider router={router} />
+          </ToastProvider>
         </QueryClientProvider>
       </ApiProvider>
     </React.StrictMode>,
