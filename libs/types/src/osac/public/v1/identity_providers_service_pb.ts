@@ -28,49 +28,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file osac/public/v1/identity_providers_service.proto.
  */
 export const file_osac_public_v1_identity_providers_service: GenFile = /*@__PURE__*/
-  fileDesc("Ci9vc2FjL3B1YmxpYy92MS9pZGVudGl0eV9wcm92aWRlcnNfc2VydmljZS5wcm90bxIOb3NhYy5wdWJsaWMudjEiUgoeSWRlbnRpdHlQcm92aWRlcnNDcmVhdGVSZXF1ZXN0EjAKBm9iamVjdBgBIAEoCzIgLm9zYWMucHVibGljLnYxLklkZW50aXR5UHJvdmlkZXIiUwofSWRlbnRpdHlQcm92aWRlcnNDcmVhdGVSZXNwb25zZRIwCgZvYmplY3QYASABKAsyIC5vc2FjLnB1YmxpYy52MS5JZGVudGl0eVByb3ZpZGVyInwKHElkZW50aXR5UHJvdmlkZXJzTGlzdFJlcXVlc3QSEwoGb2Zmc2V0GAEgASgFSACIAQESEgoFbGltaXQYAiABKAVIAYgBARITCgZmaWx0ZXIYAyABKAlIAogBAUIJCgdfb2Zmc2V0QggKBl9saW1pdEIJCgdfZmlsdGVyIm0KHUlkZW50aXR5UHJvdmlkZXJzTGlzdFJlc3BvbnNlEgwKBHNpemUYASABKAUSDQoFdG90YWwYAiABKAUSLwoFaXRlbXMYAyADKAsyIC5vc2FjLnB1YmxpYy52MS5JZGVudGl0eVByb3ZpZGVyIoUBCiVJZGVudGl0eVByb3ZpZGVyc0xpc3RBdmFpbGFibGVSZXF1ZXN0EhMKBm9mZnNldBgBIAEoBUgAiAEBEhIKBWxpbWl0GAIgASgFSAGIAQESEwoGZmlsdGVyGAMgASgJSAKIAQFCCQoHX29mZnNldEIICgZfbGltaXRCCQoHX2ZpbHRlciJ2CiZJZGVudGl0eVByb3ZpZGVyc0xpc3RBdmFpbGFibGVSZXNwb25zZRIMCgRzaXplGAEgASgFEg0KBXRvdGFsGAIgASgFEi8KBWl0ZW1zGAMgAygLMiAub3NhYy5wdWJsaWMudjEuSWRlbnRpdHlQcm92aWRlciIpChtJZGVudGl0eVByb3ZpZGVyc0dldFJlcXVlc3QSCgoCaWQYASABKAkiUAocSWRlbnRpdHlQcm92aWRlcnNHZXRSZXNwb25zZRIwCgZvYmplY3QYASABKAsyIC5vc2FjLnB1YmxpYy52MS5JZGVudGl0eVByb3ZpZGVyIpEBCh5JZGVudGl0eVByb3ZpZGVyc1VwZGF0ZVJlcXVlc3QSMAoGb2JqZWN0GAEgASgLMiAub3NhYy5wdWJsaWMudjEuSWRlbnRpdHlQcm92aWRlchIvCgt1cGRhdGVfbWFzaxgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5GaWVsZE1hc2sSDAoEbG9jaxgDIAEoCCJTCh9JZGVudGl0eVByb3ZpZGVyc1VwZGF0ZVJlc3BvbnNlEjAKBm9iamVjdBgBIAEoCzIgLm9zYWMucHVibGljLnYxLklkZW50aXR5UHJvdmlkZXIiLAoeSWRlbnRpdHlQcm92aWRlcnNEZWxldGVSZXF1ZXN0EgoKAmlkGAEgASgJIiEKH0lkZW50aXR5UHJvdmlkZXJzRGVsZXRlUmVzcG9uc2UiLAoeSWRlbnRpdHlQcm92aWRlcnNBc3NpZ25SZXF1ZXN0EgoKAmlkGAEgASgJIiEKH0lkZW50aXR5UHJvdmlkZXJzQXNzaWduUmVzcG9uc2UiLgogSWRlbnRpdHlQcm92aWRlcnNVbmFzc2lnblJlcXVlc3QSCgoCaWQYASABKAkiIwohSWRlbnRpdHlQcm92aWRlcnNVbmFzc2lnblJlc3BvbnNlMtwKChFJZGVudGl0eVByb3ZpZGVycxKhAQoGQ3JlYXRlEi4ub3NhYy5wdWJsaWMudjEuSWRlbnRpdHlQcm92aWRlcnNDcmVhdGVSZXF1ZXN0Gi8ub3NhYy5wdWJsaWMudjEuSWRlbnRpdHlQcm92aWRlcnNDcmVhdGVSZXNwb25zZSI2gtPkkwIwOgZvYmplY3QiJi9hcGkvZnVsZmlsbG1lbnQvdjEvaWRlbnRpdHlfcHJvdmlkZXJzEpMBCgRMaXN0Eiwub3NhYy5wdWJsaWMudjEuSWRlbnRpdHlQcm92aWRlcnNMaXN0UmVxdWVzdBotLm9zYWMucHVibGljLnYxLklkZW50aXR5UHJvdmlkZXJzTGlzdFJlc3BvbnNlIi6C0+STAigSJi9hcGkvZnVsZmlsbG1lbnQvdjEvaWRlbnRpdHlfcHJvdmlkZXJzEr0BCg1MaXN0QXZhaWxhYmxlEjUub3NhYy5wdWJsaWMudjEuSWRlbnRpdHlQcm92aWRlcnNMaXN0QXZhaWxhYmxlUmVxdWVzdBo2Lm9zYWMucHVibGljLnYxLklkZW50aXR5UHJvdmlkZXJzTGlzdEF2YWlsYWJsZVJlc3BvbnNlIj2C0+STAjcSNS9hcGkvZnVsZmlsbG1lbnQvdjEvaWRlbnRpdHlfcHJvdmlkZXJzOmxpc3QtYXZhaWxhYmxlEp0BCgNHZXQSKy5vc2FjLnB1YmxpYy52MS5JZGVudGl0eVByb3ZpZGVyc0dldFJlcXVlc3QaLC5vc2FjLnB1YmxpYy52MS5JZGVudGl0eVByb3ZpZGVyc0dldFJlc3BvbnNlIjuC0+STAjViBm9iamVjdBIrL2FwaS9mdWxmaWxsbWVudC92MS9pZGVudGl0eV9wcm92aWRlcnMve2lkfRKtAQoGVXBkYXRlEi4ub3NhYy5wdWJsaWMudjEuSWRlbnRpdHlQcm92aWRlcnNVcGRhdGVSZXF1ZXN0Gi8ub3NhYy5wdWJsaWMudjEuSWRlbnRpdHlQcm92aWRlcnNVcGRhdGVSZXNwb25zZSJCgtPkkwI8OgZvYmplY3QyMi9hcGkvZnVsZmlsbG1lbnQvdjEvaWRlbnRpdHlfcHJvdmlkZXJzL3tvYmplY3QuaWR9Ep4BCgZEZWxldGUSLi5vc2FjLnB1YmxpYy52MS5JZGVudGl0eVByb3ZpZGVyc0RlbGV0ZVJlcXVlc3QaLy5vc2FjLnB1YmxpYy52MS5JZGVudGl0eVByb3ZpZGVyc0RlbGV0ZVJlc3BvbnNlIjOC0+STAi0qKy9hcGkvZnVsZmlsbG1lbnQvdjEvaWRlbnRpdHlfcHJvdmlkZXJzL3tpZH0SqAEKBkFzc2lnbhIuLm9zYWMucHVibGljLnYxLklkZW50aXR5UHJvdmlkZXJzQXNzaWduUmVxdWVzdBovLm9zYWMucHVibGljLnYxLklkZW50aXR5UHJvdmlkZXJzQXNzaWduUmVzcG9uc2UiPYLT5JMCNzoBKiIyL2FwaS9mdWxmaWxsbWVudC92MS9pZGVudGl0eV9wcm92aWRlcnMve2lkfTphc3NpZ24SsAEKCFVuYXNzaWduEjAub3NhYy5wdWJsaWMudjEuSWRlbnRpdHlQcm92aWRlcnNVbmFzc2lnblJlcXVlc3QaMS5vc2FjLnB1YmxpYy52MS5JZGVudGl0eVByb3ZpZGVyc1VuYXNzaWduUmVzcG9uc2UiP4LT5JMCOToBKiI0L2FwaS9mdWxmaWxsbWVudC92MS9pZGVudGl0eV9wcm92aWRlcnMve2lkfTp1bmFzc2lnbmIGcHJvdG8z", [file_google_api_annotations, file_google_protobuf_field_mask, file_osac_public_v1_identity_provider_type]);
-
-/**
- * Request to create an identity provider.
- *
- * @generated from message osac.public.v1.IdentityProvidersCreateRequest
- */
-export type IdentityProvidersCreateRequest = Message<"osac.public.v1.IdentityProvidersCreateRequest"> & {
-  /**
-   * The identity provider to create.
-   *
-   * @generated from field: osac.public.v1.IdentityProvider object = 1;
-   */
-  object?: IdentityProvider | undefined;
-};
-
-/**
- * Describes the message osac.public.v1.IdentityProvidersCreateRequest.
- * Use `create(IdentityProvidersCreateRequestSchema)` to create a new message.
- */
-export const IdentityProvidersCreateRequestSchema: GenMessage<IdentityProvidersCreateRequest> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_identity_providers_service, 0);
-
-/**
- * Response containing the created identity provider.
- *
- * @generated from message osac.public.v1.IdentityProvidersCreateResponse
- */
-export type IdentityProvidersCreateResponse = Message<"osac.public.v1.IdentityProvidersCreateResponse"> & {
-  /**
-   * The created identity provider.
-   *
-   * @generated from field: osac.public.v1.IdentityProvider object = 1;
-   */
-  object?: IdentityProvider | undefined;
-};
-
-/**
- * Describes the message osac.public.v1.IdentityProvidersCreateResponse.
- * Use `create(IdentityProvidersCreateResponseSchema)` to create a new message.
- */
-export const IdentityProvidersCreateResponseSchema: GenMessage<IdentityProvidersCreateResponse> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_identity_providers_service, 1);
+  fileDesc("Ci9vc2FjL3B1YmxpYy92MS9pZGVudGl0eV9wcm92aWRlcnNfc2VydmljZS5wcm90bxIOb3NhYy5wdWJsaWMudjEifAocSWRlbnRpdHlQcm92aWRlcnNMaXN0UmVxdWVzdBITCgZvZmZzZXQYASABKAVIAIgBARISCgVsaW1pdBgCIAEoBUgBiAEBEhMKBmZpbHRlchgDIAEoCUgCiAEBQgkKB19vZmZzZXRCCAoGX2xpbWl0QgkKB19maWx0ZXIibQodSWRlbnRpdHlQcm92aWRlcnNMaXN0UmVzcG9uc2USDAoEc2l6ZRgBIAEoBRINCgV0b3RhbBgCIAEoBRIvCgVpdGVtcxgDIAMoCzIgLm9zYWMucHVibGljLnYxLklkZW50aXR5UHJvdmlkZXIiKQobSWRlbnRpdHlQcm92aWRlcnNHZXRSZXF1ZXN0EgoKAmlkGAEgASgJIlAKHElkZW50aXR5UHJvdmlkZXJzR2V0UmVzcG9uc2USMAoGb2JqZWN0GAEgASgLMiAub3NhYy5wdWJsaWMudjEuSWRlbnRpdHlQcm92aWRlciJSCh5JZGVudGl0eVByb3ZpZGVyc0NyZWF0ZVJlcXVlc3QSMAoGb2JqZWN0GAEgASgLMiAub3NhYy5wdWJsaWMudjEuSWRlbnRpdHlQcm92aWRlciJTCh9JZGVudGl0eVByb3ZpZGVyc0NyZWF0ZVJlc3BvbnNlEjAKBm9iamVjdBgBIAEoCzIgLm9zYWMucHVibGljLnYxLklkZW50aXR5UHJvdmlkZXIikQEKHklkZW50aXR5UHJvdmlkZXJzVXBkYXRlUmVxdWVzdBIwCgZvYmplY3QYASABKAsyIC5vc2FjLnB1YmxpYy52MS5JZGVudGl0eVByb3ZpZGVyEi8KC3VwZGF0ZV9tYXNrGAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLkZpZWxkTWFzaxIMCgRsb2NrGAMgASgIIlMKH0lkZW50aXR5UHJvdmlkZXJzVXBkYXRlUmVzcG9uc2USMAoGb2JqZWN0GAEgASgLMiAub3NhYy5wdWJsaWMudjEuSWRlbnRpdHlQcm92aWRlciIsCh5JZGVudGl0eVByb3ZpZGVyc0RlbGV0ZVJlcXVlc3QSCgoCaWQYASABKAkiIQofSWRlbnRpdHlQcm92aWRlcnNEZWxldGVSZXNwb25zZTK+BgoRSWRlbnRpdHlQcm92aWRlcnMSoQEKBkNyZWF0ZRIuLm9zYWMucHVibGljLnYxLklkZW50aXR5UHJvdmlkZXJzQ3JlYXRlUmVxdWVzdBovLm9zYWMucHVibGljLnYxLklkZW50aXR5UHJvdmlkZXJzQ3JlYXRlUmVzcG9uc2UiNoLT5JMCMDoGb2JqZWN0IiYvYXBpL2Z1bGZpbGxtZW50L3YxL2lkZW50aXR5X3Byb3ZpZGVycxKTAQoETGlzdBIsLm9zYWMucHVibGljLnYxLklkZW50aXR5UHJvdmlkZXJzTGlzdFJlcXVlc3QaLS5vc2FjLnB1YmxpYy52MS5JZGVudGl0eVByb3ZpZGVyc0xpc3RSZXNwb25zZSIugtPkkwIoEiYvYXBpL2Z1bGZpbGxtZW50L3YxL2lkZW50aXR5X3Byb3ZpZGVycxKdAQoDR2V0Eisub3NhYy5wdWJsaWMudjEuSWRlbnRpdHlQcm92aWRlcnNHZXRSZXF1ZXN0Giwub3NhYy5wdWJsaWMudjEuSWRlbnRpdHlQcm92aWRlcnNHZXRSZXNwb25zZSI7gtPkkwI1YgZvYmplY3QSKy9hcGkvZnVsZmlsbG1lbnQvdjEvaWRlbnRpdHlfcHJvdmlkZXJzL3tpZH0SrQEKBlVwZGF0ZRIuLm9zYWMucHVibGljLnYxLklkZW50aXR5UHJvdmlkZXJzVXBkYXRlUmVxdWVzdBovLm9zYWMucHVibGljLnYxLklkZW50aXR5UHJvdmlkZXJzVXBkYXRlUmVzcG9uc2UiQoLT5JMCPDoGb2JqZWN0MjIvYXBpL2Z1bGZpbGxtZW50L3YxL2lkZW50aXR5X3Byb3ZpZGVycy97b2JqZWN0LmlkfRKeAQoGRGVsZXRlEi4ub3NhYy5wdWJsaWMudjEuSWRlbnRpdHlQcm92aWRlcnNEZWxldGVSZXF1ZXN0Gi8ub3NhYy5wdWJsaWMudjEuSWRlbnRpdHlQcm92aWRlcnNEZWxldGVSZXNwb25zZSIzgtPkkwItKisvYXBpL2Z1bGZpbGxtZW50L3YxL2lkZW50aXR5X3Byb3ZpZGVycy97aWR9YgZwcm90bzM", [file_google_api_annotations, file_google_protobuf_field_mask, file_osac_public_v1_identity_provider_type]);
 
 /**
  * Request to list identity providers for a tenant.
@@ -106,7 +64,7 @@ export type IdentityProvidersListRequest = Message<"osac.public.v1.IdentityProvi
  * Use `create(IdentityProvidersListRequestSchema)` to create a new message.
  */
 export const IdentityProvidersListRequestSchema: GenMessage<IdentityProvidersListRequest> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_identity_providers_service, 2);
+  messageDesc(file_osac_public_v1_identity_providers_service, 0);
 
 /**
  * Response containing the list of identity providers.
@@ -141,80 +99,10 @@ export type IdentityProvidersListResponse = Message<"osac.public.v1.IdentityProv
  * Use `create(IdentityProvidersListResponseSchema)` to create a new message.
  */
 export const IdentityProvidersListResponseSchema: GenMessage<IdentityProvidersListResponse> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_identity_providers_service, 3);
+  messageDesc(file_osac_public_v1_identity_providers_service, 1);
 
 /**
- * Request to list all available identity providers.
- *
- * @generated from message osac.public.v1.IdentityProvidersListAvailableRequest
- */
-export type IdentityProvidersListAvailableRequest = Message<"osac.public.v1.IdentityProvidersListAvailableRequest"> & {
-  /**
-   * Index of the first result. If not specified the default value will be zero.
-   *
-   * @generated from field: optional int32 offset = 1;
-   */
-  offset?: number | undefined;
-
-  /**
-   * Maximum number of results to be returned by the server.
-   *
-   * @generated from field: optional int32 limit = 2;
-   */
-  limit?: number | undefined;
-
-  /**
-   * Filter criteria. CEL expression to filter identity providers.
-   *
-   * @generated from field: optional string filter = 3;
-   */
-  filter?: string | undefined;
-};
-
-/**
- * Describes the message osac.public.v1.IdentityProvidersListAvailableRequest.
- * Use `create(IdentityProvidersListAvailableRequestSchema)` to create a new message.
- */
-export const IdentityProvidersListAvailableRequestSchema: GenMessage<IdentityProvidersListAvailableRequest> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_identity_providers_service, 4);
-
-/**
- * Response containing the list of available identity providers.
- *
- * @generated from message osac.public.v1.IdentityProvidersListAvailableResponse
- */
-export type IdentityProvidersListAvailableResponse = Message<"osac.public.v1.IdentityProvidersListAvailableResponse"> & {
-  /**
-   * Actual number of items returned.
-   *
-   * @generated from field: int32 size = 1;
-   */
-  size: number;
-
-  /**
-   * Total number of items that match the search criteria.
-   *
-   * @generated from field: int32 total = 2;
-   */
-  total: number;
-
-  /**
-   * List of identity providers available.
-   *
-   * @generated from field: repeated osac.public.v1.IdentityProvider items = 3;
-   */
-  items: IdentityProvider[];
-};
-
-/**
- * Describes the message osac.public.v1.IdentityProvidersListAvailableResponse.
- * Use `create(IdentityProvidersListAvailableResponseSchema)` to create a new message.
- */
-export const IdentityProvidersListAvailableResponseSchema: GenMessage<IdentityProvidersListAvailableResponse> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_identity_providers_service, 5);
-
-/**
- * Request to get a tenant's identity provider by ID.
+ * Request to get an identity provider by ID.
  *
  * @generated from message osac.public.v1.IdentityProvidersGetRequest
  */
@@ -232,7 +120,7 @@ export type IdentityProvidersGetRequest = Message<"osac.public.v1.IdentityProvid
  * Use `create(IdentityProvidersGetRequestSchema)` to create a new message.
  */
 export const IdentityProvidersGetRequestSchema: GenMessage<IdentityProvidersGetRequest> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_identity_providers_service, 6);
+  messageDesc(file_osac_public_v1_identity_providers_service, 2);
 
 /**
  * Response containing the identity provider.
@@ -253,7 +141,49 @@ export type IdentityProvidersGetResponse = Message<"osac.public.v1.IdentityProvi
  * Use `create(IdentityProvidersGetResponseSchema)` to create a new message.
  */
 export const IdentityProvidersGetResponseSchema: GenMessage<IdentityProvidersGetResponse> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_identity_providers_service, 7);
+  messageDesc(file_osac_public_v1_identity_providers_service, 3);
+
+/**
+ * Request to create an identity provider.
+ *
+ * @generated from message osac.public.v1.IdentityProvidersCreateRequest
+ */
+export type IdentityProvidersCreateRequest = Message<"osac.public.v1.IdentityProvidersCreateRequest"> & {
+  /**
+   * The identity provider to create.
+   *
+   * @generated from field: osac.public.v1.IdentityProvider object = 1;
+   */
+  object?: IdentityProvider | undefined;
+};
+
+/**
+ * Describes the message osac.public.v1.IdentityProvidersCreateRequest.
+ * Use `create(IdentityProvidersCreateRequestSchema)` to create a new message.
+ */
+export const IdentityProvidersCreateRequestSchema: GenMessage<IdentityProvidersCreateRequest> = /*@__PURE__*/
+  messageDesc(file_osac_public_v1_identity_providers_service, 4);
+
+/**
+ * Response containing the created identity provider.
+ *
+ * @generated from message osac.public.v1.IdentityProvidersCreateResponse
+ */
+export type IdentityProvidersCreateResponse = Message<"osac.public.v1.IdentityProvidersCreateResponse"> & {
+  /**
+   * The created identity provider.
+   *
+   * @generated from field: osac.public.v1.IdentityProvider object = 1;
+   */
+  object?: IdentityProvider | undefined;
+};
+
+/**
+ * Describes the message osac.public.v1.IdentityProvidersCreateResponse.
+ * Use `create(IdentityProvidersCreateResponseSchema)` to create a new message.
+ */
+export const IdentityProvidersCreateResponseSchema: GenMessage<IdentityProvidersCreateResponse> = /*@__PURE__*/
+  messageDesc(file_osac_public_v1_identity_providers_service, 5);
 
 /**
  * Request to update an identity provider.
@@ -290,7 +220,7 @@ export type IdentityProvidersUpdateRequest = Message<"osac.public.v1.IdentityPro
  * Use `create(IdentityProvidersUpdateRequestSchema)` to create a new message.
  */
 export const IdentityProvidersUpdateRequestSchema: GenMessage<IdentityProvidersUpdateRequest> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_identity_providers_service, 8);
+  messageDesc(file_osac_public_v1_identity_providers_service, 6);
 
 /**
  * Response containing the updated identity provider.
@@ -311,7 +241,7 @@ export type IdentityProvidersUpdateResponse = Message<"osac.public.v1.IdentityPr
  * Use `create(IdentityProvidersUpdateResponseSchema)` to create a new message.
  */
 export const IdentityProvidersUpdateResponseSchema: GenMessage<IdentityProvidersUpdateResponse> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_identity_providers_service, 9);
+  messageDesc(file_osac_public_v1_identity_providers_service, 7);
 
 /**
  * Request to delete an identity provider.
@@ -332,7 +262,7 @@ export type IdentityProvidersDeleteRequest = Message<"osac.public.v1.IdentityPro
  * Use `create(IdentityProvidersDeleteRequestSchema)` to create a new message.
  */
 export const IdentityProvidersDeleteRequestSchema: GenMessage<IdentityProvidersDeleteRequest> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_identity_providers_service, 10);
+  messageDesc(file_osac_public_v1_identity_providers_service, 8);
 
 /**
  * Response for delete operation.
@@ -347,81 +277,7 @@ export type IdentityProvidersDeleteResponse = Message<"osac.public.v1.IdentityPr
  * Use `create(IdentityProvidersDeleteResponseSchema)` to create a new message.
  */
 export const IdentityProvidersDeleteResponseSchema: GenMessage<IdentityProvidersDeleteResponse> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_identity_providers_service, 11);
-
-/**
- * Request to assign an identity provider to a tenant.
- * The tenant is inferred from the authenticated user's context.
- *
- * @generated from message osac.public.v1.IdentityProvidersAssignRequest
- */
-export type IdentityProvidersAssignRequest = Message<"osac.public.v1.IdentityProvidersAssignRequest"> & {
-  /**
-   * ID of the identity provider to assign.
-   *
-   * @generated from field: string id = 1;
-   */
-  id: string;
-};
-
-/**
- * Describes the message osac.public.v1.IdentityProvidersAssignRequest.
- * Use `create(IdentityProvidersAssignRequestSchema)` to create a new message.
- */
-export const IdentityProvidersAssignRequestSchema: GenMessage<IdentityProvidersAssignRequest> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_identity_providers_service, 12);
-
-/**
- * Response for assign operation.
- *
- * @generated from message osac.public.v1.IdentityProvidersAssignResponse
- */
-export type IdentityProvidersAssignResponse = Message<"osac.public.v1.IdentityProvidersAssignResponse"> & {
-};
-
-/**
- * Describes the message osac.public.v1.IdentityProvidersAssignResponse.
- * Use `create(IdentityProvidersAssignResponseSchema)` to create a new message.
- */
-export const IdentityProvidersAssignResponseSchema: GenMessage<IdentityProvidersAssignResponse> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_identity_providers_service, 13);
-
-/**
- * Request to unassign an identity provider from a tenant.
- * The tenant is inferred from the authenticated user's context.
- *
- * @generated from message osac.public.v1.IdentityProvidersUnassignRequest
- */
-export type IdentityProvidersUnassignRequest = Message<"osac.public.v1.IdentityProvidersUnassignRequest"> & {
-  /**
-   * ID of the identity provider to unassign.
-   *
-   * @generated from field: string id = 1;
-   */
-  id: string;
-};
-
-/**
- * Describes the message osac.public.v1.IdentityProvidersUnassignRequest.
- * Use `create(IdentityProvidersUnassignRequestSchema)` to create a new message.
- */
-export const IdentityProvidersUnassignRequestSchema: GenMessage<IdentityProvidersUnassignRequest> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_identity_providers_service, 14);
-
-/**
- * Response for unassign operation.
- *
- * @generated from message osac.public.v1.IdentityProvidersUnassignResponse
- */
-export type IdentityProvidersUnassignResponse = Message<"osac.public.v1.IdentityProvidersUnassignResponse"> & {
-};
-
-/**
- * Describes the message osac.public.v1.IdentityProvidersUnassignResponse.
- * Use `create(IdentityProvidersUnassignResponseSchema)` to create a new message.
- */
-export const IdentityProvidersUnassignResponseSchema: GenMessage<IdentityProvidersUnassignResponse> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_identity_providers_service, 15);
+  messageDesc(file_osac_public_v1_identity_providers_service, 9);
 
 /**
  * IdentityProviders service provides operations for managing tenant identity providers.
@@ -454,17 +310,7 @@ export const IdentityProviders: GenService<{
     output: typeof IdentityProvidersListResponseSchema;
   },
   /**
-   * Lists all identity providers available.
-   *
-   * @generated from rpc osac.public.v1.IdentityProviders.ListAvailable
-   */
-  listAvailable: {
-    methodKind: "unary";
-    input: typeof IdentityProvidersListAvailableRequestSchema;
-    output: typeof IdentityProvidersListAvailableResponseSchema;
-  },
-  /**
-   * Retrieves an identity provider by ID.
+   * Retrieves an identity provider by name.
    *
    * @generated from rpc osac.public.v1.IdentityProviders.Get
    */
@@ -492,28 +338,6 @@ export const IdentityProviders: GenService<{
     methodKind: "unary";
     input: typeof IdentityProvidersDeleteRequestSchema;
     output: typeof IdentityProvidersDeleteResponseSchema;
-  },
-  /**
-   * Assigns an identity provider to a tenant.
-   * The tenant is specified in metadata.tenant.
-   *
-   * @generated from rpc osac.public.v1.IdentityProviders.Assign
-   */
-  assign: {
-    methodKind: "unary";
-    input: typeof IdentityProvidersAssignRequestSchema;
-    output: typeof IdentityProvidersAssignResponseSchema;
-  },
-  /**
-   * Unassigns an identity provider from a tenant.
-   * The tenant is specified in metadata.tenant.
-   *
-   * @generated from rpc osac.public.v1.IdentityProviders.Unassign
-   */
-  unassign: {
-    methodKind: "unary";
-    input: typeof IdentityProvidersUnassignRequestSchema;
-    output: typeof IdentityProvidersUnassignResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_osac_public_v1_identity_providers_service, 0);

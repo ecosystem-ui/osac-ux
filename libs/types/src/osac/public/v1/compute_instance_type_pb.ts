@@ -17,21 +17,35 @@
 
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
+import { file_buf_validate_validate } from "../../../buf/validate/validate_pb";
+import { file_google_api_field_behavior } from "../../../google/api/field_behavior_pb";
 import type { Any } from "../../../google/protobuf/any_pb";
 import { file_google_protobuf_any } from "../../../google/protobuf/any_pb";
 import type { Timestamp } from "../../../google/protobuf/timestamp_pb";
 import { file_google_protobuf_timestamp } from "../../../google/protobuf/timestamp_pb";
+import type { ComputeInstanceCatalogItemReference } from "./compute_instance_catalog_item_type_pb";
+import { file_osac_public_v1_compute_instance_catalog_item_type } from "./compute_instance_catalog_item_type_pb";
+import type { ComputeInstanceDisk, ComputeInstanceRunStrategy, ComputeNetworkAttachment } from "./compute_instance_common_type_pb";
+import { file_osac_public_v1_compute_instance_common_type } from "./compute_instance_common_type_pb";
+import type { ComputeInstanceTemplateReference } from "./compute_instance_template_type_pb";
+import { file_osac_public_v1_compute_instance_template_type } from "./compute_instance_template_type_pb";
 import type { ConditionStatus } from "./condition_status_type_pb";
 import { file_osac_public_v1_condition_status_type } from "./condition_status_type_pb";
+import type { DiskImageReference } from "./disk_image_type_pb";
+import { file_osac_public_v1_disk_image_type } from "./disk_image_type_pb";
 import type { Metadata } from "./metadata_type_pb";
 import { file_osac_public_v1_metadata_type } from "./metadata_type_pb";
+import type { InstanceTypeReference } from "./instance_type_type_pb";
+import { file_osac_public_v1_instance_type_type } from "./instance_type_type_pb";
+import type { SecretLocalReference } from "./secret_type_pb";
+import { file_osac_public_v1_secret_type } from "./secret_type_pb";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file osac/public/v1/compute_instance_type.proto.
  */
 export const file_osac_public_v1_compute_instance_type: GenFile = /*@__PURE__*/
-  fileDesc("Cipvc2FjL3B1YmxpYy92MS9jb21wdXRlX2luc3RhbmNlX3R5cGUucHJvdG8SDm9zYWMucHVibGljLnYxIrMBCg9Db21wdXRlSW5zdGFuY2USCgoCaWQYASABKAkSKgoIbWV0YWRhdGEYAiABKAsyGC5vc2FjLnB1YmxpYy52MS5NZXRhZGF0YRIxCgRzcGVjGAMgASgLMiMub3NhYy5wdWJsaWMudjEuQ29tcHV0ZUluc3RhbmNlU3BlYxI1CgZzdGF0dXMYBCABKAsyJS5vc2FjLnB1YmxpYy52MS5Db21wdXRlSW5zdGFuY2VTdGF0dXMiPwoUQ29tcHV0ZUluc3RhbmNlSW1hZ2USEwoLc291cmNlX3R5cGUYASABKAkSEgoKc291cmNlX3JlZhgCIAEoCSInChNDb21wdXRlSW5zdGFuY2VEaXNrEhAKCHNpemVfZ2liGAEgASgFIjwKEU5ldHdvcmtBdHRhY2htZW50Eg4KBnN1Ym5ldBgBIAEoCRIXCg9zZWN1cml0eV9ncm91cHMYAiADKAkigwcKE0NvbXB1dGVJbnN0YW5jZVNwZWMSEAoIdGVtcGxhdGUYASABKAkSWAoTdGVtcGxhdGVfcGFyYW1ldGVycxgCIAMoCzI7Lm9zYWMucHVibGljLnYxLkNvbXB1dGVJbnN0YW5jZVNwZWMuVGVtcGxhdGVQYXJhbWV0ZXJzRW50cnkSPQoUcmVzdGFydF9yZXF1ZXN0ZWRfYXQYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wSACIAQESOAoFaW1hZ2UYBCABKAsyJC5vc2FjLnB1YmxpYy52MS5Db21wdXRlSW5zdGFuY2VJbWFnZUgBiAEBEhIKBWNvcmVzGAUgASgFSAKIAQESFwoKbWVtb3J5X2dpYhgGIAEoBUgDiAEBEhQKB3NzaF9rZXkYByABKAlIBIgBARI7Cglib290X2Rpc2sYCCABKAsyIy5vc2FjLnB1YmxpYy52MS5Db21wdXRlSW5zdGFuY2VEaXNrSAWIAQESPQoQYWRkaXRpb25hbF9kaXNrcxgJIAMoCzIjLm9zYWMucHVibGljLnYxLkNvbXB1dGVJbnN0YW5jZURpc2sSGQoMcnVuX3N0cmF0ZWd5GAogASgJSAaIAQESFgoJdXNlcl9kYXRhGAsgASgJSAeIAQESPgoTbmV0d29ya19hdHRhY2htZW50cxgOIAMoCzIhLm9zYWMucHVibGljLnYxLk5ldHdvcmtBdHRhY2htZW50EhQKDGNhdGFsb2dfaXRlbRgPIAEoCRIXCgppc193aW5kb3dzGBAgASgISAiIAQESGgoNaW5zdGFuY2VfdHlwZRgRIAEoCUgJiAEBGk8KF1RlbXBsYXRlUGFyYW1ldGVyc0VudHJ5EgsKA2tleRgBIAEoCRIjCgV2YWx1ZRgCIAEoCzIULmdvb2dsZS5wcm90b2J1Zi5Bbnk6AjgBQhcKFV9yZXN0YXJ0X3JlcXVlc3RlZF9hdEIICgZfaW1hZ2VCCAoGX2NvcmVzQg0KC19tZW1vcnlfZ2liQgoKCF9zc2hfa2V5QgwKCl9ib290X2Rpc2tCDwoNX3J1bl9zdHJhdGVneUIMCgpfdXNlcl9kYXRhQg0KC19pc193aW5kb3dzQhAKDl9pbnN0YW5jZV90eXBlSgQIDBANSgQIDRAOUgZzdWJuZXRSD3NlY3VyaXR5X2dyb3VwcyKUAgoVQ29tcHV0ZUluc3RhbmNlU3RhdHVzEjMKBXN0YXRlGAEgASgOMiQub3NhYy5wdWJsaWMudjEuQ29tcHV0ZUluc3RhbmNlU3RhdGUSPAoKY29uZGl0aW9ucxgCIAMoCzIoLm9zYWMucHVibGljLnYxLkNvbXB1dGVJbnN0YW5jZUNvbmRpdGlvbhIbChNpbnRlcm5hbF9pcF9hZGRyZXNzGAMgASgJEjoKEWxhc3RfcmVzdGFydGVkX2F0GAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEgAiAEBEhkKEXB1YmxpY19pcF9hZGRyZXNzGAUgASgJQhQKEl9sYXN0X3Jlc3RhcnRlZF9hdCKDAgoYQ29tcHV0ZUluc3RhbmNlQ29uZGl0aW9uEjoKBHR5cGUYASABKA4yLC5vc2FjLnB1YmxpYy52MS5Db21wdXRlSW5zdGFuY2VDb25kaXRpb25UeXBlEi8KBnN0YXR1cxgCIAEoDjIfLm9zYWMucHVibGljLnYxLkNvbmRpdGlvblN0YXR1cxI4ChRsYXN0X3RyYW5zaXRpb25fdGltZRgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASEwoGcmVhc29uGAQgASgJSACIAQESFAoHbWVzc2FnZRgFIAEoCUgBiAEBQgkKB19yZWFzb25CCgoIX21lc3NhZ2UquwIKFENvbXB1dGVJbnN0YW5jZVN0YXRlEiYKIkNPTVBVVEVfSU5TVEFOQ0VfU1RBVEVfVU5TUEVDSUZJRUQQABIjCh9DT01QVVRFX0lOU1RBTkNFX1NUQVRFX1NUQVJUSU5HEAESIgoeQ09NUFVURV9JTlNUQU5DRV9TVEFURV9SVU5OSU5HEAISIQodQ09NUFVURV9JTlNUQU5DRV9TVEFURV9GQUlMRUQQAxIjCh9DT01QVVRFX0lOU1RBTkNFX1NUQVRFX0RFTEVUSU5HEAQSIwofQ09NUFVURV9JTlNUQU5DRV9TVEFURV9TVE9QUElORxAFEiIKHkNPTVBVVEVfSU5TVEFOQ0VfU1RBVEVfU1RPUFBFRBAGEiEKHUNPTVBVVEVfSU5TVEFOQ0VfU1RBVEVfUEFVU0VEEAcqiQMKHENvbXB1dGVJbnN0YW5jZUNvbmRpdGlvblR5cGUSLworQ09NUFVURV9JTlNUQU5DRV9DT05ESVRJT05fVFlQRV9VTlNQRUNJRklFRBAAEjkKNUNPTVBVVEVfSU5TVEFOQ0VfQ09ORElUSU9OX1RZUEVfQ09ORklHVVJBVElPTl9BUFBMSUVEEAESKQolQ09NUFVURV9JTlNUQU5DRV9DT05ESVRJT05fVFlQRV9SRUFEWRACEjcKM0NPTVBVVEVfSU5TVEFOQ0VfQ09ORElUSU9OX1RZUEVfUkVTVEFSVF9JTl9QUk9HUkVTUxADEjIKLkNPTVBVVEVfSU5TVEFOQ0VfQ09ORElUSU9OX1RZUEVfUkVTVEFSVF9GQUlMRUQQBBIvCitDT01QVVRFX0lOU1RBTkNFX0NPTkRJVElPTl9UWVBFX1BST1ZJU0lPTkVEEAUSNAowQ09NUFVURV9JTlNUQU5DRV9DT05ESVRJT05fVFlQRV9SRVNUQVJUX1JFUVVJUkVEEAZiBnByb3RvMw", [file_google_protobuf_any, file_google_protobuf_timestamp, file_osac_public_v1_condition_status_type, file_osac_public_v1_metadata_type]);
+  fileDesc("Cipvc2FjL3B1YmxpYy92MS9jb21wdXRlX2luc3RhbmNlX3R5cGUucHJvdG8SDm9zYWMucHVibGljLnYxIrMBCg9Db21wdXRlSW5zdGFuY2USCgoCaWQYASABKAkSKgoIbWV0YWRhdGEYAiABKAsyGC5vc2FjLnB1YmxpYy52MS5NZXRhZGF0YRIxCgRzcGVjGAMgASgLMiMub3NhYy5wdWJsaWMudjEuQ29tcHV0ZUluc3RhbmNlU3BlYxI1CgZzdGF0dXMYBCABKAsyJS5vc2FjLnB1YmxpYy52MS5Db21wdXRlSW5zdGFuY2VTdGF0dXMixgkKE0NvbXB1dGVJbnN0YW5jZVNwZWMSQgoIdGVtcGxhdGUYASABKAsyMC5vc2FjLnB1YmxpYy52MS5Db21wdXRlSW5zdGFuY2VUZW1wbGF0ZVJlZmVyZW5jZRJYChN0ZW1wbGF0ZV9wYXJhbWV0ZXJzGAIgAygLMjsub3NhYy5wdWJsaWMudjEuQ29tcHV0ZUluc3RhbmNlU3BlYy5UZW1wbGF0ZVBhcmFtZXRlcnNFbnRyeRI9ChRyZXN0YXJ0X3JlcXVlc3RlZF9hdBgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBIAIgBARI7Cglib290X2Rpc2sYCCABKAsyIy5vc2FjLnB1YmxpYy52MS5Db21wdXRlSW5zdGFuY2VEaXNrSAGIAQESPQoQYWRkaXRpb25hbF9kaXNrcxgJIAMoCzIjLm9zYWMucHVibGljLnYxLkNvbXB1dGVJbnN0YW5jZURpc2sSUQoMcnVuX3N0cmF0ZWd5GAogASgOMioub3NhYy5wdWJsaWMudjEuQ29tcHV0ZUluc3RhbmNlUnVuU3RyYXRlZ3lCCrpIB4IBBBABIABIAogBARIWCgl1c2VyX2RhdGEYCyABKAlIA4gBARJKChNuZXR3b3JrX2F0dGFjaG1lbnRzGA4gAygLMigub3NhYy5wdWJsaWMudjEuQ29tcHV0ZU5ldHdvcmtBdHRhY2htZW50QgPgQQUSSQoMY2F0YWxvZ19pdGVtGA8gASgLMjMub3NhYy5wdWJsaWMudjEuQ29tcHV0ZUluc3RhbmNlQ2F0YWxvZ0l0ZW1SZWZlcmVuY2USPAoNaW5zdGFuY2VfdHlwZRgRIAEoCzIlLm9zYWMucHVibGljLnYxLkluc3RhbmNlVHlwZVJlZmVyZW5jZRItChthdXRvX2V4dGVybmFsX2lwX2F0dGFjaG1lbnQYEiABKAhCA+BBBUgEiAEBEjYKCmRpc2tfaW1hZ2UYEyABKAsyIi5vc2FjLnB1YmxpYy52MS5EaXNrSW1hZ2VSZWZlcmVuY2USQwoQdXNlcl9kYXRhX3NlY3JldBgUIAEoCzIkLm9zYWMucHVibGljLnYxLlNlY3JldExvY2FsUmVmZXJlbmNlQgPgQQUSOgoHc3NoX2tleRgVIAEoCzIkLm9zYWMucHVibGljLnYxLlNlY3JldExvY2FsUmVmZXJlbmNlQgPgQQUaTwoXVGVtcGxhdGVQYXJhbWV0ZXJzRW50cnkSCwoDa2V5GAEgASgJEiMKBXZhbHVlGAIgASgLMhQuZ29vZ2xlLnByb3RvYnVmLkFueToCOAFCFwoVX3Jlc3RhcnRfcmVxdWVzdGVkX2F0QgwKCl9ib290X2Rpc2tCDwoNX3J1bl9zdHJhdGVneUIMCgpfdXNlcl9kYXRhQh4KHF9hdXRvX2V4dGVybmFsX2lwX2F0dGFjaG1lbnRKBAgEEAVKBAgFEAZKBAgGEAdKBAgHEAhKBAgMEA1KBAgNEA5KBAgQEBFSBWltYWdlUgVjb3Jlc1IKbWVtb3J5X2dpYlIOc3NoX3B1YmxpY19rZXlSBnN1Ym5ldFIPc2VjdXJpdHlfZ3JvdXBzUgppc193aW5kb3dzIvACChVDb21wdXRlSW5zdGFuY2VTdGF0dXMSMwoFc3RhdGUYASABKA4yJC5vc2FjLnB1YmxpYy52MS5Db21wdXRlSW5zdGFuY2VTdGF0ZRI8Cgpjb25kaXRpb25zGAIgAygLMigub3NhYy5wdWJsaWMudjEuQ29tcHV0ZUluc3RhbmNlQ29uZGl0aW9uEhsKE2ludGVybmFsX2lwX2FkZHJlc3MYAyABKAkSOgoRbGFzdF9yZXN0YXJ0ZWRfYXQYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wSACIAQESGwoTZXh0ZXJuYWxfaXBfYWRkcmVzcxgFIAEoCRI+ChVzdGF0ZV90cmFuc2l0aW9uX3RpbWUYBiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wSAGIAQFCFAoSX2xhc3RfcmVzdGFydGVkX2F0QhgKFl9zdGF0ZV90cmFuc2l0aW9uX3RpbWUigwIKGENvbXB1dGVJbnN0YW5jZUNvbmRpdGlvbhI6CgR0eXBlGAEgASgOMiwub3NhYy5wdWJsaWMudjEuQ29tcHV0ZUluc3RhbmNlQ29uZGl0aW9uVHlwZRIvCgZzdGF0dXMYAiABKA4yHy5vc2FjLnB1YmxpYy52MS5Db25kaXRpb25TdGF0dXMSOAoUbGFzdF90cmFuc2l0aW9uX3RpbWUYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhMKBnJlYXNvbhgEIAEoCUgAiAEBEhQKB21lc3NhZ2UYBSABKAlIAYgBAUIJCgdfcmVhc29uQgoKCF9tZXNzYWdlIjkKHUNvbXB1dGVJbnN0YW5jZUxvY2FsUmVmZXJlbmNlEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkquwIKFENvbXB1dGVJbnN0YW5jZVN0YXRlEiYKIkNPTVBVVEVfSU5TVEFOQ0VfU1RBVEVfVU5TUEVDSUZJRUQQABIjCh9DT01QVVRFX0lOU1RBTkNFX1NUQVRFX1NUQVJUSU5HEAESIgoeQ09NUFVURV9JTlNUQU5DRV9TVEFURV9SVU5OSU5HEAISIQodQ09NUFVURV9JTlNUQU5DRV9TVEFURV9GQUlMRUQQAxIjCh9DT01QVVRFX0lOU1RBTkNFX1NUQVRFX0RFTEVUSU5HEAQSIwofQ09NUFVURV9JTlNUQU5DRV9TVEFURV9TVE9QUElORxAFEiIKHkNPTVBVVEVfSU5TVEFOQ0VfU1RBVEVfU1RPUFBFRBAGEiEKHUNPTVBVVEVfSU5TVEFOQ0VfU1RBVEVfUEFVU0VEEAcqiQMKHENvbXB1dGVJbnN0YW5jZUNvbmRpdGlvblR5cGUSLworQ09NUFVURV9JTlNUQU5DRV9DT05ESVRJT05fVFlQRV9VTlNQRUNJRklFRBAAEjkKNUNPTVBVVEVfSU5TVEFOQ0VfQ09ORElUSU9OX1RZUEVfQ09ORklHVVJBVElPTl9BUFBMSUVEEAESKQolQ09NUFVURV9JTlNUQU5DRV9DT05ESVRJT05fVFlQRV9SRUFEWRACEjcKM0NPTVBVVEVfSU5TVEFOQ0VfQ09ORElUSU9OX1RZUEVfUkVTVEFSVF9JTl9QUk9HUkVTUxADEjIKLkNPTVBVVEVfSU5TVEFOQ0VfQ09ORElUSU9OX1RZUEVfUkVTVEFSVF9GQUlMRUQQBBIvCitDT01QVVRFX0lOU1RBTkNFX0NPTkRJVElPTl9UWVBFX1BST1ZJU0lPTkVEEAUSNAowQ09NUFVURV9JTlNUQU5DRV9DT05ESVRJT05fVFlQRV9SRVNUQVJUX1JFUVVJUkVEEAZiBnByb3RvMw", [file_buf_validate_validate, file_google_api_field_behavior, file_google_protobuf_any, file_google_protobuf_timestamp, file_osac_public_v1_compute_instance_catalog_item_type, file_osac_public_v1_compute_instance_common_type, file_osac_public_v1_compute_instance_template_type, file_osac_public_v1_condition_status_type, file_osac_public_v1_disk_image_type, file_osac_public_v1_metadata_type, file_osac_public_v1_instance_type_type, file_osac_public_v1_secret_type]);
 
 /**
  * Contains the details of the compute instance.
@@ -73,83 +87,6 @@ export const ComputeInstanceSchema: GenMessage<ComputeInstance> = /*@__PURE__*/
   messageDesc(file_osac_public_v1_compute_instance_type, 0);
 
 /**
- * Contains the image configuration for a compute instance.
- *
- * @generated from message osac.public.v1.ComputeInstanceImage
- */
-export type ComputeInstanceImage = Message<"osac.public.v1.ComputeInstanceImage"> & {
-  /**
-   * Image source type (e.g. "registry").
-   *
-   * @generated from field: string source_type = 1;
-   */
-  sourceType: string;
-
-  /**
-   * Image reference (e.g. OCI image URL).
-   *
-   * @generated from field: string source_ref = 2;
-   */
-  sourceRef: string;
-};
-
-/**
- * Describes the message osac.public.v1.ComputeInstanceImage.
- * Use `create(ComputeInstanceImageSchema)` to create a new message.
- */
-export const ComputeInstanceImageSchema: GenMessage<ComputeInstanceImage> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_compute_instance_type, 1);
-
-/**
- * Contains the disk configuration for a compute instance.
- *
- * @generated from message osac.public.v1.ComputeInstanceDisk
- */
-export type ComputeInstanceDisk = Message<"osac.public.v1.ComputeInstanceDisk"> & {
-  /**
-   * Disk size in GiB.
-   *
-   * @generated from field: int32 size_gib = 1;
-   */
-  sizeGib: number;
-};
-
-/**
- * Describes the message osac.public.v1.ComputeInstanceDisk.
- * Use `create(ComputeInstanceDiskSchema)` to create a new message.
- */
-export const ComputeInstanceDiskSchema: GenMessage<ComputeInstanceDisk> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_compute_instance_type, 2);
-
-/**
- * Groups one subnet with security groups for that network attachment (multi-NIC VMs).
- *
- * @generated from message osac.public.v1.NetworkAttachment
- */
-export type NetworkAttachment = Message<"osac.public.v1.NetworkAttachment"> & {
-  /**
-   * Fulfillment Subnet ID; must reference a Subnet in READY state (same tenant and region rules as ComputeInstance).
-   *
-   * @generated from field: string subnet = 1;
-   */
-  subnet: string;
-
-  /**
-   * Fulfillment SecurityGroup IDs applied on this NIC; each must be READY and belong to the same VirtualNetwork as subnet.
-   *
-   * @generated from field: repeated string security_groups = 2;
-   */
-  securityGroups: string[];
-};
-
-/**
- * Describes the message osac.public.v1.NetworkAttachment.
- * Use `create(NetworkAttachmentSchema)` to create a new message.
- */
-export const NetworkAttachmentSchema: GenMessage<NetworkAttachment> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_compute_instance_type, 3);
-
-/**
  * The spec contains the details of a compute instance as desired by the user.
  *
  * @generated from message osac.public.v1.ComputeInstanceSpec
@@ -158,13 +95,13 @@ export type ComputeInstanceSpec = Message<"osac.public.v1.ComputeInstanceSpec"> 
   /**
    * Reference to the compute instance template. Either `template` or `catalog_item` is required on create.
    *
-   * Must be the value of the `id` field of one of the compute instance templates. Mutually exclusive with `catalog_item`.
+   * Mutually exclusive with `catalog_item`.
    *
    * This can't be modified after the compute instance is created.
    *
-   * @generated from field: string template = 1;
+   * @generated from field: osac.public.v1.ComputeInstanceTemplateReference template = 1;
    */
-  template: string;
+  template?: ComputeInstanceTemplateReference | undefined;
 
   /**
    * Values of the template parameters.
@@ -237,34 +174,6 @@ export type ComputeInstanceSpec = Message<"osac.public.v1.ComputeInstanceSpec"> 
   restartRequestedAt?: Timestamp | undefined;
 
   /**
-   * VM image configuration.
-   *
-   * @generated from field: optional osac.public.v1.ComputeInstanceImage image = 4;
-   */
-  image?: ComputeInstanceImage | undefined;
-
-  /**
-   * Number of CPU cores.
-   *
-   * @generated from field: optional int32 cores = 5;
-   */
-  cores?: number | undefined;
-
-  /**
-   * Memory size in GiB.
-   *
-   * @generated from field: optional int32 memory_gib = 6;
-   */
-  memoryGib?: number | undefined;
-
-  /**
-   * SSH public key.
-   *
-   * @generated from field: optional string ssh_key = 7;
-   */
-  sshKey?: string | undefined;
-
-  /**
    * Boot disk configuration.
    *
    * @generated from field: optional osac.public.v1.ComputeInstanceDisk boot_disk = 8;
@@ -279,11 +188,11 @@ export type ComputeInstanceSpec = Message<"osac.public.v1.ComputeInstanceSpec"> 
   additionalDisks: ComputeInstanceDisk[];
 
   /**
-   * Run strategy for the compute instance (e.g. "Always" or "Halted").
+   * Run strategy for the compute instance.
    *
-   * @generated from field: optional string run_strategy = 10;
+   * @generated from field: optional osac.public.v1.ComputeInstanceRunStrategy run_strategy = 10;
    */
-  runStrategy?: string | undefined;
+  runStrategy?: ComputeInstanceRunStrategy | undefined;
 
   /**
    * User data for the compute instance (e.g. cloud-init, ignition).
@@ -293,50 +202,66 @@ export type ComputeInstanceSpec = Message<"osac.public.v1.ComputeInstanceSpec"> 
   userData?: string | undefined;
 
   /**
-   * Network attachments: one entry per NIC.
+   * Network attachments: one entry per NIC. The complete attachment list, including
+   * subnet and security group references, is immutable after creation.
    *
-   * @generated from field: repeated osac.public.v1.NetworkAttachment network_attachments = 14;
+   * @generated from field: repeated osac.public.v1.ComputeNetworkAttachment network_attachments = 14;
    */
-  networkAttachments: NetworkAttachment[];
+  networkAttachments: ComputeNetworkAttachment[];
 
   /**
-   * Reference to a compute instance catalog item. Mutually exclusive with template during the migration period.
-   * When set, the server fetches the catalog item and applies its field definitions.
+   * Reference to a compute instance catalog item. Mutually exclusive with template on Create; retained as immutable provenance afterward.
+   * When set, the server fetches the catalog item and applies its typed field policies.
    *
-   * @generated from field: string catalog_item = 15;
+   * @generated from field: osac.public.v1.ComputeInstanceCatalogItemReference catalog_item = 15;
    */
-  catalogItem: string;
+  catalogItem?: ComputeInstanceCatalogItemReference | undefined;
 
   /**
-   * IsWindows indicates whether this compute instance runs a Windows guest operating system.
+   * Reference to an instance type. Specifies the compute configuration (cores, memory)
+   * for this instance. The API validates that the instance type exists and is not OBSOLETE;
+   * resolution of cores/memory_gib happens in the reconciler.
    *
-   * When `true`, the VM is configured for Windows. When `false` or omitted, the VM runs Linux.
-   *
-   * This field is immutable after creation - the guest OS type cannot be changed after the
-   * compute instance is provisioned.
-   *
-   * Example (when converted to JSON):
-   *
-   *    {
-   *      "spec": {
-   *        "template": "123",
-   *        "is_windows": true
-   *      }
-   *    }
-   *
-   *
-   * @generated from field: optional bool is_windows = 16;
+   * @generated from field: osac.public.v1.InstanceTypeReference instance_type = 17;
    */
-  isWindows?: boolean | undefined;
+  instanceType?: InstanceTypeReference | undefined;
 
   /**
-   * Reference to an instance type by name. The API validates that the instance type exists and is
-   * not OBSOLETE, but does NOT resolve cores/memory_gib — resolution happens in the reconciler.
-   * Mutually exclusive with direct cores/memory_gib fields.
+   * When true, the system auto-selects an ExternalIPPool and creates an ExternalIP
+   * with an ExternalIPAttachment for this instance atomically during creation.
+   * Immutable after creation.
    *
-   * @generated from field: optional string instance_type = 17;
+   * @generated from field: optional bool auto_external_ip_attachment = 18;
    */
-  instanceType?: string | undefined;
+  autoExternalIpAttachment?: boolean | undefined;
+
+  /**
+   * Reference to a DiskImage resource. Required after template/catalog item
+   * defaults are applied. The server validates existence, lifecycle, and tenant visibility.
+   *
+   * @generated from field: osac.public.v1.DiskImageReference disk_image = 19;
+   */
+  diskImage?: DiskImageReference | undefined;
+
+  /**
+   * Reference to a Secret containing user data for the compute instance.
+   * The Secret must contain a non-empty `userdata` entry. Mutually exclusive with `user_data`.
+   * Immutable after creation: an existing inline value may be migrated by setting this field
+   * while clearing `user_data` in the same update, but the reference itself cannot be changed
+   * afterwards.
+   *
+   * @generated from field: osac.public.v1.SecretLocalReference user_data_secret = 20;
+   */
+  userDataSecret?: SecretLocalReference | undefined;
+
+  /**
+   * Reference to a tenant-scoped Secret containing an OpenSSH public key used to configure cloud-init access.
+   * The referenced Secret must have type SECRET_TYPE_SSH_PUBLIC_KEY and a non-empty data["public_key"] entry.
+   * The reference is resolved to its canonical ID and name during creation and cannot be changed afterwards.
+   *
+   * @generated from field: osac.public.v1.SecretLocalReference ssh_key = 21;
+   */
+  sshKey?: SecretLocalReference | undefined;
 };
 
 /**
@@ -344,7 +269,7 @@ export type ComputeInstanceSpec = Message<"osac.public.v1.ComputeInstanceSpec"> 
  * Use `create(ComputeInstanceSpecSchema)` to create a new message.
  */
 export const ComputeInstanceSpecSchema: GenMessage<ComputeInstanceSpec> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_compute_instance_type, 4);
+  messageDesc(file_osac_public_v1_compute_instance_type, 1);
 
 /**
  * The status contains the details of the compute instance provided by the system.
@@ -437,11 +362,22 @@ export type ComputeInstanceStatus = Message<"osac.public.v1.ComputeInstanceStatu
   lastRestartedAt?: Timestamp | undefined;
 
   /**
-   * Public IP address attached to the compute instance.
+   * External IP address attached to the compute instance.
    *
-   * @generated from field: string public_ip_address = 5;
+   * @generated from field: string external_ip_address = 5;
    */
-  publicIpAddress: string;
+  externalIpAddress: string;
+
+  /**
+   * Records when the compute instance entered its current state, as reported by the provisioning
+   * backend. This is the authoritative timestamp of the state transition, suitable for billing
+   * interval calculations.
+   *
+   * This will be empty if no state transition has been reported yet.
+   *
+   * @generated from field: optional google.protobuf.Timestamp state_transition_time = 6;
+   */
+  stateTransitionTime?: Timestamp | undefined;
 };
 
 /**
@@ -449,7 +385,7 @@ export type ComputeInstanceStatus = Message<"osac.public.v1.ComputeInstanceStatu
  * Use `create(ComputeInstanceStatusSchema)` to create a new message.
  */
 export const ComputeInstanceStatusSchema: GenMessage<ComputeInstanceStatus> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_compute_instance_type, 5);
+  messageDesc(file_osac_public_v1_compute_instance_type, 2);
 
 /**
  * Contains the details of a condition that describes the status of a compute instance.
@@ -502,7 +438,31 @@ export type ComputeInstanceCondition = Message<"osac.public.v1.ComputeInstanceCo
  * Use `create(ComputeInstanceConditionSchema)` to create a new message.
  */
 export const ComputeInstanceConditionSchema: GenMessage<ComputeInstanceCondition> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_compute_instance_type, 6);
+  messageDesc(file_osac_public_v1_compute_instance_type, 3);
+
+/**
+ * Local reference to a ComputeInstance resource.
+ *
+ * @generated from message osac.public.v1.ComputeInstanceLocalReference
+ */
+export type ComputeInstanceLocalReference = Message<"osac.public.v1.ComputeInstanceLocalReference"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+};
+
+/**
+ * Describes the message osac.public.v1.ComputeInstanceLocalReference.
+ * Use `create(ComputeInstanceLocalReferenceSchema)` to create a new message.
+ */
+export const ComputeInstanceLocalReferenceSchema: GenMessage<ComputeInstanceLocalReference> = /*@__PURE__*/
+  messageDesc(file_osac_public_v1_compute_instance_type, 4);
 
 /**
  * Represents the overall state of a compute instance.

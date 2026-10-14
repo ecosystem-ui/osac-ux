@@ -17,6 +17,7 @@
 
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
+import { file_buf_validate_validate } from "../../../buf/validate/validate_pb";
 import type { Timestamp } from "../../../google/protobuf/timestamp_pb";
 import { file_google_protobuf_timestamp } from "../../../google/protobuf/timestamp_pb";
 import type { Metadata } from "./metadata_type_pb";
@@ -27,7 +28,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file osac/public/v1/instance_type_type.proto.
  */
 export const file_osac_public_v1_instance_type_type: GenFile = /*@__PURE__*/
-  fileDesc("Cidvc2FjL3B1YmxpYy92MS9pbnN0YW5jZV90eXBlX3R5cGUucHJvdG8SDm9zYWMucHVibGljLnYxItcBChdJbnN0YW5jZVR5cGVEZXByZWNhdGlvbhIwCgVzdGF0ZRgBIAEoDjIhLm9zYWMucHVibGljLnYxLkluc3RhbmNlVHlwZVN0YXRlEhMKC3JlcGxhY2VtZW50GAIgASgJEjkKFWRlcHJlY2F0aW9uX3RpbWVzdGFtcBgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASOgoWb2Jzb2xlc2NlbmNlX3RpbWVzdGFtcBgEIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiqgEKDEluc3RhbmNlVHlwZRIKCgJpZBgBIAEoCRIqCghtZXRhZGF0YRgCIAEoCzIYLm9zYWMucHVibGljLnYxLk1ldGFkYXRhEi4KBHNwZWMYAyABKAsyIC5vc2FjLnB1YmxpYy52MS5JbnN0YW5jZVR5cGVTcGVjEjIKBnN0YXR1cxgEIAEoCzIiLm9zYWMucHVibGljLnYxLkluc3RhbmNlVHlwZVN0YXR1cyK6AQoQSW5zdGFuY2VUeXBlU3BlYxINCgVjb3JlcxgBIAEoBRISCgptZW1vcnlfZ2liGAIgASgFEhMKC2Rlc2NyaXB0aW9uGAMgASgJEjAKBXN0YXRlGAQgASgOMiEub3NhYy5wdWJsaWMudjEuSW5zdGFuY2VUeXBlU3RhdGUSPAoLZGVwcmVjYXRpb24YBSABKAsyJy5vc2FjLnB1YmxpYy52MS5JbnN0YW5jZVR5cGVEZXByZWNhdGlvbiIUChJJbnN0YW5jZVR5cGVTdGF0dXMqngEKEUluc3RhbmNlVHlwZVN0YXRlEiMKH0lOU1RBTkNFX1RZUEVfU1RBVEVfVU5TUEVDSUZJRUQQABIeChpJTlNUQU5DRV9UWVBFX1NUQVRFX0FDVElWRRABEiIKHklOU1RBTkNFX1RZUEVfU1RBVEVfREVQUkVDQVRFRBACEiAKHElOU1RBTkNFX1RZUEVfU1RBVEVfT0JTT0xFVEUQA2IGcHJvdG8z", [file_google_protobuf_timestamp, file_osac_public_v1_metadata_type]);
+  fileDesc("Cidvc2FjL3B1YmxpYy92MS9pbnN0YW5jZV90eXBlX3R5cGUucHJvdG8SDm9zYWMucHVibGljLnYxIoMCChdJbnN0YW5jZVR5cGVEZXByZWNhdGlvbhIwCgVzdGF0ZRgBIAEoDjIhLm9zYWMucHVibGljLnYxLkluc3RhbmNlVHlwZVN0YXRlEj8KC3JlcGxhY2VtZW50GAIgASgLMioub3NhYy5wdWJsaWMudjEuSW5zdGFuY2VUeXBlTG9jYWxSZWZlcmVuY2USOQoVZGVwcmVjYXRpb25fdGltZXN0YW1wGAMgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBI6ChZvYnNvbGVzY2VuY2VfdGltZXN0YW1wGAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCKqAQoMSW5zdGFuY2VUeXBlEgoKAmlkGAEgASgJEioKCG1ldGFkYXRhGAIgASgLMhgub3NhYy5wdWJsaWMudjEuTWV0YWRhdGESLgoEc3BlYxgDIAEoCzIgLm9zYWMucHVibGljLnYxLkluc3RhbmNlVHlwZVNwZWMSMgoGc3RhdHVzGAQgASgLMiIub3NhYy5wdWJsaWMudjEuSW5zdGFuY2VUeXBlU3RhdHVzImkKB0dwdVNwZWMSJAoTcGNpX2RldmljZV9zZWxlY3RvchgBIAEoCUIHukgEcgIQARIeCg1yZXNvdXJjZV9uYW1lGAIgASgJQge6SARyAhABEhgKBWNvdW50GAMgASgFQgm6SAYaBBgQKAEi/wEKEEluc3RhbmNlVHlwZVNwZWMSFgoFdmNwdXMYASABKAVCB7pIBBoCIAASGwoKbWVtb3J5X2dpYhgCIAEoBUIHukgEGgIgABITCgtkZXNjcmlwdGlvbhgDIAEoCRIwCgVzdGF0ZRgEIAEoDjIhLm9zYWMucHVibGljLnYxLkluc3RhbmNlVHlwZVN0YXRlEjwKC2RlcHJlY2F0aW9uGAUgASgLMicub3NhYy5wdWJsaWMudjEuSW5zdGFuY2VUeXBlRGVwcmVjYXRpb24SKQoDZ3B1GAYgASgLMhcub3NhYy5wdWJsaWMudjEuR3B1U3BlY0gAiAEBQgYKBF9ncHUiFAoSSW5zdGFuY2VUeXBlU3RhdHVzIlIKFUluc3RhbmNlVHlwZVJlZmVyZW5jZRIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEg8KB3Byb2plY3QYAyABKAkSDgoGc2hhcmVkGAQgASgIIjYKGkluc3RhbmNlVHlwZUxvY2FsUmVmZXJlbmNlEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkqngEKEUluc3RhbmNlVHlwZVN0YXRlEiMKH0lOU1RBTkNFX1RZUEVfU1RBVEVfVU5TUEVDSUZJRUQQABIeChpJTlNUQU5DRV9UWVBFX1NUQVRFX0FDVElWRRABEiIKHklOU1RBTkNFX1RZUEVfU1RBVEVfREVQUkVDQVRFRBACEiAKHElOU1RBTkNFX1RZUEVfU1RBVEVfT0JTT0xFVEUQA2IGcHJvdG8z", [file_buf_validate_validate, file_google_protobuf_timestamp, file_osac_public_v1_metadata_type]);
 
 /**
  * Contains deprecation details for an instance type.
@@ -47,11 +48,11 @@ export type InstanceTypeDeprecation = Message<"osac.public.v1.InstanceTypeDeprec
   state: InstanceTypeState;
 
   /**
-   * Suggested replacement instance type name (e.g., "standard-8-32").
+   * Suggested replacement instance type.
    *
-   * @generated from field: string replacement = 2;
+   * @generated from field: osac.public.v1.InstanceTypeLocalReference replacement = 2;
    */
-  replacement: string;
+  replacement?: InstanceTypeLocalReference | undefined;
 
   /**
    * When deprecation was announced. Auto-set on transition to DEPRECATED.
@@ -76,9 +77,9 @@ export const InstanceTypeDeprecationSchema: GenMessage<InstanceTypeDeprecation> 
   messageDesc(file_osac_public_v1_instance_type_type, 0);
 
 /**
- * Describes a pre-configured compute bundle (cores, memory) that can be referenced by name when creating VMs.
+ * Describes a pre-configured compute bundle (vCPUs, memory) that can be referenced by name when creating VMs.
  *
- * Instance types are admin-managed catalog resources. Organization users select an instance type by name instead
+ * Instance types are admin-managed catalog resources. Tenant users select an instance type by name instead
  * of specifying raw compute resources. Cloud Provider Admins control the available configurations through
  * lifecycle-managed instance types.
  *
@@ -128,9 +129,44 @@ export const InstanceTypeSchema: GenMessage<InstanceType> = /*@__PURE__*/
   messageDesc(file_osac_public_v1_instance_type_type, 1);
 
 /**
+ * Hardware specification for GPU devices attached to compute instances provisioned with this instance type.
+ *
+ * @generated from message osac.public.v1.GpuSpec
+ */
+export type GpuSpec = Message<"osac.public.v1.GpuSpec"> & {
+  /**
+   * PCI device selector identifying the GPU hardware (e.g., "10DE:20B0").
+   *
+   * @generated from field: string pci_device_selector = 1;
+   */
+  pciDeviceSelector: string;
+
+  /**
+   * Kubernetes device plugin resource name (e.g., "nvidia.com/A100").
+   *
+   * @generated from field: string resource_name = 2;
+   */
+  resourceName: string;
+
+  /**
+   * Number of GPU devices of this type.
+   *
+   * @generated from field: int32 count = 3;
+   */
+  count: number;
+};
+
+/**
+ * Describes the message osac.public.v1.GpuSpec.
+ * Use `create(GpuSpecSchema)` to create a new message.
+ */
+export const GpuSpecSchema: GenMessage<GpuSpec> = /*@__PURE__*/
+  messageDesc(file_osac_public_v1_instance_type_type, 2);
+
+/**
  * Defines the desired configuration for an InstanceType.
  *
- * The spec contains admin-specified parameters that define the compute bundle. The `cores` and `memory_gib`
+ * The spec contains admin-specified parameters that define the compute bundle. The `vcpus` and `memory_gib`
  * fields are immutable after creation. The `description`, `state`, and `deprecation` fields may be updated
  * to manage the instance type lifecycle.
  *
@@ -138,11 +174,11 @@ export const InstanceTypeSchema: GenMessage<InstanceType> = /*@__PURE__*/
  */
 export type InstanceTypeSpec = Message<"osac.public.v1.InstanceTypeSpec"> & {
   /**
-   * Number of CPU cores. Immutable after creation.
+   * Number of virtual CPUs. Immutable after creation.
    *
-   * @generated from field: int32 cores = 1;
+   * @generated from field: int32 vcpus = 1;
    */
-  cores: number;
+  vcpus: number;
 
   /**
    * Amount of memory in GiB. Immutable after creation.
@@ -171,6 +207,13 @@ export type InstanceTypeSpec = Message<"osac.public.v1.InstanceTypeSpec"> & {
    * @generated from field: osac.public.v1.InstanceTypeDeprecation deprecation = 5;
    */
   deprecation?: InstanceTypeDeprecation | undefined;
+
+  /**
+   * GPU configuration. Omit for non-GPU instance types. Immutable after creation.
+   *
+   * @generated from field: optional osac.public.v1.GpuSpec gpu = 6;
+   */
+  gpu?: GpuSpec | undefined;
 };
 
 /**
@@ -178,7 +221,7 @@ export type InstanceTypeSpec = Message<"osac.public.v1.InstanceTypeSpec"> & {
  * Use `create(InstanceTypeSpecSchema)` to create a new message.
  */
 export const InstanceTypeSpecSchema: GenMessage<InstanceTypeSpec> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_instance_type_type, 2);
+  messageDesc(file_osac_public_v1_instance_type_type, 3);
 
 /**
  * Contains the system-provided status of an InstanceType.
@@ -195,7 +238,65 @@ export type InstanceTypeStatus = Message<"osac.public.v1.InstanceTypeStatus"> & 
  * Use `create(InstanceTypeStatusSchema)` to create a new message.
  */
 export const InstanceTypeStatusSchema: GenMessage<InstanceTypeStatus> = /*@__PURE__*/
-  messageDesc(file_osac_public_v1_instance_type_type, 3);
+  messageDesc(file_osac_public_v1_instance_type_type, 4);
+
+/**
+ * Reference to an InstanceType resource.
+ *
+ * @generated from message osac.public.v1.InstanceTypeReference
+ */
+export type InstanceTypeReference = Message<"osac.public.v1.InstanceTypeReference"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+
+  /**
+   * @generated from field: string project = 3;
+   */
+  project: string;
+
+  /**
+   * @generated from field: bool shared = 4;
+   */
+  shared: boolean;
+};
+
+/**
+ * Describes the message osac.public.v1.InstanceTypeReference.
+ * Use `create(InstanceTypeReferenceSchema)` to create a new message.
+ */
+export const InstanceTypeReferenceSchema: GenMessage<InstanceTypeReference> = /*@__PURE__*/
+  messageDesc(file_osac_public_v1_instance_type_type, 5);
+
+/**
+ * Local reference to an InstanceType resource.
+ *
+ * @generated from message osac.public.v1.InstanceTypeLocalReference
+ */
+export type InstanceTypeLocalReference = Message<"osac.public.v1.InstanceTypeLocalReference"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+};
+
+/**
+ * Describes the message osac.public.v1.InstanceTypeLocalReference.
+ * Use `create(InstanceTypeLocalReferenceSchema)` to create a new message.
+ */
+export const InstanceTypeLocalReferenceSchema: GenMessage<InstanceTypeLocalReference> = /*@__PURE__*/
+  messageDesc(file_osac_public_v1_instance_type_type, 6);
 
 /**
  * Lifecycle states for InstanceType resources.

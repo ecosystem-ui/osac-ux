@@ -1,216 +1,103 @@
-/**
- * flow: bare-metal
- * step: bm_list
- */
-import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useMemo } from 'react';
 import {
-  Alert,
-  Button,
-  Flex,
-  FlexItem,
-  Label,
   SearchInput,
-  ToggleGroup,
-  ToggleGroupItem,
+  Toolbar,
+  ToolbarContent,
+  ToolbarGroup,
+  ToolbarItem,
 } from '@patternfly/react-core';
-import DumpsterIcon from '@patternfly/react-icons/dist/esm/icons/dumpster-icon';
-import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
-import type { BareMetalInstance } from '@osac/types';
-import { BareMetalInstanceRunStrategy, BareMetalInstanceState } from '@osac/types';
-
-import { useBareMetalInstances } from '../../api/v1/baremetal-instance';
-import { resourceComplianceResult } from '../../api/v1/compliance';
-import BareMetalDeleteConfirmModal from '../../components/Baremetal/BareMetalDeleteConfirmModal';
-import { BareMetalStatusLabel } from '../../components/Baremetal/BareMetalStatusLabel';
-import { ComplianceStateLabel } from '../../components/compliance/ComplianceStateLabel';
-import ListPage from '../../components/Page/ListPage';
-import ListPageBody from '../../components/Page/ListPageBody';
-import { useSession } from '../../hooks/use-session';
-import { useTranslation } from '../../hooks/useTranslation';
-
-const STATUS_FILTERS = [
-  { value: 'all', label: 'All' },
-  { value: 'running', label: 'Running' },
-  { value: 'stopped', label: 'Stopped' },
-  { value: 'failed', label: 'Failed' },
-] as const;
-
-type BmStatusFilter = (typeof STATUS_FILTERS)[number]['value'];
-
-const RunStrategyBadge = ({ runStrategy }: { runStrategy?: BareMetalInstanceRunStrategy }) => {
-  const { t } = useTranslation();
-  switch (runStrategy) {
-    case BareMetalInstanceRunStrategy.ALWAYS:
-      return (
-        <Label color="green" isCompact>
-          {t('Always on')}
-        </Label>
-      );
-    case BareMetalInstanceRunStrategy.HALTED:
-      return (
-        <Label color="orange" isCompact>
-          {t('Halted')}
-        </Label>
-      );
-    default:
-      return (
-        <Label color="grey" isCompact>
-          —
-        </Label>
-      );
-  }
-};
+import { useBareMetalInstances } from '@osac/ui-components/api/v1/baremetal-instance';
+import { BareMetalActionsMenu } from '@osac/ui-components/components/BareMetalInstance/BareMetalActionsMenu';
+import { BareMetalStatusLabel } from '@osac/ui-components/components/BareMetalInstance/BareMetalStatusLabel';
+import ListPage from '@osac/ui-components/components/Page/ListPage';
+import ListPageBody from '@osac/ui-components/components/Page/ListPageBody';
+import ProjectFilter from '@osac/ui-components/components/Page/ProjectFilter';
+import CreateButton from '@osac/ui-components/components/Primitives/CreateButton.tsx';
+import { Timestamp } from '@osac/ui-components/components/Primitives/Timestamp';
+import ResourceNameField from '@osac/ui-components/components/Resource/ResourceNameField.tsx';
+import { SubtleContent } from '@osac/ui-components/components/SubtleContent/SubtleContent';
+import { SEARCH_PARAM, usePageFilter } from '@osac/ui-components/hooks/use-page-filter';
+import { useTranslation } from '@osac/ui-components/hooks/useTranslation';
 
 export const BareMetalListPage = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const { role } = useSession();
+  const [search, setSearch] = usePageFilter(SEARCH_PARAM);
+
   const { data: instances = [], isLoading, error } = useBareMetalInstances();
-  const [instanceToDelete, setInstanceToDelete] = useState<BareMetalInstance | null>(null);
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<BmStatusFilter>('all');
 
   const filteredInstances = useMemo(() => {
-    return instances.filter((instance) => {
-      const name = instance.metadata?.name ?? '';
-      const matchesSearch = !search || name.toLowerCase().includes(search.toLowerCase());
-      const state = instance.status?.state;
-      const matchesStatus =
-        statusFilter === 'all' ||
-        (statusFilter === 'running' && state === BareMetalInstanceState.RUNNING) ||
-        (statusFilter === 'stopped' && state === BareMetalInstanceState.STOPPED) ||
-        (statusFilter === 'failed' && state === BareMetalInstanceState.FAILED);
-      return matchesSearch && matchesStatus;
-    });
-  }, [instances, search, statusFilter]);
+    if (!search) {
+      return instances;
+    }
+    const lc = search.toLowerCase();
+    return instances.filter((inst) => (inst.metadata?.name ?? inst.id).toLowerCase().includes(lc));
+  }, [search, instances]);
 
   return (
     <ListPage
-      title={t('Bare metal')}
-      description={t('Physical bare metal instances provisioned for your organization.')}
-      actions={
-        role === 'tenantUser' ? (
-          <Button variant="primary" onClick={() => navigate('/bare-metal/create')}>
-            {t('Create bare metal')}
-          </Button>
-        ) : undefined
-      }
+      title={t('Bare Metal')}
+      description={t('View and manage your bare metal instances.')}
+      error={error}
+      actions={<CreateButton to="/bare-metal/create">{t('Provision bare metal')}</CreateButton>}
     >
-      {instanceToDelete && (
-        <BareMetalDeleteConfirmModal
-          instance={instanceToDelete}
-          onClose={() => setInstanceToDelete(null)}
-          onSuccess={() => setInstanceToDelete(null)}
-        />
-      )}
       <ListPageBody isLoading={isLoading} error={error}>
-        <Flex
-          spaceItems={{ default: 'spaceItemsSm' }}
-          alignItems={{ default: 'alignItemsCenter' }}
-          flexWrap={{ default: 'wrap' }}
-          style={{ marginBottom: '1rem' }}
-        >
-          <FlexItem>
-            <SearchInput
-              placeholder={t('Search by name…')}
-              value={search}
-              onChange={(_e, v) => setSearch(v)}
-              onClear={() => setSearch('')}
-            />
-          </FlexItem>
-          <FlexItem>
-            <ToggleGroup aria-label={t('Filter bare metal instances by status')}>
-              {STATUS_FILTERS.map((option) => (
-                <ToggleGroupItem
-                  key={option.value}
-                  text={option.label}
-                  buttonId={`bm-filter-status-${option.value}`}
-                  isSelected={statusFilter === option.value}
-                  onChange={() => setStatusFilter(option.value)}
+        <Toolbar>
+          <ToolbarContent>
+            <ToolbarGroup>
+              <ToolbarItem>
+                <ProjectFilter />
+              </ToolbarItem>
+            </ToolbarGroup>
+            <ToolbarGroup>
+              <ToolbarItem>
+                <SearchInput
+                  placeholder={t('Search by name')}
+                  value={search}
+                  onChange={(_e, v) => setSearch(v)}
+                  onClear={() => setSearch('')}
+                  aria-label={t('Filter bare metal instances by name')}
                 />
-              ))}
-            </ToggleGroup>
-          </FlexItem>
-        </Flex>
+              </ToolbarItem>
+            </ToolbarGroup>
+          </ToolbarContent>
+        </Toolbar>
         {filteredInstances.length === 0 ? (
-          <Alert variant="info" isInline title={t('No bare metal instances found')}>
-            {search || statusFilter !== 'all'
-              ? t('No bare metal instances match your filters.')
-              : t('No bare metal instances are provisioned for your organization yet.')}
-          </Alert>
+          <SubtleContent component="p">
+            {search
+              ? t('No bare metal instances match your search.')
+              : t('No bare metal instances yet.')}
+          </SubtleContent>
         ) : (
-          <Table aria-label={t('Bare metal instances')} variant="compact">
+          <Table aria-label={t('Bare metal instances')} variant="compact" borders>
             <Thead>
               <Tr>
                 <Th>{t('Name')}</Th>
-                <Th>{t('State')}</Th>
-                <Th>{t('Compliance')}</Th>
+                <Th>{t('Status')}</Th>
                 <Th>{t('Catalog item')}</Th>
-                <Th>{t('Run strategy')}</Th>
                 <Th>{t('Created')}</Th>
-                <Td />
+                <Th aria-label={t('Actions')} />
               </Tr>
             </Thead>
             <Tbody>
-              {filteredInstances.map((instance) => {
-                const name = instance.metadata?.name ?? instance.id;
-                const created = instance.metadata?.creationTimestamp
-                  ? new Date(
-                      instance.metadata.creationTimestamp as unknown as string,
-                    ).toLocaleDateString()
-                  : '—';
-
-                return (
-                  <Tr
-                    key={instance.id}
-                    isClickable
-                    onRowClick={() => navigate(`/bare-metal/${instance.id}`)}
-                  >
-                    <Td dataLabel={t('Name')}>
-                      <Button
-                        variant="link"
-                        isInline
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/bare-metal/${instance.id}`);
-                        }}
-                      >
-                        {name}
-                      </Button>
-                    </Td>
-                    <Td dataLabel={t('State')}>
-                      <BareMetalStatusLabel state={instance.status?.state} />
-                    </Td>
-                    <Td dataLabel={t('Compliance')}>
-                      <ComplianceStateLabel result={resourceComplianceResult(instance, 'CIS')} />
-                    </Td>
-                    <Td dataLabel={t('Catalog item')}>{instance.spec?.catalogItem || '—'}</Td>
-                    <Td dataLabel={t('Run strategy')}>
-                      <RunStrategyBadge runStrategy={instance.spec?.runStrategy} />
-                    </Td>
-                    <Td dataLabel={t('Created')}>{created}</Td>
-                    <Td isActionCell>
-                      <ActionsColumn
-                        items={[
-                          {
-                            title: (
-                              <>
-                                <DumpsterIcon /> {t('Delete')}
-                              </>
-                            ),
-                            onClick: (e) => {
-                              e.stopPropagation();
-                              setInstanceToDelete(instance);
-                            },
-                          },
-                        ]}
-                      />
-                    </Td>
-                  </Tr>
-                );
-              })}
+              {filteredInstances.map((inst) => (
+                <Tr key={inst.id}>
+                  <Td dataLabel={t('Name')}>
+                    <ResourceNameField resource={inst} detailsUrl={`/bare-metal/${inst.id}`} />
+                  </Td>
+                  <Td dataLabel={t('Status')}>
+                    <BareMetalStatusLabel state={inst.status?.state} />
+                  </Td>
+                  <Td dataLabel={t('Catalog item')}>{inst.spec?.catalogItem?.name ?? '—'}</Td>
+                  <Td dataLabel={t('Created')}>
+                    <Timestamp value={inst.metadata?.creationTimestamp} />
+                  </Td>
+                  <Td dataLabel={t('Actions')} isActionCell>
+                    <BareMetalActionsMenu instance={inst} />
+                  </Td>
+                </Tr>
+              ))}
             </Tbody>
           </Table>
         )}

@@ -1,0 +1,60 @@
+.admin-billing-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pf-t--global--spacer--md);
+}
+
+.admin-billing-page__alert.pf-v6-c-alert {
+  margin-block-start: var(--pf-t--global--spacer--md);
+}
+
+.admin-billing-page__kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--pf-t--global--spacer--lg);
+}
+
+.admin-billing-page__kpi-value.pf-v6-c-title {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-billing-page__kpi-hint.pf-v6-c-content--p,
+.admin-billing-page__table-meta.pf-v6-c-content--p,
+.admin-billing-page__empty.pf-v6-c-content--p {
+  margin: 0;
+  color: var(--pf-t--global--text--color--subtle);
+  font-size: var(--pf-t--global--font--size--body--sm);
+}
+
+.admin-billing-page__kpi-hint.pf-v6-c-content--p {
+  margin-block-start: var(--pf-t--global--spacer--sm);
+}
+
+.admin-billing-page__table-toolbar {
+  padding-block: 0 var(--pf-t--global--spacer--sm);
+}
+
+.admin-billing-page__table-row--inactive {
+  background-color: var(--pf-t--global--background--color--status--warning--default);
+}
+
+.admin-billing-page__table-account-link,
+.admin-billing-page__table-tenant-link {
+  color: var(--pf-t--global--text--color--link--default);
+  text-decoration: none;
+}
+
+.admin-billing-page__table-account-link:hover,
+.admin-billing-page__table-account-link:focus,
+.admin-billing-page__table-tenant-link:hover,
+.admin-billing-page__table-tenant-link:focus {
+  color: var(--pf-t--global--text--color--link--hover);
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .admin-billing-page__kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,7 +1,3 @@
-/**
- * flow: catalog-provision-wizard
- * steps: catalog → general → configuration → networking → review
- */
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
@@ -22,17 +18,31 @@ import {
 } from '@patternfly/react-core';
 import { type FormikProps, FormikProvider, useFormik } from 'formik';
 
-import type { ComputeInstanceCatalogItem } from '@osac/types';
-
 import type { CatalogProvisionKind } from './catalogFieldDefinition';
+import type {
+  CatalogProvisionPayload,
+  CatalogProvisionWizardValues,
+} from './catalogProvisionTypes';
 import { useTranslation } from '../../hooks/useTranslation';
+import { CatalogItem } from '../catalog/catalogItemDisplay';
 import { FieldValidationProvider } from '../Form/FieldValidationContext';
-import type { ComputeInstanceWizardValues } from './wizard/adapters/computeInstance/fields';
+import { useBareMetalInstanceAdapter } from './wizard/adapters/bareMetalInstanceAdapter';
+import { useClusterAdapter } from './wizard/adapters/clusterAdapter';
 import { useComputeInstanceAdapter } from './wizard/adapters/computeInstanceAdapter';
 import type { CatalogProvisionAdapter } from './wizard/adapters/types';
-import { STEP_LABEL_KEYS, type WizardStepId, getWizardOrderedSteps } from './wizard/stepIds';
-import { CatalogStep, GeneralStep, ReviewStep } from './wizard/steps/WizardSteps';
-import type { BuildComputeInstanceCreateBodyInput } from '../../api/v1/compute-instance-wire';
+import {
+  STEP_LABEL_KEYS,
+  WIZARD_STEP_IDS,
+  type WizardStepId,
+  getWizardOrderedSteps,
+} from './wizard/stepIds';
+import { CatalogStep } from './wizard/steps/WizardSteps';
+import { WizardValidationProvider } from './wizard/WizardValidationContext';
+
+export type {
+  CatalogProvisionPayload,
+  CatalogProvisionWizardValues,
+} from './catalogProvisionTypes';
 
 const hasWizardUnsavedProgress = (values: { catalogItemId?: string }): boolean =>
   Boolean(values.catalogItemId?.trim());
@@ -43,33 +53,35 @@ export type CatalogProvisionWizardCloseHandler = {
 };
 
 interface Props {
-  kind?: CatalogProvisionKind;
+  kind: CatalogProvisionKind;
   initialCatalogItemId?: string;
-  onProvision: (payload: BuildComputeInstanceCreateBodyInput) => void | Promise<void>;
+  onProvision: (payload: CatalogProvisionPayload) => void | Promise<void>;
   onClosed?: () => void;
   onCloseHandlerChange?: (handler: CatalogProvisionWizardCloseHandler) => void;
 }
 
+type ErasedCatalogAdapter = CatalogProvisionAdapter<
+  CatalogItem,
+  CatalogProvisionWizardValues,
+  CatalogProvisionPayload
+>;
+
 interface WizardFooterProps {
-  formik: FormikProps<ComputeInstanceWizardValues>;
-  catalogItem: ComputeInstanceCatalogItem | null;
+  formik: FormikProps<CatalogProvisionWizardValues>;
+  catalogItem: CatalogItem | null;
   setActiveStepId: (stepId: WizardStepId) => void;
   setProvisionError: (message: string | undefined) => void;
   setValidationAlert: (visible: boolean) => void;
   pending: boolean;
   setPending: (pending: boolean) => void;
   onProvision: Props['onProvision'];
-  buildCreatePayload: CatalogProvisionAdapter<
-    ComputeInstanceCatalogItem,
-    ComputeInstanceWizardValues,
-    BuildComputeInstanceCreateBodyInput
-  >['buildCreatePayload'];
+  buildCreatePayload: ErasedCatalogAdapter['buildCreatePayload'];
   close: (options?: { notifyClosed?: boolean }) => void;
   requestClose: () => void;
 }
 
 const isWizardStepId = (stepId: string | number | undefined): stepId is WizardStepId =>
-  typeof stepId === 'string' && Object.hasOwn(STEP_LABEL_KEYS, stepId);
+  typeof stepId === 'string' && WIZARD_STEP_IDS.includes(stepId);
 
 const CatalogProvisionWizardFooter = ({
   formik,
@@ -202,14 +214,9 @@ const CatalogProvisionWizardFooter = ({
 };
 
 interface WizardBodyProps {
-  adapter: CatalogProvisionAdapter<
-    ComputeInstanceCatalogItem,
-    ComputeInstanceWizardValues,
-    BuildComputeInstanceCreateBodyInput
-  >;
+  adapter: ErasedCatalogAdapter;
   stepId: WizardStepId;
-  catalogItem: ComputeInstanceCatalogItem | null;
-  values: ComputeInstanceWizardValues;
+  catalogItem: CatalogItem | null;
   provisionError?: string;
   validationAlert: boolean;
 }
@@ -218,16 +225,18 @@ const WizardStepBody = ({
   adapter,
   stepId,
   catalogItem,
-  values,
   provisionError,
   validationAlert,
 }: WizardBodyProps) => {
   const { t } = useTranslation();
   const ConfigurationStep = adapter.ConfigurationStep;
+  const StorageStep = adapter.StorageStep;
   const NetworkingStep = adapter.NetworkingStep;
+  const GeneralStepComponent = adapter.GeneralStep;
+  const ReviewStepComponent = adapter.ReviewStep;
 
   return (
-    <FieldValidationProvider value={validationAlert}>
+    <FieldValidationProvider showErrors={validationAlert}>
       <Stack hasGutter>
         {validationAlert ? (
           <StackItem>
@@ -242,30 +251,19 @@ const WizardStepBody = ({
           </StackItem>
         ) : null}
         {stepId === 'catalog' ? <CatalogStep adapter={adapter} /> : null}
-        {stepId === 'general' ? (
-          adapter.GeneralStepComponent ? (
-            <adapter.GeneralStepComponent catalogItem={catalogItem} />
-          ) : (
-            <GeneralStep fields={adapter.resolveGeneralFields(catalogItem)} />
-          )
-        ) : null}
+        {stepId === 'general' ? <GeneralStepComponent catalogItem={catalogItem} /> : null}
         {stepId === 'configuration' ? <ConfigurationStep catalogItem={catalogItem} /> : null}
+        {stepId === 'storage' && StorageStep ? <StorageStep catalogItem={catalogItem} /> : null}
         {stepId === 'networking' ? <NetworkingStep catalogItem={catalogItem} /> : null}
-        {stepId === 'review' ? (
-          <ReviewStep adapter={adapter} catalogItem={catalogItem} values={values} />
-        ) : null}
+        {stepId === 'review' ? <ReviewStepComponent catalogItem={catalogItem} /> : null}
       </Stack>
     </FieldValidationProvider>
   );
 };
 
 interface InnerProps extends Props {
-  adapter: CatalogProvisionAdapter<
-    ComputeInstanceCatalogItem,
-    ComputeInstanceWizardValues,
-    BuildComputeInstanceCreateBodyInput
-  >;
-  initialValues: ComputeInstanceWizardValues;
+  adapter: ErasedCatalogAdapter;
+  initialValues: CatalogProvisionWizardValues;
 }
 
 const CatalogProvisionWizardInner = ({
@@ -277,7 +275,7 @@ const CatalogProvisionWizardInner = ({
   onCloseHandlerChange,
 }: InnerProps) => {
   const { t } = useTranslation();
-  const orderedSteps = useMemo(() => getWizardOrderedSteps(), []);
+  const orderedSteps = useMemo(() => getWizardOrderedSteps(adapter.kind), [adapter.kind]);
   const [wizardResetKey, setWizardResetKey] = useState(0);
   const [activeStepId, setActiveStepId] = useState<WizardStepId>('catalog');
   const [schemaCatalogItemId, setSchemaCatalogItemId] = useState(initialValues.catalogItemId);
@@ -291,7 +289,7 @@ const CatalogProvisionWizardInner = ({
     setActiveStepId('catalog');
   }, [wizardResetKey]);
 
-  const selectedCatalogItem = schemaCatalogItemId
+  const selectedCatalogItem: CatalogItem | null = schemaCatalogItemId
     ? (catalogItems.find((item) => item.id === schemaCatalogItemId) ?? null)
     : null;
 
@@ -302,7 +300,7 @@ const CatalogProvisionWizardInner = ({
     [adapter, activeStepId, selectedCatalogItem],
   );
 
-  const formik = useFormik<ComputeInstanceWizardValues>({
+  const formik = useFormik<CatalogProvisionWizardValues>({
     initialValues,
     validationSchema,
     validateOnBlur: true,
@@ -358,12 +356,8 @@ const CatalogProvisionWizardInner = ({
 };
 
 interface FormProps {
-  adapter: CatalogProvisionAdapter<
-    ComputeInstanceCatalogItem,
-    ComputeInstanceWizardValues,
-    BuildComputeInstanceCreateBodyInput
-  >;
-  formik: FormikProps<ComputeInstanceWizardValues>;
+  adapter: ErasedCatalogAdapter;
+  formik: FormikProps<CatalogProvisionWizardValues>;
   initialCatalogItemId?: string;
   orderedSteps: readonly WizardStepId[];
   wizardResetKey: number;
@@ -403,7 +397,7 @@ const CatalogProvisionWizardForm = ({
   t,
 }: FormProps) => {
   const { data: catalogItems = [] } = adapter.useCatalogItems();
-  const selectedCatalogItem = formik.values.catalogItemId
+  const selectedCatalogItem: CatalogItem | null = formik.values.catalogItemId
     ? (catalogItems.find((item) => item.id === formik.values.catalogItemId) ?? null)
     : null;
 
@@ -454,6 +448,10 @@ const CatalogProvisionWizardForm = ({
     void adapter.onCatalogItemSelected?.(item, formik);
   }, [adapter, catalogItems, formik, initialCatalogItemId]);
 
+  const clearValidationAlert = useCallback(() => {
+    setValidationAlert(false);
+  }, [setValidationAlert]);
+
   return (
     <>
       {showCancelConfirm ? (
@@ -479,62 +477,68 @@ const CatalogProvisionWizardForm = ({
           </ModalFooter>
         </Modal>
       ) : null}
-      <PageSection
-        hasBodyWrapper={false}
-        type={PageSectionTypes.wizard}
-        aria-label={t(adapter.ariaLabelKey)}
-      >
-        <Wizard
-          key={wizardResetKey}
-          navAriaLabel={t('catalogProvision.wizard.navAria', {
-            title: t(adapter.wizardTitleKey),
-          })}
-          isVisitRequired
-          onStepChange={handleStepChange}
-          footer={
-            <WizardFooterWrapper>
-              <CatalogProvisionWizardFooter
-                formik={formik}
-                catalogItem={selectedCatalogItem}
-                setActiveStepId={setActiveStepId}
-                setProvisionError={setProvisionError}
-                setValidationAlert={setValidationAlert}
-                pending={pending}
-                setPending={setPending}
-                onProvision={onProvision}
-                buildCreatePayload={adapter.buildCreatePayload}
-                close={close}
-                requestClose={requestClose}
-              />
-            </WizardFooterWrapper>
-          }
+      <WizardValidationProvider clearValidationAlert={clearValidationAlert}>
+        <PageSection
+          hasBodyWrapper={false}
+          type={PageSectionTypes.wizard}
+          aria-label={t(adapter.ariaLabelKey)}
         >
-          {orderedSteps.map((stepId) => (
-            <WizardStep key={stepId} id={stepId} name={t(STEP_LABEL_KEYS[stepId])}>
-              <WizardStepBody
-                adapter={adapter}
-                stepId={stepId}
-                catalogItem={selectedCatalogItem}
-                values={formik.values}
-                provisionError={provisionError}
-                validationAlert={validationAlert}
-              />
-            </WizardStep>
-          ))}
-        </Wizard>
-      </PageSection>
+          <Wizard
+            key={wizardResetKey}
+            navAriaLabel={t('catalogProvision.wizard.navAria', {
+              title: t(adapter.wizardTitleKey),
+            })}
+            isVisitRequired
+            onStepChange={handleStepChange}
+            footer={
+              <WizardFooterWrapper>
+                <CatalogProvisionWizardFooter
+                  formik={formik}
+                  catalogItem={selectedCatalogItem}
+                  setActiveStepId={setActiveStepId}
+                  setProvisionError={setProvisionError}
+                  setValidationAlert={setValidationAlert}
+                  pending={pending}
+                  setPending={setPending}
+                  onProvision={onProvision}
+                  buildCreatePayload={adapter.buildCreatePayload}
+                  close={close}
+                  requestClose={requestClose}
+                />
+              </WizardFooterWrapper>
+            }
+          >
+            {orderedSteps.map((stepId) => (
+              <WizardStep key={stepId} id={stepId} name={STEP_LABEL_KEYS(t)[stepId]}>
+                <WizardStepBody
+                  adapter={adapter}
+                  stepId={stepId}
+                  catalogItem={selectedCatalogItem}
+                  provisionError={provisionError}
+                  validationAlert={validationAlert}
+                />
+              </WizardStep>
+            ))}
+          </Wizard>
+        </PageSection>
+      </WizardValidationProvider>
     </>
   );
 };
 
 export const CatalogProvisionWizard = ({
-  kind: _kind = 'compute_instance',
+  kind,
   initialCatalogItemId,
   onProvision,
   onClosed,
   onCloseHandlerChange,
 }: Props) => {
-  const adapter = useComputeInstanceAdapter();
+  const vmAdapter = useComputeInstanceAdapter();
+  const clusterAdapter = useClusterAdapter();
+  const bmAdapter = useBareMetalInstanceAdapter();
+  const adapter = (
+    kind === 'cluster' ? clusterAdapter : kind === 'bare_metal_instance' ? bmAdapter : vmAdapter
+  ) as ErasedCatalogAdapter;
   const initialValues = useMemo(() => {
     const values = adapter.getInitialValues(null);
     if (initialCatalogItemId) {
@@ -545,6 +549,7 @@ export const CatalogProvisionWizard = ({
 
   return (
     <CatalogProvisionWizardInner
+      kind={kind}
       adapter={adapter}
       initialCatalogItemId={initialCatalogItemId}
       initialValues={initialValues}

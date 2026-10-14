@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { FormGroup } from '@patternfly/react-core';
 import { MultiTypeaheadSelect, type MultiTypeaheadSelectOption } from '@patternfly/react-templates';
 import { useField } from 'formik';
@@ -7,7 +7,6 @@ import { getVisibleFieldError } from './fieldError';
 import { useShowFieldValidationErrors } from './FieldValidationContext';
 import { FormFieldHelper } from './FormFieldHelper';
 import type { SelectFieldOption } from './SelectField';
-import { useTranslation } from '../../hooks/useTranslation';
 
 interface MultiSelectFieldProps {
   name: string;
@@ -20,6 +19,8 @@ interface MultiSelectFieldProps {
   placeholder?: string;
   loadingPlaceholder?: string;
   noOptionsFoundMessage?: string | ((filter: string) => string);
+  /** When true, commits the sole option to Formik once loading finishes and exactly one option exists. */
+  autoSelectSingleOption?: boolean;
 }
 
 export const MultiSelectField = ({
@@ -30,32 +31,44 @@ export const MultiSelectField = ({
   isRequired = false,
   isDisabled = false,
   isLoading = false,
-  placeholder,
-  loadingPlaceholder,
-  noOptionsFoundMessage,
+  placeholder = 'Select options',
+  loadingPlaceholder = 'Loading...',
+  noOptionsFoundMessage = (filter) => `No options found for "${filter}"`,
+  autoSelectSingleOption = false,
 }: MultiSelectFieldProps) => {
-  const { t } = useTranslation();
-  const [field, meta, helpers] = useField<string[]>(name);
+  const [field, meta, helpers] = useField<(string | number)[]>(name);
   const showValidationErrors = useShowFieldValidationErrors();
   const error = getVisibleFieldError(meta, showValidationErrors);
   const validated = error ? 'error' : 'default';
-  const effectivePlaceholder = isLoading
-    ? (loadingPlaceholder ?? t('Loading...'))
-    : (placeholder ?? t('Select options'));
-  const effectiveNoOptionsFoundMessage =
-    noOptionsFoundMessage ??
-    ((filter: string) => t('No options found for "{{filter}}"', { filter }));
+  const effectivePlaceholder = isLoading ? loadingPlaceholder : placeholder;
   const controlDisabled = isDisabled || isLoading;
 
+  const selectedValues = useMemo(
+    () => (Array.isArray(field.value) ? field.value : []),
+    [field.value],
+  );
+
+  useEffect(() => {
+    if (
+      !autoSelectSingleOption ||
+      isLoading ||
+      isDisabled ||
+      options.length !== 1 ||
+      selectedValues.length > 0
+    ) {
+      return;
+    }
+    void helpers.setValue([options[0].value], false);
+  }, [autoSelectSingleOption, helpers, isDisabled, isLoading, options, selectedValues.length]);
+
   const initialOptions = useMemo<MultiTypeaheadSelectOption[]>(() => {
-    const selected = Array.isArray(field.value) ? field.value : [];
     return options.map((option) => ({
       content: option.label,
       value: option.value,
-      selected: selected.includes(option.value),
+      selected: selectedValues.some((value) => value === option.value),
       isDisabled: option.isDisabled,
     }));
-  }, [field.value, options]);
+  }, [options, selectedValues]);
 
   return (
     <FormGroup label={label} fieldId={fieldId} isRequired={isRequired}>
@@ -64,13 +77,13 @@ export const MultiSelectField = ({
         initialOptions={initialOptions}
         placeholder={effectivePlaceholder}
         isDisabled={controlDisabled}
-        noOptionsFoundMessage={effectiveNoOptionsFoundMessage}
+        noOptionsFoundMessage={noOptionsFoundMessage}
         onSelectionChange={(_event, selections) => {
-          void helpers.setValue(selections.map(String));
+          void helpers.setValue(selections, true);
           void helpers.setTouched(true);
         }}
-        onToggle={(isOpen) => {
-          if (!isOpen) {
+        onToggle={(open) => {
+          if (!open) {
             void helpers.setTouched(true);
           }
         }}

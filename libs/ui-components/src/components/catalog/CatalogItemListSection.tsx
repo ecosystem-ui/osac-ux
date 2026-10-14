@@ -1,86 +1,94 @@
-import { useState } from 'react';
 import {
-  Alert,
   Bullseye,
-  ExpandableSection,
   Gallery,
   GalleryItem,
   Spinner,
   Stack,
   StackItem,
+  Title,
 } from '@patternfly/react-core';
 
+import {
+  DEFAULT_VIEW_TYPE,
+  ViewType,
+  getViewTypePrefKey,
+  isViewType,
+} from '@osac/ui-components/components/Primitives/ViewSwitcher';
+import { useUserPreferences } from '@osac/ui-components/hooks/use-user-preferences';
+
 import CatalogItemCard from './CatalogItemCard';
-import type { CatalogItemForDisplay, CatalogItemKind } from './catalogItemDisplay';
-import { useTranslation } from '../../hooks/useTranslation';
+import { type CatalogItem } from './catalogItemDisplay';
+import { useCatalogItemResourceLookups } from './catalogItemResourceLookups';
+import CatalogItemTable from './CatalogItemTable';
 import { getErrorMessage } from '../../utils/error';
+import QueryErrorState from '../Resource/QueryErrorState';
 
 interface CatalogItemListSectionProps {
-  title: string;
-  kind: CatalogItemKind;
-  items: CatalogItemForDisplay[];
-  selectedItemId?: string | null;
-  onSelectItem: (item: CatalogItemForDisplay) => void;
+  title?: string;
+  items: CatalogItem[];
   isLoading?: boolean;
   error?: unknown;
 }
 
+export const CATALOG_ITEMS_VIEW_KEY = 'catalog-items';
+
 export const CatalogItemListSection = ({
   title,
-  kind,
   items,
-  selectedItemId = null,
-  onSelectItem,
   isLoading = false,
   error = null,
 }: CatalogItemListSectionProps) => {
-  const { t } = useTranslation();
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [viewTypePref] = useUserPreferences(getViewTypePrefKey(CATALOG_ITEMS_VIEW_KEY));
+  const viewType: ViewType = isViewType(viewTypePref) ? viewTypePref : DEFAULT_VIEW_TYPE;
+
+  const resourceLookups = useCatalogItemResourceLookups({
+    enabled: items.length > 0 && !isLoading && !error,
+  });
 
   if (!isLoading && !error && items.length === 0) {
     return null;
   }
 
   return (
-    <StackItem>
-      <Stack hasGutter>
-        <ExpandableSection
-          toggleText={title}
-          isExpanded={isExpanded}
-          onToggle={(_e, expanded) => setIsExpanded(expanded)}
-          isIndented={false}
-          displaySize="lg"
-        >
-          {isLoading && (
-            <Bullseye>
-              <Spinner aria-label={t('Loading {{title}}', { title })} />
-            </Bullseye>
-          )}
-          {error && (
-            <Alert variant="danger" title={title} isInline>
-              {getErrorMessage(error)}
-            </Alert>
-          )}
-          {items.length > 0 && (
+    <Stack hasGutter>
+      {title ? (
+        <StackItem>
+          <Title headingLevel="h2" size="lg">
+            {title}
+          </Title>
+        </StackItem>
+      ) : null}
+      {isLoading ? (
+        <StackItem>
+          <Bullseye>
+            <Spinner aria-label={`Loading ${title ?? ''}`} />
+          </Bullseye>
+        </StackItem>
+      ) : null}
+      {error ? (
+        <StackItem>
+          <QueryErrorState error={error} title={title} body={getErrorMessage(error)} />
+        </StackItem>
+      ) : null}
+      {items.length > 0 ? (
+        <StackItem>
+          {viewType === 'cards' ? (
             <Gallery
               hasGutter
-              minWidths={{ default: '200px', md: '240px', lg: '260px', xl: '280px' }}
-              maxWidths={{ md: '280px', lg: '320px', xl: '360px' }}
+              minWidths={{ default: '20.875rem' }}
+              maxWidths={{ default: '20.875rem' }}
             >
               {items.map((item) => (
                 <GalleryItem key={item.id}>
-                  <CatalogItemCard
-                    item={item}
-                    kind={kind}
-                    isBrowseSelected={selectedItemId === item.id}
-                    onOpenDetails={() => onSelectItem(item)}
-                  />
+                  <CatalogItemCard item={item} resourceLookups={resourceLookups} />
                 </GalleryItem>
               ))}
             </Gallery>
+          ) : (
+            <CatalogItemTable items={items} resourceLookups={resourceLookups} />
           )}
-        </ExpandableSection>
-      </Stack>
-    </StackItem>
+        </StackItem>
+      ) : null}
+    </Stack>
   );
 };

@@ -1,4 +1,13 @@
-import { FormGroup, TextArea, TextInput } from '@patternfly/react-core';
+import { useRef } from 'react';
+import {
+  FormGroup,
+  NumberInput,
+  Split,
+  SplitItem,
+  Stack,
+  TextArea,
+  TextInput,
+} from '@patternfly/react-core';
 import { useField } from 'formik';
 
 import { getVisibleFieldError } from './fieldError';
@@ -16,6 +25,13 @@ interface InputFieldProps {
   resizeOrientation?: 'vertical' | 'horizontal' | 'both' | 'none';
   type?: 'text' | 'number' | 'password';
   helperText?: string;
+  placeholder?: string;
+  onBlur?: () => void;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
+  min?: number;
+  max?: number;
+  step?: number;
+  asFormGroup?: boolean;
 }
 
 export const InputField = ({
@@ -25,52 +41,151 @@ export const InputField = ({
   isRequired = false,
   isDisabled = false,
   multiline = false,
-  rows,
-  resizeOrientation,
+  rows = 8,
+  resizeOrientation = 'vertical',
   type = 'text',
   helperText,
-}: InputFieldProps) => {
-  const [field, meta] = useField<string>(name);
+  placeholder,
+  onBlur,
+  inputMode,
+  min,
+  max,
+  step,
+  children,
+  asFormGroup = true,
+}: React.PropsWithChildren<InputFieldProps>) => {
+  const [field, meta, helpers] = useField<string>(name);
   const showValidationErrors = useShowFieldValidationErrors();
   const error = getVisibleFieldError(meta, showValidationErrors);
   const validated = error ? 'error' : 'default';
   const helperDescribedBy = getFormFieldHelperDescribedBy(fieldId, error, helperText);
+  const shouldTrimOnBlur = type === 'text' && !multiline;
+  const emptyNumberInputOnBlur = useRef(false);
 
-  return (
-    <FormGroup label={label} fieldId={fieldId} isRequired={isRequired}>
+  const handleBlur = (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    field.onBlur(event);
+    if (shouldTrimOnBlur) {
+      const trimmed = (field.value ?? '').trim();
+      if (trimmed !== field.value) {
+        void helpers.setValue(trimmed);
+      }
+    }
+    onBlur?.();
+  };
+
+  const handleNumberChange = (event: React.FormEvent<HTMLInputElement>) => {
+    const value = event.currentTarget.value;
+    if (emptyNumberInputOnBlur.current && value === '0') {
+      emptyNumberInputOnBlur.current = false;
+      return;
+    }
+    emptyNumberInputOnBlur.current = false;
+    void field.onChange({ target: { name, value } });
+  };
+
+  const handleNumberBlurCapture = (event: React.FocusEvent<HTMLInputElement>) => {
+    emptyNumberInputOnBlur.current = event.currentTarget.value === '';
+    field.onBlur(event);
+    onBlur?.();
+  };
+
+  const adjustNumber = (direction: -1 | 1) => {
+    const current = Number(field.value);
+    const next = (Number.isFinite(current) ? current : 0) + direction * (step ?? 1);
+    if ((min !== undefined && next < min) || (max !== undefined && next > max)) {
+      return;
+    }
+    void helpers.setValue(String(next));
+  };
+
+  const numberValue =
+    field.value === '' || field.value === undefined
+      ? ''
+      : Number.isFinite(Number(field.value))
+        ? Number(field.value)
+        : '';
+
+  const textComponent = (
+    <Stack>
       {multiline ? (
         <TextArea
           id={fieldId}
           name={name}
           value={field.value ?? ''}
+          placeholder={placeholder}
           rows={rows}
           resizeOrientation={resizeOrientation}
           onChange={(_event, value) => {
             void field.onChange({ target: { name, value } });
           }}
-          onBlur={field.onBlur}
+          onBlur={handleBlur}
           isDisabled={isDisabled}
           validated={validated}
           aria-invalid={error ? true : undefined}
           aria-describedby={helperDescribedBy}
         />
       ) : (
-        <TextInput
-          id={fieldId}
-          name={name}
-          type={type}
-          value={field.value ?? ''}
-          onChange={(_event, value) => {
-            void field.onChange({ target: { name, value } });
-          }}
-          onBlur={field.onBlur}
-          isDisabled={isDisabled}
-          validated={validated}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={helperDescribedBy}
-        />
+        <Split hasGutter>
+          <SplitItem isFilled>
+            {type === 'number' ? (
+              <NumberInput
+                value={numberValue}
+                min={min}
+                max={max}
+                inputName={name}
+                inputAriaLabel={label}
+                onMinus={() => adjustNumber(-1)}
+                onPlus={() => adjustNumber(1)}
+                onChange={handleNumberChange}
+                isDisabled={isDisabled}
+                validated={validated}
+                inputProps={{
+                  id: fieldId,
+                  placeholder,
+                  inputMode,
+                  min,
+                  max,
+                  step,
+                  onBlurCapture: handleNumberBlurCapture,
+                  'aria-invalid': error ? true : undefined,
+                  'aria-describedby': helperDescribedBy,
+                }}
+              />
+            ) : (
+              <TextInput
+                id={fieldId}
+                name={name}
+                type={type}
+                inputMode={inputMode}
+                value={field.value ?? ''}
+                placeholder={placeholder}
+                min={min}
+                max={max}
+                step={step}
+                onChange={(_event, value) => {
+                  void field.onChange({ target: { name, value } });
+                }}
+                onBlur={handleBlur}
+                isDisabled={isDisabled}
+                validated={validated}
+                aria-invalid={error ? true : undefined}
+                aria-describedby={helperDescribedBy}
+                aria-label={label}
+              />
+            )}
+          </SplitItem>
+          {children && <SplitItem>{children}</SplitItem>}
+        </Split>
       )}
       <FormFieldHelper error={error} description={helperText} fieldId={fieldId} />
+    </Stack>
+  );
+
+  return asFormGroup ? (
+    <FormGroup label={label} fieldId={fieldId} isRequired={isRequired}>
+      {textComponent}
     </FormGroup>
+  ) : (
+    textComponent
   );
 };

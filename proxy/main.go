@@ -34,8 +34,6 @@ func main() {
 		log.WithError(err).Fatal("Failed to get TLS configuration")
 	}
 
-	fulfillmentHandler := bridge.NewFulfillmentHandler(tlsConfig)
-
 	oidcTLSConfig, err := bridge.GetOIDCTlsConfig()
 	if err != nil {
 		log.WithError(err).Fatal("Failed to get OIDC TLS configuration")
@@ -84,18 +82,65 @@ func main() {
 		router.Post("/api/logout", authHandler.PostLogout)
 	}
 
-	// API routes — authenticated via session cookie (middleware injects Bearer header upstream).
-	router.Group(func(r chi.Router) {
-		r.Use(proxymiddleware.Auth)
-		for _, prefix := range []string{
-			"/api/fulfillment/v1",
-			"/api/events/v1",
-			"/api/osac/public/v1",
-		} {
-			r.Handle(prefix, fulfillmentHandler)
-			r.Handle(prefix+"/*", fulfillmentHandler)
+	grpcTarget, err := config.FulfillmentGrpcTarget()
+	if err != nil {
+		log.WithError(err).Fatal("Failed to resolve gRPC target from FULFILLMENT_API_URL")
+	}
+
+	// Console WebSocket uses the console-ticket cookie (browser cannot set Authorization).
+	// Do not run Auth middleware here: it injects the OIDC access token as Bearer, and
+	// console-proxy prefers Authorization over the cookie, causing 401 invalid ticket.
+	if config.FulfillmentApiUrl != "" {
+		consoleWSHandler, err := bridge.NewConsoleWebSocketProxy(config.FulfillmentApiUrl, tlsConfig)
+		if err != nil {
+			log.WithError(err).Fatal("Failed to create console WebSocket proxy")
 		}
-	})
+		router.Handle(
+			"/api/fulfillment/v1/console_sessions/connect",
+			proxymiddleware.ConsoleWebSocketAuth(config.BaseUIURL)(consoleWSHandler),
+		)
+		log.Info("Console WebSocket proxy enabled")
+
+		router.Post("/api/console-ticket/clear", bridge.NewClearConsoleTicketCookieHandler())
+	}
+
+	if grpcTarget != "" {
+		var reflectionToken string
+		if config.OIDCServiceClientID != "" && config.OIDCServiceClientSecret != "" {
+			if config.OIDCIssuerURL == "" {
+				log.Fatal("OIDC_ISSUER_URL is required when OIDC_SERVICE_CLIENT_ID and OIDC_SERVICE_CLIENT_SECRET are set")
+			}
+			tr, err := auth.ClientCredentialsToken(
+				config.OIDCIssuerURL,
+				config.OIDCServiceClientID,
+				config.OIDCServiceClientSecret,
+				newHTTPClient(oidcTLSConfig),
+			)
+			if err != nil {
+				log.WithError(err).Fatal("Failed to fetch service account token for gRPC reflection")
+			}
+			reflectionToken = tr.AccessToken
+		}
+
+		connectHandler, err := bridge.NewConnectJSONProxy(grpcTarget, tlsConfig, reflectionToken)
+		if err != nil {
+			log.WithError(err).Fatal("Failed to create Connect JSON proxy")
+		}
+		router.Group(func(r chi.Router) {
+			r.Use(proxymiddleware.Auth)
+			strippedConnect := http.StripPrefix("/api/fulfillment", connectHandler)
+			// The console-ticket must never reach the browser as a JS-readable
+			// value (see bridge.WrapConsoleSessionCreate) — chi matches this
+			// literal path ahead of the /* wildcard below regardless of
+			// registration order.
+			r.Handle(
+				"/api/fulfillment/osac.public.v1.ConsoleSessions/Create",
+				bridge.WrapConsoleSessionCreate(strippedConnect),
+			)
+			r.Handle("/api/fulfillment/*", strippedConnect)
+		})
+		log.Info("Connect JSON proxy enabled")
+	}
 
 	log.Info("Serving SPA static files from /app/public")
 	spa := server.SpaHandler{Dir: "/app/public"}
@@ -114,7 +159,11 @@ func main() {
 
 func newHTTPClient(tlsConfig *tls.Config) *http.Client {
 	return &http.Client{
-		Transport: &http.Transport{TLSClientConfig: tlsConfig},
-		Timeout:   15 * time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig:     tlsConfig,
+			IdleConnTimeout:     90 * time.Second,
+			MaxIdleConnsPerHost: 2,
+		},
+		Timeout: 15 * time.Second,
 	}
 }

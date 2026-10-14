@@ -2,20 +2,11 @@ import type { ComponentType } from 'react';
 import type { FormikHelpers } from 'formik';
 import type { AnyObjectSchema } from 'yup';
 
-import type {
-  InstanceType,
-  PublicIPPool,
-  SecurityGroup,
-  Subnet,
-  VirtualNetwork,
-} from '@osac/types';
-
+import type { CatalogItem } from '../../../catalog/catalogItemDisplay';
 import type { CatalogProvisionKind } from '../../catalogFieldDefinition';
-import type { CatalogProvisionCatalogItem } from '../../catalogProvisionItem';
-import type { ReviewSection } from '../catalogOverlay';
 import type { WizardStepId } from '../stepIds';
 
-export interface CatalogItemsQueryResult<TItem extends CatalogProvisionCatalogItem> {
+export interface CatalogItemsQueryResult<TItem extends CatalogItem> {
   data: TItem[];
   isPending: boolean;
   isError: boolean;
@@ -31,39 +22,25 @@ export interface GeneralFieldDescriptor {
   isRequired?: boolean;
   isPassword?: boolean;
   isDisabled?: boolean;
+  /** i18n key for InputField helperText (e.g. RFC 1035 DNS label description). */
+  helperTextKey?: string;
 }
 
-export interface ReviewContext {
-  securityGroups?: SecurityGroup[];
-  instanceTypes?: InstanceType[];
-  virtualNetworks?: VirtualNetwork[];
-  subnets?: Subnet[];
-  publicIPPools?: PublicIPPool[];
-}
-
-export interface CatalogProvisionAdapter<
-  TItem extends CatalogProvisionCatalogItem,
-  TValues,
-  TPayload,
-> {
+export interface CatalogProvisionAdapter<TItem extends CatalogItem, TValues, TPayload> {
   kind: CatalogProvisionKind;
   useCatalogItems: () => CatalogItemsQueryResult<TItem>;
   getInitialValues: (catalogItem: TItem | null) => TValues;
   buildCreatePayload: (values: TValues, catalogItem: TItem) => TPayload;
   ConfigurationStep: ComponentType<{ catalogItem: TItem | null }>;
+  /** Optional — only kinds whose ordered steps include 'storage' (compute instances) set this. */
+  StorageStep?: ComponentType<{ catalogItem: TItem | null }>;
   NetworkingStep: ComponentType<{ catalogItem: TItem | null }>;
-  /** Optional custom General step — renders instead of the default field-list GeneralStep when provided */
-  GeneralStepComponent?: ComponentType<{ catalogItem: TItem | null }>;
-  resolveGeneralFields: (catalogItem: TItem | null) => GeneralFieldDescriptor[];
+  GeneralStep: ComponentType<{ catalogItem: TItem | null }>;
+  ReviewStep: ComponentType<{ catalogItem: TItem | null }>;
   getStepValidationSchema: (
     catalogItem: TItem | null,
     stepId: WizardStepId,
   ) => AnyObjectSchema | undefined;
-  getReviewSections: (
-    values: TValues,
-    catalogItem: TItem,
-    context?: ReviewContext,
-  ) => ReviewSection[];
   onCatalogItemSelected?: (item: TItem, helpers: FormikHelpers<TValues>) => void | Promise<void>;
   wizardTitleKey: string;
   wizardDescriptionKey: string;

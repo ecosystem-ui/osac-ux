@@ -12,7 +12,6 @@ import {
 
 import type { Cluster } from '@osac/types';
 
-import { useTranslation } from '../../../hooks/useTranslation';
 import ExternalLink from '../../Primitives/ExternalLink';
 import { ClusterStatusLabel } from '../ClusterStatusLabel';
 
@@ -21,13 +20,12 @@ interface ClusterStatusCardProps {
 }
 
 export const ClusterAccessCard = ({ cluster }: ClusterStatusCardProps) => {
-  const { t } = useTranslation();
   const apiUrl = cluster.status?.apiUrl;
   const consoleUrl = cluster.status?.consoleUrl;
 
   return (
     <Card isFullHeight>
-      <CardTitle>{t('Access')}</CardTitle>
+      <CardTitle>Access</CardTitle>
       <CardBody>
         <Stack hasGutter>
           <StackItem>
@@ -36,13 +34,13 @@ export const ClusterAccessCard = ({ cluster }: ClusterStatusCardProps) => {
           <StackItem>
             <DescriptionList isCompact>
               <DescriptionListGroup>
-                <DescriptionListTerm>{t('API URL')}</DescriptionListTerm>
+                <DescriptionListTerm>API URL</DescriptionListTerm>
                 <DescriptionListDescription>
                   <ExternalLink href={apiUrl} showUnsafeAsText />
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
-                <DescriptionListTerm>{t('Console URL')}</DescriptionListTerm>
+                <DescriptionListTerm>Console URL</DescriptionListTerm>
                 <DescriptionListDescription>
                   <ExternalLink href={consoleUrl} showUnsafeAsText />
                 </DescriptionListDescription>

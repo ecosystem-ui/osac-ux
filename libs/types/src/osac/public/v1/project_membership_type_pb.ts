@@ -19,13 +19,15 @@ import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2"
 import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
 import type { Metadata } from "./metadata_type_pb";
 import { file_osac_public_v1_metadata_type } from "./metadata_type_pb";
+import type { UserReference } from "./user_type_pb";
+import { file_osac_public_v1_user_type } from "./user_type_pb";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file osac/public/v1/project_membership_type.proto.
  */
 export const file_osac_public_v1_project_membership_type: GenFile = /*@__PURE__*/
-  fileDesc("Cixvc2FjL3B1YmxpYy92MS9wcm9qZWN0X21lbWJlcnNoaXBfdHlwZS5wcm90bxIOb3NhYy5wdWJsaWMudjEiuQEKEVByb2plY3RNZW1iZXJzaGlwEgoKAmlkGAEgASgJEioKCG1ldGFkYXRhGAIgASgLMhgub3NhYy5wdWJsaWMudjEuTWV0YWRhdGESMwoEc3BlYxgDIAEoCzIlLm9zYWMucHVibGljLnYxLlByb2plY3RNZW1iZXJzaGlwU3BlYxI3CgZzdGF0dXMYBCABKAsyJy5vc2FjLnB1YmxpYy52MS5Qcm9qZWN0TWVtYmVyc2hpcFN0YXR1cyJ3ChVQcm9qZWN0TWVtYmVyc2hpcFNwZWMSDwoHcHJvamVjdBgBIAEoCRIzCgRyb2xlGAIgASgOMiUub3NhYy5wdWJsaWMudjEuUHJvamVjdE1lbWJlcnNoaXBSb2xlEg4KBHVzZXIYAyABKAlIAEIICgZtZW1iZXIicgoXUHJvamVjdE1lbWJlcnNoaXBTdGF0dXMSNQoFc3RhdGUYASABKA4yJi5vc2FjLnB1YmxpYy52MS5Qcm9qZWN0TWVtYmVyc2hpcFN0YXRlEhQKB21lc3NhZ2UYAiABKAlIAIgBAUIKCghfbWVzc2FnZSqJAQoVUHJvamVjdE1lbWJlcnNoaXBSb2xlEicKI1BST0pFQ1RfTUVNQkVSU0hJUF9ST0xFX1VOU1BFQ0lGSUVEEAASIgoeUFJPSkVDVF9NRU1CRVJTSElQX1JPTEVfVklFV0VSEAESIwofUFJPSkVDVF9NRU1CRVJTSElQX1JPTEVfTUFOQUdFUhACKrEBChZQcm9qZWN0TWVtYmVyc2hpcFN0YXRlEigKJFBST0pFQ1RfTUVNQkVSU0hJUF9TVEFURV9VTlNQRUNJRklFRBAAEiQKIFBST0pFQ1RfTUVNQkVSU0hJUF9TVEFURV9QRU5ESU5HEAESIgoeUFJPSkVDVF9NRU1CRVJTSElQX1NUQVRFX1JFQURZEAISIwofUFJPSkVDVF9NRU1CRVJTSElQX1NUQVRFX0ZBSUxFRBADYgZwcm90bzM", [file_osac_public_v1_metadata_type]);
+  fileDesc("Cixvc2FjL3B1YmxpYy92MS9wcm9qZWN0X21lbWJlcnNoaXBfdHlwZS5wcm90bxIOb3NhYy5wdWJsaWMudjEiuQEKEVByb2plY3RNZW1iZXJzaGlwEgoKAmlkGAEgASgJEioKCG1ldGFkYXRhGAIgASgLMhgub3NhYy5wdWJsaWMudjEuTWV0YWRhdGESMwoEc3BlYxgDIAEoCzIlLm9zYWMucHVibGljLnYxLlByb2plY3RNZW1iZXJzaGlwU3BlYxI3CgZzdGF0dXMYBCABKAsyJy5vc2FjLnB1YmxpYy52MS5Qcm9qZWN0TWVtYmVyc2hpcFN0YXR1cyJ6ChVQcm9qZWN0TWVtYmVyc2hpcFNwZWMSMwoEcm9sZRgCIAEoDjIlLm9zYWMucHVibGljLnYxLlByb2plY3RNZW1iZXJzaGlwUm9sZRIsCgV1c2VycxgDIAMoCzIdLm9zYWMucHVibGljLnYxLlVzZXJSZWZlcmVuY2UicgoXUHJvamVjdE1lbWJlcnNoaXBTdGF0dXMSNQoFc3RhdGUYASABKA4yJi5vc2FjLnB1YmxpYy52MS5Qcm9qZWN0TWVtYmVyc2hpcFN0YXRlEhQKB21lc3NhZ2UYAiABKAlIAIgBAUIKCghfbWVzc2FnZSqJAQoVUHJvamVjdE1lbWJlcnNoaXBSb2xlEicKI1BST0pFQ1RfTUVNQkVSU0hJUF9ST0xFX1VOU1BFQ0lGSUVEEAASIgoeUFJPSkVDVF9NRU1CRVJTSElQX1JPTEVfVklFV0VSEAESIwofUFJPSkVDVF9NRU1CRVJTSElQX1JPTEVfTUFOQUdFUhACKrEBChZQcm9qZWN0TWVtYmVyc2hpcFN0YXRlEigKJFBST0pFQ1RfTUVNQkVSU0hJUF9TVEFURV9VTlNQRUNJRklFRBAAEiQKIFBST0pFQ1RfTUVNQkVSU0hJUF9TVEFURV9QRU5ESU5HEAESIgoeUFJPSkVDVF9NRU1CRVJTSElQX1NUQVRFX1JFQURZEAISIwofUFJPSkVDVF9NRU1CRVJTSElQX1NUQVRFX0ZBSUxFRBADYgZwcm90bzM", [file_osac_public_v1_metadata_type, file_osac_public_v1_user_type]);
 
 /**
  * ProjectMembership represents a member's association with a project and their role within it.
@@ -70,39 +72,24 @@ export const ProjectMembershipSchema: GenMessage<ProjectMembership> = /*@__PURE_
   messageDesc(file_osac_public_v1_project_membership_type, 0);
 
 /**
- * Describes a member of a project.
+ * Describes the members of a project.
  *
  * @generated from message osac.public.v1.ProjectMembershipSpec
  */
 export type ProjectMembershipSpec = Message<"osac.public.v1.ProjectMembershipSpec"> & {
   /**
-   * Reference to the project that this membership applies to. This is the unique identifier (ID) of the Project object,
-   * not the project name.
-   *
-   * @generated from field: string project = 1;
-   */
-  project: string;
-
-  /**
-   * Role of the member in the project. This indicates whether the member is a viewer, manager, etc.
+   * Role of the members in the project. This indicates whether the members are viewers, managers, etc.
    *
    * @generated from field: osac.public.v1.ProjectMembershipRole role = 2;
    */
   role: ProjectMembershipRole;
 
   /**
-   * Unique identifier of the member. Currently members are users (referenced by their User object ID), but this leaves
-   * room for adding other kinds of members in the future, like groups.
+   * References to the users that are members of the project.
    *
-   * @generated from oneof osac.public.v1.ProjectMembershipSpec.member
+   * @generated from field: repeated osac.public.v1.UserReference users = 3;
    */
-  member: {
-    /**
-     * @generated from field: string user = 3;
-     */
-    value: string;
-    case: "user";
-  } | { case: undefined; value?: undefined };
+  users: UserReference[];
 };
 
 /**

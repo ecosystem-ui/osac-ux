@@ -1,7 +1,15 @@
-/**
- * flow: cluster-service-catalog
- * step: csc_clusters_list
- */
+import type { ComponentType, ReactNode, SVGProps } from 'react';
+import {
+  Card,
+  CardBody,
+  CardTitle,
+  Flex,
+  FlexItem,
+  Grid,
+  GridItem,
+  Icon,
+} from '@patternfly/react-core';
+import CubeIcon from '@patternfly/react-icons/dist/esm/icons/cube-icon';
 import NetworkWiredIcon from '@patternfly/react-icons/dist/esm/icons/network-wired-icon';
 import ServerIcon from '@patternfly/react-icons/dist/esm/icons/server-icon';
 
@@ -9,53 +17,63 @@ import type { Cluster } from '@osac/types';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import { displayValue } from '../../../utils/detailFormatters';
-import { ResourceKpiHeader } from '../../Resource/Header';
+
+type SummaryIcon = ComponentType<SVGProps<SVGSVGElement>>;
+
+interface SummaryCardProps {
+  icon: SummaryIcon;
+  title: string;
+  children: ReactNode;
+}
+
+const SummaryCard = ({ icon: SummaryIconComponent, title, children }: SummaryCardProps) => (
+  <Card isFullHeight>
+    <CardTitle>
+      <Flex alignItems={{ default: 'alignItemsCenter' }} spaceItems={{ default: 'spaceItemsSm' }}>
+        <FlexItem>
+          <Icon size="md">
+            <SummaryIconComponent aria-hidden />
+          </Icon>
+        </FlexItem>
+        <FlexItem>{title}</FlexItem>
+      </Flex>
+    </CardTitle>
+    <CardBody>{children}</CardBody>
+  </Card>
+);
 
 interface ClusterDetailsSummaryProps {
   cluster: Cluster;
 }
 
+const sumNodeSetSizes = (nodeSets?: Record<string, { size?: number }>) =>
+  Object.values(nodeSets ?? {}).reduce((sum, nodeSet) => sum + (nodeSet?.size ?? 0), 0);
+
 const ClusterDetailsSummary = ({ cluster }: ClusterDetailsSummaryProps) => {
   const { t } = useTranslation();
 
-  const nodeSetsSpec = cluster.spec?.nodeSets ?? {};
-  const nodeSetsStatus = cluster.status?.nodeSets ?? {};
-  const totalWorkers = Object.values(nodeSetsStatus).reduce(
-    (sum, nodeSet) => sum + (nodeSet?.size ?? 0),
-    0,
-  );
-  const desiredWorkers = Object.values(nodeSetsSpec).reduce(
-    (sum, nodeSet) => sum + (nodeSet?.size ?? 0),
-    0,
-  );
-
-  const podCidr = displayValue(cluster.spec?.network?.podCidr);
-  const serviceCidr = displayValue(cluster.spec?.network?.serviceCidr);
-
-  const workerValue =
-    totalWorkers === desiredWorkers ? String(totalWorkers) : `${totalWorkers}/${desiredWorkers}`;
+  const workerCount = sumNodeSetSizes(cluster.spec?.nodeSets);
+  const apiUrl = displayValue(cluster.status?.apiUrl);
+  const consoleUrl = displayValue(cluster.status?.consoleUrl);
 
   return (
-    <ResourceKpiHeader
-      ariaLabel={t('Cluster summary')}
-      items={[
-        {
-          title: t('Worker nodes'),
-          icon: ServerIcon,
-          value: workerValue,
-        },
-        {
-          title: t('Pod CIDR'),
-          icon: NetworkWiredIcon,
-          value: podCidr,
-        },
-        {
-          title: t('Service CIDR'),
-          icon: NetworkWiredIcon,
-          value: serviceCidr,
-        },
-      ]}
-    />
+    <Grid hasGutter role="group" aria-label={t('Cluster summary')}>
+      <GridItem sm={6} md={4}>
+        <SummaryCard icon={ServerIcon} title={t('Worker nodes')}>
+          {workerCount}
+        </SummaryCard>
+      </GridItem>
+      <GridItem sm={6} md={4}>
+        <SummaryCard icon={NetworkWiredIcon} title={t('API URL')}>
+          {apiUrl}
+        </SummaryCard>
+      </GridItem>
+      <GridItem sm={6} md={4}>
+        <SummaryCard icon={CubeIcon} title={t('Console URL')}>
+          {consoleUrl}
+        </SummaryCard>
+      </GridItem>
+    </Grid>
   );
 };
 

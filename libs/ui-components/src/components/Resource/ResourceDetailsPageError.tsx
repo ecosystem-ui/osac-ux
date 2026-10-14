@@ -1,84 +1,77 @@
 import { useNavigate } from 'react-router-dom';
-import {
-  Button,
-  EmptyState,
-  EmptyStateActions,
-  EmptyStateBody,
-  EmptyStateFooter,
-  PageSection,
-} from '@patternfly/react-core';
+import type { EmptyStateProps } from '@patternfly/react-core';
 import ExclamationTriangleIcon from '@patternfly/react-icons/dist/esm/icons/exclamation-triangle-icon';
 import SearchIcon from '@patternfly/react-icons/dist/esm/icons/search-icon';
 
-import { useTranslation } from '../../hooks/useTranslation';
+import QueryErrorPage from './QueryErrorPage';
+import { isUnauthorizedError } from '../../utils/unauthorizedError';
 
-type ResourceDetailsPageErrorVariant = 'load-error' | 'not-found';
+type ResourceDetailsPageErrorVariant = 'load-error' | 'not-found' | 'unauthorized';
 
-interface ResourceDetailsPageErrorProps {
+type ResourceDetailsPageErrorProps = {
   parentTo: string;
   parentLabel: string;
-  resourceLabel: string;
-  variant: ResourceDetailsPageErrorVariant;
+  resourceLabel?: string;
   onRetry?: () => void;
-}
+} & ({ error: unknown; variant?: never } | { variant: 'not-found'; error?: never });
+
+const resolveVariant = (error: unknown): Exclude<ResourceDetailsPageErrorVariant, 'not-found'> =>
+  isUnauthorizedError(error) ? 'unauthorized' : 'load-error';
 
 const variantConfig = (
-  t: (key: string, options?: Record<string, unknown>) => string,
   resourceLabel: string,
 ): Record<
-  ResourceDetailsPageErrorVariant,
+  Exclude<ResourceDetailsPageErrorVariant, 'unauthorized'>,
   {
-    icon: typeof ExclamationTriangleIcon;
     status: 'danger' | 'warning';
     title: string;
     body: string;
+    icon: NonNullable<EmptyStateProps['icon']>;
   }
 > => ({
   'load-error': {
-    icon: ExclamationTriangleIcon,
     status: 'danger',
-    title: t('Could not load {{resourceLabel}}', { resourceLabel }),
-    body: t('Unable to load this {{resourceLabel}} right now.', { resourceLabel }),
+    title: `Could not load ${resourceLabel}`,
+    body: `Unable to load this ${resourceLabel} right now.`,
+    icon: ExclamationTriangleIcon,
   },
   'not-found': {
-    icon: SearchIcon,
     status: 'warning',
-    title: `${resourceLabel.charAt(0).toUpperCase()}${resourceLabel.slice(1)} ${t('not found')}`,
-    body: t('This {{resourceLabel}} could not be found.', { resourceLabel }),
+    title: `${resourceLabel.charAt(0).toUpperCase()}${resourceLabel.slice(1)} not found`,
+    body: `This ${resourceLabel} could not be found.`,
+    icon: SearchIcon,
   },
 });
 
 export const ResourceDetailsPageError = ({
   parentTo,
   parentLabel,
-  resourceLabel,
-  variant,
+  resourceLabel = 'resource',
   onRetry,
+  ...props
 }: ResourceDetailsPageErrorProps) => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
-  const { icon: Icon, status, title, body } = variantConfig(t, resourceLabel)[variant];
+  const variant = props.variant ?? resolveVariant(props.error);
+  const returnAction = {
+    label: `Return to ${parentLabel.toLowerCase()}`,
+    onClick: () => navigate(parentTo),
+  };
+
+  if (variant === 'unauthorized') {
+    return <QueryErrorPage error={props.error} />;
+  }
+
+  const { status, title, body, icon } = variantConfig(resourceLabel)[variant];
 
   return (
-    <PageSection hasBodyWrapper={false} isFilled>
-      <EmptyState icon={Icon} titleText={title} headingLevel="h1" status={status}>
-        <EmptyStateBody>{body}</EmptyStateBody>
-        <EmptyStateFooter>
-          <EmptyStateActions>
-            {variant === 'load-error' && onRetry && (
-              <Button variant="primary" onClick={onRetry}>
-                {t('Retry')}
-              </Button>
-            )}
-            <Button
-              variant={variant === 'load-error' && onRetry ? 'link' : 'primary'}
-              onClick={() => navigate(parentTo)}
-            >
-              {t('Return to {{parentLabel}}', { parentLabel: parentLabel.toLowerCase() })}
-            </Button>
-          </EmptyStateActions>
-        </EmptyStateFooter>
-      </EmptyState>
-    </PageSection>
+    <QueryErrorPage
+      error={props.error}
+      title={title}
+      body={body}
+      status={status}
+      icon={icon}
+      onRetry={variant === 'load-error' ? onRetry : undefined}
+      secondaryAction={returnAction}
+    />
   );
 };

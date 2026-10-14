@@ -5,26 +5,29 @@ import {
   ConditionStatus,
 } from '@osac/types';
 
-export type ConditionResourceKind = 'cluster' | 'compute_instance' | 'baremetal_instance';
+const BM_CONDITION_TYPE_PREFIX = /^BARE_METAL_INSTANCE_CONDITION_TYPE_/;
+const VM_CONDITION_TYPE_PREFIX = /^COMPUTE_INSTANCE_CONDITION_TYPE_/;
+
+export type ConditionResourceKind = 'cluster' | 'compute_instance' | 'bare_metal_instance';
 
 export const humanizeConditionType = (
   type: ClusterConditionType | ComputeInstanceConditionType | BareMetalInstanceConditionType,
   resourceKind: ConditionResourceKind,
 ): string => {
   if (resourceKind === 'cluster') {
-    const name = ClusterConditionType[type as ClusterConditionType];
-    if (typeof name === 'string') {
-      return name.replace(/_/g, ' ');
+    const clusterName = ClusterConditionType[type as ClusterConditionType];
+    if (typeof clusterName === 'string') {
+      return clusterName.replace(/_/g, ' ');
     }
   } else if (resourceKind === 'compute_instance') {
-    const name = ComputeInstanceConditionType[type as ComputeInstanceConditionType];
-    if (typeof name === 'string') {
-      return name.replace(/^COMPUTE_INSTANCE_CONDITION_TYPE_/, '').replace(/_/g, ' ');
+    const vmName = ComputeInstanceConditionType[type as ComputeInstanceConditionType];
+    if (typeof vmName === 'string') {
+      return vmName.replace(VM_CONDITION_TYPE_PREFIX, '').replace(/_/g, ' ');
     }
-  } else if (resourceKind === 'baremetal_instance') {
-    const name = BareMetalInstanceConditionType[type as BareMetalInstanceConditionType];
-    if (typeof name === 'string') {
-      return name.replace(/^BARE_METAL_INSTANCE_CONDITION_TYPE_/, '').replace(/_/g, ' ');
+  } else {
+    const bmName = BareMetalInstanceConditionType[type as BareMetalInstanceConditionType];
+    if (typeof bmName === 'string') {
+      return bmName.replace(BM_CONDITION_TYPE_PREFIX, '').replace(/_/g, ' ');
     }
   }
   return String(type);

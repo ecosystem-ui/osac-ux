@@ -1,70 +1,47 @@
-/** Default run strategy on create — VM starts immediately. */
-export const VM_CREATE_RUN_STRATEGY = 'Always' as const;
-
-export const RUN_STRATEGY_OPTIONS = [
-  { value: 'Always', label: 'Always (start immediately)' },
-  { value: 'Halted', label: 'Halted (start stopped)' },
-  { value: 'RerunOnFailure', label: 'RerunOnFailure' },
-  { value: 'Manual', label: 'Manual' },
-] as const;
-
-export type RunStrategy = (typeof RUN_STRATEGY_OPTIONS)[number]['value'];
+import type { ResourceSelectValue } from '../../../../Form/resourceSelectValue';
 
 export interface ComputeInstanceNetworkingValues {
-  virtualNetworkId: string;
-  subnetId: string;
-  securityGroupIds: string[];
-  /** Optional public IP pool ID — if set, a PublicIP is allocated and attached after VM creation */
-  publicIPPoolId?: string;
+  useDefaultNetwork: boolean;
+  virtualNetwork: ResourceSelectValue;
+  subnet: ResourceSelectValue;
+  securityGroups: ResourceSelectValue[];
+  autoExternalIpAttachment: boolean;
 }
 
-export interface AdditionalDiskValue {
+export interface ComputeInstanceDiskValues {
   sizeGib: string;
-}
-
-export interface NetworkAttachmentValue {
-  virtualNetworkId: string;
-  subnetId: string;
-  securityGroupIds: string[];
+  storageTier: ResourceSelectValue;
 }
 
 export interface ComputeInstanceWizardValues {
   catalogItemId: string;
   metadata: {
     name: string;
-    /** User-defined key-value tags (maps to metadata.labels on the resource) */
-    labels: Record<string, string>;
+    project: string;
   };
   spec: {
-    sshKey: string;
-    image: {
-      sourceRef: string;
+    sshKey: {
+      name: string;
     };
     instanceType: string;
+    userDataSource: 'inline' | 'secret';
     userData: string;
-    bootDisk: {
-      sizeGib: string;
+    userDataSecret: {
+      name: string;
     };
-    /** Additional block disks — proto-aligned: spec.additional_disks[].size_gib */
-    additionalDisks: AdditionalDiskValue[];
-    /** Windows guest OS — proto-aligned: spec.is_windows */
-    isWindows: boolean;
-    /** VM run strategy — proto-aligned: spec.run_strategy */
-    runStrategy: string;
+    bootDisk: ComputeInstanceDiskValues;
+    additionalDisks: ComputeInstanceDiskValues[];
     networking: ComputeInstanceNetworkingValues;
-    /** Additional NICs — each entry maps to a separate networkAttachment on the VM */
-    additionalNetworkAttachments: NetworkAttachmentValue[];
-    /** @predicted: metadata.project — OSAC-1064 */
-    projectId?: string;
-    /** Custom (`custom.*`) and Template-declared (`template_parameters.*`) dynamic
-     * field values, keyed by their catalog field_definitions `path` — see
-     * DynamicFieldsFormSection. */
-    dynamicParameters: Record<string, string>;
   };
 }
 
+export const VM_SSH_KEY_FORM_PATH = 'spec.sshKey.name';
+export const VM_USER_DATA_SOURCE_FORM_PATH = 'spec.userDataSource';
+export const VM_USER_DATA_FORM_PATH = 'spec.userData';
+export const VM_USER_DATA_SECRET_FORM_PATH = 'spec.userDataSecret.name';
+
 export const CONFIGURATION_CATALOG_PATHS = [
-  'spec.image.source_ref',
   'spec.user_data',
   'spec.boot_disk.size_gib',
+  'spec.boot_disk.storage_tier',
 ] as const;

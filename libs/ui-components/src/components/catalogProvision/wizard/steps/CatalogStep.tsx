@@ -15,33 +15,25 @@ import {
 } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 
-import type { ComputeInstanceCatalogItem } from '@osac/types';
-
-import type { BuildComputeInstanceCreateBodyInput } from '../../../../api/v1/compute-instance-wire';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import CatalogItemCard from '../../../catalog/CatalogItemCard';
-import {
-  type CatalogItemKind,
-  filterCatalogItemsBySearch,
-} from '../../../catalog/catalogItemDisplay';
+import { CatalogItem, filterCatalogItemsBySearch } from '../../../catalog/catalogItemDisplay';
+import { useCatalogItemResourceLookups } from '../../../catalog/catalogItemResourceLookups';
 import { getVisibleFieldError } from '../../../Form/fieldError';
 import { useShowFieldValidationErrors } from '../../../Form/FieldValidationContext';
 import { FormFieldHelper } from '../../../Form/FormFieldHelper';
-import type { ComputeInstanceWizardValues } from '../adapters/computeInstance/fields';
 import type { CatalogProvisionAdapter } from '../adapters/types';
 
-interface Props {
-  adapter: CatalogProvisionAdapter<
-    ComputeInstanceCatalogItem,
-    ComputeInstanceWizardValues,
-    BuildComputeInstanceCreateBodyInput
-  >;
+interface Props<TValues extends { catalogItemId: string }, TPayload> {
+  adapter: CatalogProvisionAdapter<CatalogItem, TValues, TPayload>;
 }
 
-export const CatalogStep = ({ adapter }: Props) => {
+export const CatalogStep = <TValues extends { catalogItemId: string }, TPayload>({
+  adapter,
+}: Props<TValues, TPayload>) => {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
-  const formik = useFormikContext<ComputeInstanceWizardValues>();
+  const formik = useFormikContext<TValues>();
   const { values } = formik;
 
   const {
@@ -51,12 +43,14 @@ export const CatalogStep = ({ adapter }: Props) => {
     refetch: refetchCatalogItems,
   } = adapter.useCatalogItems();
 
-  const catalogItemKind: CatalogItemKind = adapter.kind === 'cluster' ? 'cluster' : 'vm';
-
   const filtered = useMemo(
     () => filterCatalogItemsBySearch(catalogItems, search),
     [catalogItems, search],
   );
+
+  const resourceLookups = useCatalogItemResourceLookups({
+    enabled: !catalogLoading && !catalogError && filtered.length > 0,
+  });
 
   const count = filtered.length;
   const countPhrase = t('catalogProvision.catalog.count', { count });
@@ -66,7 +60,7 @@ export const CatalogStep = ({ adapter }: Props) => {
     showValidationErrors,
   );
 
-  const handleSelect = async (item: ComputeInstanceCatalogItem) => {
+  const handleSelect = async (item: CatalogItem) => {
     await adapter.onCatalogItemSelected?.(item, formik);
   };
 
@@ -119,7 +113,7 @@ export const CatalogStep = ({ adapter }: Props) => {
       <StackItem>
         <Gallery
           hasGutter
-          minWidths={{ default: '200px' }}
+          minWidths={{ default: '300px' }}
           role="radiogroup"
           aria-label={t('catalogProvision.steps.catalog.title')}
         >
@@ -143,12 +137,9 @@ export const CatalogStep = ({ adapter }: Props) => {
                 <GalleryItem key={item.id}>
                   <CatalogItemCard
                     item={item}
-                    kind={catalogItemKind}
-                    id={`catalog-item-card-${item.id}`}
-                    ouiaId={`catalog-item-option-${item.id}`}
+                    resourceLookups={resourceLookups}
                     selection={{
                       selected,
-                      radioName: 'selectedCatalogItem',
                       onSelect: () => {
                         void handleSelect(item);
                       },

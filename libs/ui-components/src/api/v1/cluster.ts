@@ -1,113 +1,140 @@
-import { useMutation } from '@tanstack/react-query';
+import { useCallback, useEffect, useState } from 'react';
+import { type MessageInitShape } from '@bufbuild/protobuf';
+import { keepPreviousData, useMutation } from '@tanstack/react-query';
 
-import {
-  type Cluster,
-  ClusterSchema,
-  type ClustersListResponse,
-  ClustersListResponseSchema,
-} from '@osac/types';
-
-export type CreateClusterInput = {
-  metadata: { name: string };
-  spec: {
-    catalogItem: string;
-    sshPublicKey?: string;
-    pullSecret?: string;
-    templateParameters?: Record<string, unknown>;
-  };
-};
+import { Cluster, ClusterSchema, Clusters, Secrets } from '@osac/types';
+import { useProjectFilterQuery } from '@osac/ui-components/hooks/use-project-filter-query';
 
 import { useApiFetch } from '../api-context';
 import { apiQueryKey } from '../types';
-import { useApiQuery, useApiQueryClient } from '../use-api-query';
+import { type ApiQueryClient, useApiQuery, useApiQueryClient } from '../use-api-query';
 
-export type ListClustersParams = {
-  filter?: string;
-  limit?: number;
-  offset?: number;
+export const useClusters = () => {
+  const client = useApiFetch(Clusters);
+  const filter = useProjectFilterQuery<Cluster>();
+  return useApiQuery({
+    queryKey: apiQueryKey('v1/clusters', undefined, filter ? { filter } : undefined),
+    queryFn: () => client.list({ filter }),
+    select: (data) => data.items,
+    placeholderData: keepPreviousData,
+  });
 };
 
-export const useClusters = (params: ListClustersParams = {}) =>
-  useApiQuery<ClustersListResponse, Cluster[]>({
-    queryKey: ['v1/clusters', null, params],
-    select: (data: ClustersListResponse) => data.items,
-    meta: { decode: ClustersListResponseSchema },
-  });
-
 export const useCluster = (id: string) => {
+  const client = useApiFetch(Clusters);
   const trimmedId = id?.trim() ?? '';
-  return useApiQuery<Cluster>({
-    queryKey: ['v1/clusters', [trimmedId]],
-    meta: { decode: ClusterSchema },
+  return useApiQuery({
+    queryKey: apiQueryKey('v1/clusters', [trimmedId]),
+    queryFn: () => client.get({ id: trimmedId }),
+    select: (data) => data.object,
     enabled: Boolean(trimmedId),
   });
 };
 
-export const invalidateClustersQueries = async (qc: ReturnType<typeof useApiQueryClient>) => {
-  await qc.invalidateQueries({ queryKey: apiQueryKey('v1/clusters', null) });
-};
-
-export const useCreateCluster = () => {
-  const apiFetch = useApiFetch();
-  const qc = useApiQueryClient();
-  return useMutation({
-    mutationFn: (body: CreateClusterInput) =>
-      apiFetch<Cluster>('v1/clusters', {
-        method: 'POST',
-        body,
-        decode: ClusterSchema,
-      }),
-    onSuccess: () => invalidateClustersQueries(qc),
-    retry: false,
-  });
+export const invalidateClustersQueries = async (qc: ApiQueryClient) => {
+  await qc.invalidateQueries({ queryKey: apiQueryKey('v1/clusters') });
 };
 
 export const useDeleteCluster = () => {
-  const apiFetch = useApiFetch();
+  const client = useApiFetch(Clusters);
   const qc = useApiQueryClient();
   return useMutation({
-    mutationFn: (id: string) =>
-      apiFetch<void>('v1/clusters', {
-        pathParams: [id],
-        method: 'DELETE',
-      }),
+    mutationFn: (id: string) => client.delete({ id }),
     onSuccess: () => invalidateClustersQueries(qc),
     retry: false,
   });
 };
 
-const FULFILLMENT_API_BASE = '/api/fulfillment';
-
-export const useDownloadClusterKubeconfig = () =>
-  useMutation({
-    mutationFn: async (id: string) => {
-      const res = await window.fetch(`${FULFILLMENT_API_BASE}/v1/clusters/${id}/kubeconfig`, {
-        credentials: 'include',
-      });
-      if (!res.ok) {
-        throw new Error(`Failed to download kubeconfig: ${res.status} ${res.statusText}`);
-      }
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement('a');
-      anchor.href = url;
-      anchor.download = `kubeconfig-${id}.yaml`;
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      URL.revokeObjectURL(url);
+export const useProvisionCluster = () => {
+  const client = useApiFetch(Clusters);
+  const qc = useApiQueryClient();
+  return useMutation({
+    mutationFn: (cluster: MessageInitShape<typeof ClusterSchema>) =>
+      client.create({ object: cluster }).then((r) => r.object),
+    onSuccess: async () => {
+      await invalidateClustersQueries(qc);
     },
+    retry: false,
   });
+};
 
-export const useGetClusterPassword = () =>
-  useMutation({
-    mutationFn: async (id: string) => {
-      const res = await window.fetch(`${FULFILLMENT_API_BASE}/v1/clusters/${id}/password`, {
-        credentials: 'include',
-      });
-      if (!res.ok) {
-        throw new Error(`Failed to retrieve password: ${res.status} ${res.statusText}`);
+const triggerDownload = (content: string, filename: string) => {
+  const blob = new Blob([content], { type: 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+export const useDownloadKubeconfig = () => {
+  const client = useApiFetch(Secrets);
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<unknown>();
+
+  const download = useCallback(
+    async (kubeconfigSecretId: string, clusterName: string) => {
+      setIsPending(true);
+      setError(undefined);
+      try {
+        const resp = await client.get({ id: kubeconfigSecretId });
+        const bytes = resp.object?.data.kubeconfig;
+        if (!bytes) {
+          throw new Error('Kubeconfig secret is missing kubeconfig data');
+        }
+        triggerDownload(new TextDecoder().decode(bytes), `${clusterName}-kubeconfig.yaml`);
+      } catch (e) {
+        setError(e);
+      } finally {
+        setIsPending(false);
       }
-      return res.text();
     },
-  });
+    [client],
+  );
+
+  return { download, isPending, error, setError };
+};
+
+export const useFetchClusterPassword = (passwordSecretId: string) => {
+  const client = useApiFetch(Secrets);
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<unknown>();
+  const [password, setPassword] = useState<string>();
+  const [resetId, setResetId] = useState<number>(0);
+
+  useEffect(() => {
+    if (!passwordSecretId) {
+      setPassword(undefined);
+      return;
+    }
+
+    const controller = new AbortController();
+    (async () => {
+      setIsPending(true);
+      setError(undefined);
+      try {
+        const resp = await client.get({ id: passwordSecretId }, { signal: controller.signal });
+        const bytes = resp.object?.data.password;
+        setPassword(bytes ? new TextDecoder().decode(bytes) : undefined);
+      } catch (e) {
+        if (!controller.signal.aborted) {
+          setError(e);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsPending(false);
+        }
+      }
+    })();
+  }, [client, resetId, passwordSecretId]);
+
+  const retry = useCallback(() => {
+    setPassword(undefined);
+    setResetId((id) => id + 1);
+  }, []);
+
+  return { password, isPending, error, retry };
+};

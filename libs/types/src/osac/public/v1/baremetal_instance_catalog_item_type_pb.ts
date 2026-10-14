@@ -17,21 +17,27 @@
 
 import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
-import type { FieldDefinition } from "./field_definition_type_pb";
-import { file_osac_public_v1_field_definition_type } from "./field_definition_type_pb";
+import { file_buf_validate_validate } from "../../../buf/validate/validate_pb";
+import { file_google_api_field_behavior } from "../../../google/api/field_behavior_pb";
+import type { BareMetalInstanceRunStrategyFieldPolicy, BareMetalInstanceTypeReferenceFieldPolicy, BareMetalNetworkAttachmentListFieldPolicy, BoolFieldPolicy, DiskImageReferenceFieldPolicy, StringFieldPolicy, TemplateParameterPolicy } from "./field_policy_type_pb";
+import { file_osac_public_v1_field_policy_type } from "./field_policy_type_pb";
 import type { Metadata } from "./metadata_type_pb";
 import { file_osac_public_v1_metadata_type } from "./metadata_type_pb";
+import type { BareMetalInstanceTemplateReference } from "./baremetal_instance_template_type_pb";
+import { file_osac_public_v1_baremetal_instance_template_type } from "./baremetal_instance_template_type_pb";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file osac/public/v1/baremetal_instance_catalog_item_type.proto.
  */
 export const file_osac_public_v1_baremetal_instance_catalog_item_type: GenFile = /*@__PURE__*/
-  fileDesc("Cjlvc2FjL3B1YmxpYy92MS9iYXJlbWV0YWxfaW5zdGFuY2VfY2F0YWxvZ19pdGVtX3R5cGUucHJvdG8SDm9zYWMucHVibGljLnYxItsBChxCYXJlTWV0YWxJbnN0YW5jZUNhdGFsb2dJdGVtEgoKAmlkGAEgASgJEioKCG1ldGFkYXRhGAIgASgLMhgub3NhYy5wdWJsaWMudjEuTWV0YWRhdGESDQoFdGl0bGUYAyABKAkSEwoLZGVzY3JpcHRpb24YBCABKAkSEAoIdGVtcGxhdGUYBSABKAkSEQoJcHVibGlzaGVkGAYgASgIEjoKEWZpZWxkX2RlZmluaXRpb25zGAggAygLMh8ub3NhYy5wdWJsaWMudjEuRmllbGREZWZpbml0aW9uYgZwcm90bzM", [file_osac_public_v1_field_definition_type, file_osac_public_v1_metadata_type]);
+  fileDesc("Cjlvc2FjL3B1YmxpYy92MS9iYXJlbWV0YWxfaW5zdGFuY2VfY2F0YWxvZ19pdGVtX3R5cGUucHJvdG8SDm9zYWMucHVibGljLnYxIpMEChxCYXJlTWV0YWxJbnN0YW5jZUNhdGFsb2dJdGVtEgoKAmlkGAEgASgJEioKCG1ldGFkYXRhGAIgASgLMhgub3NhYy5wdWJsaWMudjEuTWV0YWRhdGESDQoFdGl0bGUYAyABKAkSEwoLZGVzY3JpcHRpb24YBCABKAkSUgoIdGVtcGxhdGUYBSABKAsyMi5vc2FjLnB1YmxpYy52MS5CYXJlTWV0YWxJbnN0YW5jZVRlbXBsYXRlUmVmZXJlbmNlQgzgQQLgQQW6SAPIAQESEQoJcHVibGlzaGVkGAYgASgIEmEKE3RlbXBsYXRlX3BhcmFtZXRlcnMYCSADKAsyRC5vc2FjLnB1YmxpYy52MS5CYXJlTWV0YWxJbnN0YW5jZUNhdGFsb2dJdGVtLlRlbXBsYXRlUGFyYW1ldGVyc0VudHJ5EkIKBmZpZWxkcxgKIAEoCzIyLm9zYWMucHVibGljLnYxLkJhcmVNZXRhbEluc3RhbmNlQ2F0YWxvZ0l0ZW1GaWVsZHMaYgoXVGVtcGxhdGVQYXJhbWV0ZXJzRW50cnkSCwoDa2V5GAEgASgJEjYKBXZhbHVlGAIgASgLMicub3NhYy5wdWJsaWMudjEuVGVtcGxhdGVQYXJhbWV0ZXJQb2xpY3k6AjgBSgQIBxAISgQICBAJUgZ0ZW5hbnRSEWZpZWxkX2RlZmluaXRpb25zIqQECiJCYXJlTWV0YWxJbnN0YW5jZUNhdGFsb2dJdGVtRmllbGRzEjkKDnNzaF9wdWJsaWNfa2V5GAEgASgLMiEub3NhYy5wdWJsaWMudjEuU3RyaW5nRmllbGRQb2xpY3kSNAoJdXNlcl9kYXRhGAIgASgLMiEub3NhYy5wdWJsaWMudjEuU3RyaW5nRmllbGRQb2xpY3kSTQoMcnVuX3N0cmF0ZWd5GAMgASgLMjcub3NhYy5wdWJsaWMudjEuQmFyZU1ldGFsSW5zdGFuY2VSdW5TdHJhdGVneUZpZWxkUG9saWN5ElYKE25ldHdvcmtfYXR0YWNobWVudHMYBSABKAsyOS5vc2FjLnB1YmxpYy52MS5CYXJlTWV0YWxOZXR3b3JrQXR0YWNobWVudExpc3RGaWVsZFBvbGljeRJEChthdXRvX2V4dGVybmFsX2lwX2F0dGFjaG1lbnQYBiABKAsyHy5vc2FjLnB1YmxpYy52MS5Cb29sRmllbGRQb2xpY3kSUAoNaW5zdGFuY2VfdHlwZRgHIAEoCzI5Lm9zYWMucHVibGljLnYxLkJhcmVNZXRhbEluc3RhbmNlVHlwZVJlZmVyZW5jZUZpZWxkUG9saWN5EkEKCmRpc2tfaW1hZ2UYCCABKAsyLS5vc2FjLnB1YmxpYy52MS5EaXNrSW1hZ2VSZWZlcmVuY2VGaWVsZFBvbGljeUoECAQQBVIFaW1hZ2UiYgolQmFyZU1ldGFsSW5zdGFuY2VDYXRhbG9nSXRlbVJlZmVyZW5jZRIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEg8KB3Byb2plY3QYAyABKAkSDgoGc2hhcmVkGAQgASgIYgZwcm90bzM", [file_buf_validate_validate, file_google_api_field_behavior, file_osac_public_v1_field_policy_type, file_osac_public_v1_metadata_type, file_osac_public_v1_baremetal_instance_template_type]);
 
 /**
  * A bare metal instance catalog item defines a curated hardware offering that references an underlying bare metal
- * instance template.
+ * instance template. Admins control typed resource-field and template-parameter policies, including locked values and defaults.
+ *
+ * buf:lint:ignore OSAC_OBJECT_SHAPE
  *
  * @generated from message osac.public.v1.BareMetalInstanceCatalogItem
  */
@@ -63,25 +69,32 @@ export type BareMetalInstanceCatalogItem = Message<"osac.public.v1.BareMetalInst
   description: string;
 
   /**
-   * Identifier of the underlying bare metal instance template that this catalog item references.
+   * Reference to the underlying bare metal instance template that this catalog item references.
    *
-   * @generated from field: string template = 5;
+   * @generated from field: osac.public.v1.BareMetalInstanceTemplateReference template = 5;
    */
-  template: string;
+  template?: BareMetalInstanceTemplateReference | undefined;
 
   /**
-   * Whether this catalog item is published.
+   * Whether this catalog item is available for provisioning. Drafts retain ordinary tenant/project visibility.
    *
    * @generated from field: bool published = 6;
    */
   published: boolean;
 
   /**
-   * Definitions of the fields that users can or cannot set when creating a resource from this catalog item.
+   * Policies that govern template parameters during resource creation.
    *
-   * @generated from field: repeated osac.public.v1.FieldDefinition field_definitions = 8;
+   * @generated from field: map<string, osac.public.v1.TemplateParameterPolicy> template_parameters = 9;
    */
-  fieldDefinitions: FieldDefinition[];
+  templateParameters: { [key: string]: TemplateParameterPolicy };
+
+  /**
+   * Policies that govern bare metal instance fields during resource creation.
+   *
+   * @generated from field: osac.public.v1.BareMetalInstanceCatalogItemFields fields = 10;
+   */
+  fields?: BareMetalInstanceCatalogItemFields | undefined;
 };
 
 /**
@@ -90,4 +103,91 @@ export type BareMetalInstanceCatalogItem = Message<"osac.public.v1.BareMetalInst
  */
 export const BareMetalInstanceCatalogItemSchema: GenMessage<BareMetalInstanceCatalogItem> = /*@__PURE__*/
   messageDesc(file_osac_public_v1_baremetal_instance_catalog_item_type, 0);
+
+/**
+ * Groups the policies for governable bare metal instance fields.
+ *
+ * @generated from message osac.public.v1.BareMetalInstanceCatalogItemFields
+ */
+export type BareMetalInstanceCatalogItemFields = Message<"osac.public.v1.BareMetalInstanceCatalogItemFields"> & {
+  /**
+   * @generated from field: osac.public.v1.StringFieldPolicy ssh_public_key = 1;
+   */
+  sshPublicKey?: StringFieldPolicy | undefined;
+
+  /**
+   * @generated from field: osac.public.v1.StringFieldPolicy user_data = 2;
+   */
+  userData?: StringFieldPolicy | undefined;
+
+  /**
+   * @generated from field: osac.public.v1.BareMetalInstanceRunStrategyFieldPolicy run_strategy = 3;
+   */
+  runStrategy?: BareMetalInstanceRunStrategyFieldPolicy | undefined;
+
+  /**
+   * @generated from field: osac.public.v1.BareMetalNetworkAttachmentListFieldPolicy network_attachments = 5;
+   */
+  networkAttachments?: BareMetalNetworkAttachmentListFieldPolicy | undefined;
+
+  /**
+   * @generated from field: osac.public.v1.BoolFieldPolicy auto_external_ip_attachment = 6;
+   */
+  autoExternalIpAttachment?: BoolFieldPolicy | undefined;
+
+  /**
+   * Policy for the bare metal instance type selected for host placement.
+   *
+   * @generated from field: osac.public.v1.BareMetalInstanceTypeReferenceFieldPolicy instance_type = 7;
+   */
+  instanceType?: BareMetalInstanceTypeReferenceFieldPolicy | undefined;
+
+  /**
+   * Policy for the DiskImage used to provision the instance.
+   *
+   * @generated from field: osac.public.v1.DiskImageReferenceFieldPolicy disk_image = 8;
+   */
+  diskImage?: DiskImageReferenceFieldPolicy | undefined;
+};
+
+/**
+ * Describes the message osac.public.v1.BareMetalInstanceCatalogItemFields.
+ * Use `create(BareMetalInstanceCatalogItemFieldsSchema)` to create a new message.
+ */
+export const BareMetalInstanceCatalogItemFieldsSchema: GenMessage<BareMetalInstanceCatalogItemFields> = /*@__PURE__*/
+  messageDesc(file_osac_public_v1_baremetal_instance_catalog_item_type, 1);
+
+/**
+ * Reference to a BareMetalInstanceCatalogItem resource.
+ *
+ * @generated from message osac.public.v1.BareMetalInstanceCatalogItemReference
+ */
+export type BareMetalInstanceCatalogItemReference = Message<"osac.public.v1.BareMetalInstanceCatalogItemReference"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+
+  /**
+   * @generated from field: string project = 3;
+   */
+  project: string;
+
+  /**
+   * @generated from field: bool shared = 4;
+   */
+  shared: boolean;
+};
+
+/**
+ * Describes the message osac.public.v1.BareMetalInstanceCatalogItemReference.
+ * Use `create(BareMetalInstanceCatalogItemReferenceSchema)` to create a new message.
+ */
+export const BareMetalInstanceCatalogItemReferenceSchema: GenMessage<BareMetalInstanceCatalogItemReference> = /*@__PURE__*/
+  messageDesc(file_osac_public_v1_baremetal_instance_catalog_item_type, 2);
 

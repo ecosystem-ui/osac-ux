@@ -76,6 +76,7 @@ export default defineConfig(
       'func-style': ['error', 'expression', { allowArrowFunctions: true }],
       'semi': ['error', 'always'],
       'curly': ['error', 'all'],
+      '@typescript-eslint/no-non-null-assertion': 'error',
     },
   },
 
@@ -136,10 +137,14 @@ export default defineConfig(
       ],
     },
   },
-  // ui-components must use useApiQuery / useApiQueryClient, never tanstack hooks directly
+  // ui-components consumers must use the API wrappers instead of TanStack hooks directly
   {
     files: ['libs/ui-components/src/**/*.{ts,tsx}'],
-    ignores: ['libs/ui-components/src/api/use-api-query.ts', 'libs/ui-components/src/hooks/useTranslation.ts'],
+    ignores: [
+      'libs/ui-components/src/api/use-resource.ts',
+      'libs/ui-components/src/api/use-api-query.ts',
+      'libs/ui-components/src/hooks/useTranslation.ts',
+    ],
     rules: {
       'no-restricted-imports': [
         'error',
@@ -172,7 +177,7 @@ export default defineConfig(
             {
               name: '@tanstack/react-query',
               importNames: ['useQueryClient'],
-              message: "Use useApiQueryClient from '@osac/ui-components/api/use-api-query-client' instead. It constrains all cache operations to known ApiRoute values.",
+              message: "Use useApiQueryClient from '@osac/ui-components/api/use-api-query' instead. It constrains all cache operations to known ApiRoute values.",
             },
             {
               name: 'react-i18next',
@@ -183,22 +188,6 @@ export default defineConfig(
           ],
         },
       ],
-    },
-  },
-
-  {
-    files: [
-      'apps/app-frontend/src/**/*.test.{ts,tsx}',
-      'libs/ui-components/src/**/*.test.{ts,tsx}',
-      'libs/ui-components/src/**/test/**/*.{ts,tsx}',
-    ],
-    rules: {
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-argument': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-unsafe-return': 'off',
-      '@typescript-eslint/require-await': 'off',
     },
   },
 )

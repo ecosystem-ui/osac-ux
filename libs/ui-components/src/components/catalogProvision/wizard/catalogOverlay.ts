@@ -1,4 +1,3 @@
-import type { TFunction } from 'i18next';
 import type { AnySchema } from 'yup';
 import * as yup from 'yup';
 
@@ -201,6 +200,15 @@ export const formatReviewScalar = (value: unknown, sensitive = false): string =>
   if (typeof value === 'string' || typeof value === 'number' || typeof value === 'bigint') {
     return String(value);
   }
+  if (
+    typeof value === 'object' &&
+    value !== null &&
+    'name' in value &&
+    typeof value.name === 'string' &&
+    value.name
+  ) {
+    return value.name;
+  }
   return '—';
 };
 
@@ -211,12 +219,3 @@ export const formatBootDiskSizeForReview = (value: unknown): string => {
   }
   return `${formatted} GB`;
 };
-
-export type ReviewSection = {
-  title: string;
-  rows: Array<{ label: string; value: string }>;
-};
-
-export const reviewRow = (label: string, value: string) => ({ label, value });
-
-export type TranslateFn = TFunction;

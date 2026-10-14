@@ -17,16 +17,19 @@
 
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
+import { file_buf_validate_validate } from "../../../buf/validate/validate_pb";
 import { file_google_api_field_behavior } from "../../../google/api/field_behavior_pb";
 import type { Metadata } from "./metadata_type_pb";
 import { file_osac_public_v1_metadata_type } from "./metadata_type_pb";
+import type { VirtualNetworkLocalReference } from "./virtual_network_type_pb";
+import { file_osac_public_v1_virtual_network_type } from "./virtual_network_type_pb";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file osac/public/v1/subnet_type.proto.
  */
 export const file_osac_public_v1_subnet_type: GenFile = /*@__PURE__*/
-  fileDesc("CiBvc2FjL3B1YmxpYy92MS9zdWJuZXRfdHlwZS5wcm90bxIOb3NhYy5wdWJsaWMudjEimAEKBlN1Ym5ldBIKCgJpZBgBIAEoCRIqCghtZXRhZGF0YRgCIAEoCzIYLm9zYWMucHVibGljLnYxLk1ldGFkYXRhEigKBHNwZWMYAyABKAsyGi5vc2FjLnB1YmxpYy52MS5TdWJuZXRTcGVjEiwKBnN0YXR1cxgEIAEoCzIcLm9zYWMucHVibGljLnYxLlN1Ym5ldFN0YXR1cyKDAQoKU3VibmV0U3BlYxIfCg92aXJ0dWFsX25ldHdvcmsYASABKAlCBuBBAuBBBRIbCglpcHY0X2NpZHIYAiABKAlCA+BBBUgAiAEBEhsKCWlwdjZfY2lkchgDIAEoCUID4EEFSAGIAQFCDAoKX2lwdjRfY2lkckIMCgpfaXB2Nl9jaWRyIlwKDFN1Ym5ldFN0YXR1cxIqCgVzdGF0ZRgBIAEoDjIbLm9zYWMucHVibGljLnYxLlN1Ym5ldFN0YXRlEhQKB21lc3NhZ2UYAiABKAlIAIgBAUIKCghfbWVzc2FnZSqxAQoLU3VibmV0U3RhdGUSHAoYU1VCTkVUX1NUQVRFX1VOU1BFQ0lGSUVEEAASGAoUU1VCTkVUX1NUQVRFX1BFTkRJTkcQARIWChJTVUJORVRfU1RBVEVfUkVBRFkQAhIXChNTVUJORVRfU1RBVEVfRkFJTEVEEAMSGQoVU1VCTkVUX1NUQVRFX0RFTEVUSU5HEAQSHgoaU1VCTkVUX1NUQVRFX0RFTEVURV9GQUlMRUQQBWIGcHJvdG8z", [file_google_api_field_behavior, file_osac_public_v1_metadata_type]);
+  fileDesc("CiBvc2FjL3B1YmxpYy92MS9zdWJuZXRfdHlwZS5wcm90bxIOb3NhYy5wdWJsaWMudjEimAEKBlN1Ym5ldBIKCgJpZBgBIAEoCRIqCghtZXRhZGF0YRgCIAEoCzIYLm9zYWMucHVibGljLnYxLk1ldGFkYXRhEigKBHNwZWMYAyABKAsyGi5vc2FjLnB1YmxpYy52MS5TdWJuZXRTcGVjEiwKBnN0YXR1cxgEIAEoCzIcLm9zYWMucHVibGljLnYxLlN1Ym5ldFN0YXR1cyLpAgoKU3VibmV0U3BlYxJNCg92aXJ0dWFsX25ldHdvcmsYASABKAsyLC5vc2FjLnB1YmxpYy52MS5WaXJ0dWFsTmV0d29ya0xvY2FsUmVmZXJlbmNlQgbgQQLgQQUSdgoJaXB2NF9jaWRyGAIgASgJQl7gQQW6SFi6AU4KE2Nhbm9uaWNhbF9pcHY0X2NpZHISHW11c3QgYmUgYSBjYW5vbmljYWwgSVB2NCBDSURSGhh0aGlzLmlzSXBQcmVmaXgoNCwgdHJ1ZSnIAQFyAhABSACIAQESeAoJaXB2Nl9jaWRyGAMgASgJQmDgQQW6SFq6AVcKF2lwdjZfY2lkcl9ub3Rfc3VwcG9ydGVkEjBJUHY2IGFuZCBkdWFsLXN0YWNrIG5ldHdvcmtpbmcgYXJlIG5vdCBzdXBwb3J0ZWQaCnRoaXMgPT0gJydIAYgBAUIMCgpfaXB2NF9jaWRyQgwKCl9pcHY2X2NpZHIiXAoMU3VibmV0U3RhdHVzEioKBXN0YXRlGAEgASgOMhsub3NhYy5wdWJsaWMudjEuU3VibmV0U3RhdGUSFAoHbWVzc2FnZRgCIAEoCUgAiAEBQgoKCF9tZXNzYWdlIjAKFFN1Ym5ldExvY2FsUmVmZXJlbmNlEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkqsQEKC1N1Ym5ldFN0YXRlEhwKGFNVQk5FVF9TVEFURV9VTlNQRUNJRklFRBAAEhgKFFNVQk5FVF9TVEFURV9QRU5ESU5HEAESFgoSU1VCTkVUX1NUQVRFX1JFQURZEAISFwoTU1VCTkVUX1NUQVRFX0ZBSUxFRBADEhkKFVNVQk5FVF9TVEFURV9ERUxFVElORxAEEh4KGlNVQk5FVF9TVEFURV9ERUxFVEVfRkFJTEVEEAViBnByb3RvMw", [file_buf_validate_validate, file_google_api_field_behavior, file_osac_public_v1_metadata_type, file_osac_public_v1_virtual_network_type]);
 
 /**
  * Represents a subdivision of a VirtualNetwork for organizing compute instances.
@@ -36,10 +39,8 @@ export const file_osac_public_v1_subnet_type: GenFile = /*@__PURE__*/
  * VirtualNetwork and Subnet (one subnet per network), but the schema is designed to support multiple subnets per
  * VirtualNetwork in the future.
  *
- * Subnets support flexible IP addressing to match the parent VirtualNetwork's capabilities:
- * - IPv4-only: Set ipv4_cidr, leave ipv6_cidr empty
- * - IPv6-only: Set ipv6_cidr, leave ipv4_cidr empty
- * - Dual-stack: Set both ipv4_cidr and ipv6_cidr
+ * Subnets currently support canonical IPv4 addressing only. The legacy ipv6_cidr field remains in the wire
+ * contract for compatibility, but non-empty IPv6 and dual-stack requests are rejected.
  *
  * The parent VirtualNetwork relationship should be specified via metadata.annotations using the 'osac.openshift.io/owner-reference'
  * key with the VirtualNetwork ID as the value. This establishes resource hierarchy for garbage collection, ensuring
@@ -101,10 +102,10 @@ export const SubnetSchema: GenMessage<Subnet> = /*@__PURE__*/
  */
 export type SubnetSpec = Message<"osac.public.v1.SubnetSpec"> & {
   /**
-   * Parent VirtualNetwork ID. Required and immutable after creation.
+   * Parent VirtualNetwork reference. Required and immutable after creation.
    *
-   * Must reference the ID of an existing VirtualNetwork in READY state. This field is required and immutable
-   * after creation. The referenced VirtualNetwork must be in the same region as this Subnet.
+   * Must reference an existing VirtualNetwork in READY state. The referenced VirtualNetwork must be
+   * in the same region as this Subnet.
    *
    * The system validates that:
    * - The VirtualNetwork exists
@@ -112,35 +113,27 @@ export type SubnetSpec = Message<"osac.public.v1.SubnetSpec"> & {
    * - The Subnet's CIDR blocks are subsets of the VirtualNetwork's CIDR blocks
    * - The Subnet's CIDR blocks do not overlap with other Subnets in the same VirtualNetwork
    *
-   * Example: "vnet-abc123"
-   *
-   * @generated from field: string virtual_network = 1;
+   * @generated from field: osac.public.v1.VirtualNetworkLocalReference virtual_network = 1;
    */
-  virtualNetwork: string;
+  virtualNetwork?: VirtualNetworkLocalReference | undefined;
 
   /**
-   * IPv4 CIDR block for this subnet. Optional for IPv6-only subnets. Immutable after creation.
+   * Canonical IPv4 CIDR block for this subnet. Required and immutable after creation.
    *
-   * Must be valid CIDR notation and a subset of the parent VirtualNetwork.spec.ipv4_cidr. Validation enforced
+   * Must be canonical IPv4 CIDR notation with no host bits set and a subset of the parent
+   * VirtualNetwork.spec.ipv4_cidr. Validation enforced
    * at service layer. The CIDR block must not overlap with other Subnets within the same VirtualNetwork.
    *
    * Example: "10.0.1.0/24", "192.168.100.0/24"
    *
-   * Leave empty for IPv6-only subnets.
    *
    * @generated from field: optional string ipv4_cidr = 2;
    */
   ipv4Cidr?: string | undefined;
 
   /**
-   * IPv6 CIDR block for this subnet. Optional for IPv4-only subnets. Immutable after creation.
+   * Legacy IPv6 CIDR field. IPv6 and dual-stack networking are not supported; non-empty values are rejected.
    *
-   * Must be valid CIDR notation and a subset of the parent VirtualNetwork.spec.ipv6_cidr. Validation enforced
-   * at service layer. The CIDR block must not overlap with other Subnets within the same VirtualNetwork.
-   *
-   * Example: "2001:db8::/64", "fd00:1234::/64"
-   *
-   * Leave empty for IPv4-only subnets.
    *
    * @generated from field: optional string ipv6_cidr = 3;
    */
@@ -196,6 +189,30 @@ export type SubnetStatus = Message<"osac.public.v1.SubnetStatus"> & {
  */
 export const SubnetStatusSchema: GenMessage<SubnetStatus> = /*@__PURE__*/
   messageDesc(file_osac_public_v1_subnet_type, 2);
+
+/**
+ * Local reference to a Subnet resource.
+ *
+ * @generated from message osac.public.v1.SubnetLocalReference
+ */
+export type SubnetLocalReference = Message<"osac.public.v1.SubnetLocalReference"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+};
+
+/**
+ * Describes the message osac.public.v1.SubnetLocalReference.
+ * Use `create(SubnetLocalReferenceSchema)` to create a new message.
+ */
+export const SubnetLocalReferenceSchema: GenMessage<SubnetLocalReference> = /*@__PURE__*/
+  messageDesc(file_osac_public_v1_subnet_type, 3);
 
 /**
  * Lifecycle states for Subnet resources.

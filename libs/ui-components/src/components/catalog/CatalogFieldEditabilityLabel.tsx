@@ -1,21 +1,29 @@
 import { Label } from '@patternfly/react-core';
 
-import { useTranslation } from '../../hooks/useTranslation';
+import { useTranslation } from '@osac/ui-components/hooks/useTranslation';
+
+import { type CatalogFieldPolicyBehavior } from './catalogFieldPolicyDisplay';
 
 interface CatalogFieldEditabilityLabelProps {
-  editable: boolean;
+  behavior: CatalogFieldPolicyBehavior | undefined;
 }
 
-export const CatalogFieldEditabilityLabel = ({ editable }: CatalogFieldEditabilityLabelProps) => {
+const CatalogFieldEditabilityLabel = ({ behavior }: CatalogFieldEditabilityLabelProps) => {
   const { t } = useTranslation();
 
-  return editable ? (
-    <Label variant="outline" color="green" isCompact>
-      {t('Editable')}
-    </Label>
-  ) : (
-    <Label variant="outline" color="grey" isCompact>
-      {t('Fixed')}
-    </Label>
-  );
+  if (!behavior) {
+    return null;
+  }
+
+  if (behavior === 'editable') {
+    return (
+      <Label color="purple" isCompact>
+        {t('Editable')}
+      </Label>
+    );
+  }
+
+  return <Label isCompact>{t('Locked')}</Label>;
 };
+
+export default CatalogFieldEditabilityLabel;

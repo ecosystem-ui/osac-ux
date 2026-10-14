@@ -4,28 +4,27 @@ import { EllipsisVIcon } from '@patternfly/react-icons/dist/esm/icons/ellipsis-v
 
 import type { ComputeInstance } from '@osac/types';
 import { ComputeInstanceState } from '@osac/types';
+import DeleteResourceButton from '@osac/ui-components/components/Resource/DeleteResourceButton';
 
-import { VmDeleteConfirmModal } from './DetailsPage/VmDeleteConfirmModal';
-import { usePatchComputeInstance } from '../../api/v1/compute-instance';
-import { useTranslation } from '../../hooks/useTranslation';
+import VmDeleteConfirmModal from './DetailsPage/VmDeleteConfirmModal';
+import { useVmPowerAction } from './useVmPowerAction';
 
 interface VmActionsMenuProps {
   vm: ComputeInstance;
 }
 
 export const VmActionsMenu = ({ vm }: VmActionsMenuProps) => {
-  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const patchVm = usePatchComputeInstance();
+  const { runPowerAction } = useVmPowerAction();
 
+  const name = vm.metadata?.name ?? vm.id;
   const state = vm.status?.state;
   const canStart = state === ComputeInstanceState.STOPPED;
   const canStop = state === ComputeInstanceState.RUNNING || state === ComputeInstanceState.PAUSED;
   const canRestart =
     state === ComputeInstanceState.RUNNING || state === ComputeInstanceState.PAUSED;
-  const canDelete =
-    state !== ComputeInstanceState.DELETING && state !== ComputeInstanceState.STARTING;
+  const canDelete = state !== ComputeInstanceState.DELETING;
 
   return (
     <>
@@ -44,7 +43,7 @@ export const VmActionsMenu = ({ vm }: VmActionsMenuProps) => {
             ref={ref}
             variant="plain"
             onClick={() => setOpen((o) => !o)}
-            aria-label={t('Actions for {{name}}', { name: vm.metadata?.name ?? vm.id })}
+            aria-label={`Actions for ${name}`}
           >
             <EllipsisVIcon />
           </MenuToggle>
@@ -59,11 +58,11 @@ export const VmActionsMenu = ({ vm }: VmActionsMenuProps) => {
               if (!canStart) {
                 return;
               }
-              patchVm.mutate({ id: vm.id, powerAction: 'start' });
+              runPowerAction(vm.id, name, 'start');
               setOpen(false);
             }}
           >
-            {t('Start')}
+            Start
           </DropdownItem>
           <DropdownItem
             value="stop"
@@ -72,11 +71,11 @@ export const VmActionsMenu = ({ vm }: VmActionsMenuProps) => {
               if (!canStop) {
                 return;
               }
-              patchVm.mutate({ id: vm.id, powerAction: 'stop' });
+              runPowerAction(vm.id, name, 'stop');
               setOpen(false);
             }}
           >
-            {t('Stop')}
+            Stop
           </DropdownItem>
           <DropdownItem
             value="restart"
@@ -85,15 +84,15 @@ export const VmActionsMenu = ({ vm }: VmActionsMenuProps) => {
               if (!canRestart) {
                 return;
               }
-              patchVm.mutate({ id: vm.id, powerAction: 'restart' });
+              runPowerAction(vm.id, name, 'restart');
               setOpen(false);
             }}
           >
-            {t('Restart')}
+            Restart
           </DropdownItem>
-          <DropdownItem
-            value="delete"
-            isDisabled={!canDelete}
+          <DeleteResourceButton
+            isDropdown
+            canDelete={canDelete}
             onClick={() => {
               if (!canDelete) {
                 return;
@@ -101,9 +100,7 @@ export const VmActionsMenu = ({ vm }: VmActionsMenuProps) => {
               setDeleteOpen(true);
               setOpen(false);
             }}
-          >
-            {t('Delete')}
-          </DropdownItem>
+          />
         </DropdownList>
       </Dropdown>
     </>

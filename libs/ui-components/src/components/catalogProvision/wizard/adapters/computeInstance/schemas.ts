@@ -1,70 +1,39 @@
 import type { TFunction } from 'i18next';
 import * as yup from 'yup';
 
-import { RUN_STRATEGY_OPTIONS } from './fields';
+import { buildNetworkAttachmentSchemas } from '@osac/ui-components/validation/network-attachment';
+import { resourceNameSchema } from '@osac/ui-components/validation/resource-name';
+import { userDataSchema } from '@osac/ui-components/validation/user-data';
+
 import {
   getCatalogFieldOverlay,
-  hasCatalogFieldDefinition,
   mergeCatalogValidation,
   readCatalogFieldDefinitions,
 } from '../../catalogOverlay';
 import type { WizardStepId } from '../../stepIds';
 
-const VALID_RUN_STRATEGIES = RUN_STRATEGY_OPTIONS.map((o) => o.value);
+const storageTierSchema = (t: TFunction) =>
+  yup
+    .object({
+      id: yup.string(),
+      name: yup.string(),
+    })
+    .test('storage-tier-id-or-name', t('Storage tier is required'), (value) => {
+      const id = value?.id?.trim() ?? '';
+      const name = value?.name?.trim() ?? '';
+      return Boolean(id || name);
+    });
 
 const buildComputeInstanceFieldDefinitions = (catalogItem: unknown, t: TFunction) => {
   const definitions = readCatalogFieldDefinitions(catalogItem);
 
-  const imageOverlay = getCatalogFieldOverlay(
-    'spec.image.source_ref',
-    definitions,
-    t('catalogProvision.vm.fields.image'),
-  );
-  const userDataOverlay = getCatalogFieldOverlay(
-    'spec.user_data',
-    definitions,
-    t('catalogProvision.vm.fields.userData'),
-  );
   const bootDiskOverlay = getCatalogFieldOverlay(
     'spec.boot_disk.size_gib',
     definitions,
     t('catalogProvision.vm.fields.bootDisk'),
   );
-  const sshKeyOverlay = getCatalogFieldOverlay(
-    'ssh_key',
-    definitions,
-    t('catalogProvision.vm.fields.sshKey'),
-  );
-  const sshKeyRequired = hasCatalogFieldDefinition('ssh_key', definitions);
-  const userDataRequired = hasCatalogFieldDefinition('spec.user_data', definitions);
 
   return {
-    catalogItemId: yup.string().required(t('catalogProvision.validation.catalogItemRequired')),
-    metadataName: yup.string().trim().required(t('catalogProvision.validation.nameRequired')),
-    specSshKey: mergeCatalogValidation(
-      yup.string(),
-      sshKeyOverlay,
-      sshKeyRequired,
-      t('catalogProvision.validation.required'),
-    ),
-    specImage: yup.object({
-      sourceRef: mergeCatalogValidation(
-        yup.string().trim(),
-        imageOverlay,
-        true,
-        t('catalogProvision.validation.imageRequired'),
-      ),
-    }),
-    specInstanceType: yup
-      .string()
-      .trim()
-      .required(t('catalogProvision.validation.instanceTypeRequired')),
-    specUserData: mergeCatalogValidation(
-      yup.string(),
-      userDataOverlay,
-      userDataRequired,
-      t('catalogProvision.validation.required'),
-    ),
     specBootDisk: yup.object({
       sizeGib: mergeCatalogValidation(
         yup
@@ -78,30 +47,37 @@ const buildComputeInstanceFieldDefinitions = (catalogItem: unknown, t: TFunction
         true,
         t('catalogProvision.validation.required'),
       ),
+      storageTier: storageTierSchema(t),
     }),
-    specNetworking: yup.object({
-      virtualNetworkId: yup
-        .string()
-        .required(t('catalogProvision.validation.virtualNetworkRequired')),
-      subnetId: yup.string().required(t('catalogProvision.validation.subnetRequired')),
-      securityGroupIds: yup
-        .array()
-        .of(yup.string().defined())
-        .min(1, t('catalogProvision.validation.securityGroupRequired')),
-    }),
-    specAdditionalDisks: yup.array().of(
+    specAdditionalDisks: yup.array(
       yup.object({
         sizeGib: yup
           .string()
-          .required('Disk size is required')
-          .test(
-            'additional-disk-number',
-            'Disk size must be a positive integer',
-            (value) => !value?.trim() || (Number.isInteger(Number(value)) && Number(value) > 0),
-          ),
+          .test('additional-disk-number', t('Additional disk size must be a number'), (value) => {
+            const size = Number(value?.trim());
+            return Number.isInteger(size) && size >= 1 && size <= 16384;
+          }),
+        storageTier: storageTierSchema(t),
       }),
     ),
-    specRunStrategy: yup.string().oneOf(VALID_RUN_STRATEGIES, 'Invalid run strategy'),
+    specNetworking: (() => {
+      const na = buildNetworkAttachmentSchemas(t);
+      return yup.object({
+        useDefaultNetwork: yup.boolean(),
+        virtualNetwork: yup.object().when('useDefaultNetwork', {
+          is: false,
+          then: () => na.requiredVirtualNetwork,
+          otherwise: () => na.optionalResourceSelect,
+        }),
+        subnet: yup.object().when('useDefaultNetwork', {
+          is: false,
+          then: () => na.requiredSubnet,
+          otherwise: () => na.optionalResourceSelect,
+        }),
+        securityGroups: na.securityGroupsSchema,
+        autoExternalIpAttachment: yup.boolean(),
+      });
+    })(),
   };
 };
 
@@ -128,42 +104,39 @@ export const buildComputeInstanceStepSchema = (
   switch (stepId) {
     case 'catalog':
       return yup.object({
-        catalogItemId: fields.catalogItemId,
+        catalogItemId: yup.string().required(t('Select a catalog item')),
       });
     case 'general':
       return yup.object({
         metadata: yup.object({
-          name: fields.metadataName,
+          name: resourceNameSchema(t),
         }),
         spec: yup.object({
-          sshKey: fields.specSshKey,
+          sshKey: yup.object({ name: yup.string() }),
         }),
       });
     case 'configuration':
       return yup.object({
         spec: yup.object({
-          image: fields.specImage,
-          instanceType: fields.specInstanceType,
-          userData: fields.specUserData,
+          instanceType: yup.string().required(t('Instance type is required')),
+          userData: yup.string().when('userDataSource', {
+            is: 'inline',
+            then: () => userDataSchema(t),
+            otherwise: (schema) => schema.notRequired(),
+          }),
+        }),
+      });
+    case 'storage':
+      return yup.object({
+        spec: yup.object({
           bootDisk: fields.specBootDisk,
           additionalDisks: fields.specAdditionalDisks,
-          runStrategy: fields.specRunStrategy,
         }),
       });
     case 'networking':
       return yup.object({
         spec: yup.object({
           networking: fields.specNetworking,
-          additionalNetworkAttachments: yup.array().of(
-            yup.object({
-              virtualNetworkId: yup.string().required('Virtual network is required'),
-              subnetId: yup.string().required('Subnet is required'),
-              securityGroupIds: yup
-                .array()
-                .of(yup.string().defined())
-                .min(1, 'At least one security group is required'),
-            }),
-          ),
         }),
       });
     default:

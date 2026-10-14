@@ -1,4 +1,11 @@
-import { readBillableComponents, totalHourlyRate } from '../../api/v1/template-billing';
+import type { TFunction } from 'i18next';
+
+import type {
+  BareMetalInstanceCatalogItem,
+  ClusterCatalogItem,
+  ComputeInstanceCatalogItem,
+} from '@osac/types';
+
 import {
   CATALOG_ITEM_RESOURCE_FIELD_PATHS,
   type CatalogFieldDefinition,
@@ -8,158 +15,61 @@ import {
   isCatalogCardResourceFieldPath,
   isCatalogItemResourceFieldPath,
   isClusterCatalogItemResourceFieldPath,
+  normalizeCatalogFieldPath,
   resolvedFieldDefault,
 } from '../catalogProvision/catalogFieldDefinition';
 
-/** Minimal catalog item shape for display helpers — wire JSON and wizard drafts. */
-export interface CatalogItemForDisplay {
-  id: string;
-  title: string;
-  description?: string;
-  template?: string;
-  published?: boolean;
-  /**
-   * When non-empty, only the listed tenant IDs can see this item.
-   * An empty array or undefined means the item is visible to ALL tenants.
-   */
-  allowed_tenants?: string[];
-  metadata?: {
-    name?: string;
-    labels?: Record<string, string>;
-    annotations?: Record<string, string>;
-  };
-  fieldDefinitions?: ReadonlyArray<{
-    path: string;
-    displayName?: string;
-    display_name?: string;
-    editable?: boolean;
-    default?: unknown;
-    validationSchema?: unknown;
-    validation_schema?: unknown;
-  }>;
-  field_definitions?: CatalogItemForDisplay['fieldDefinitions'];
-}
+export const isCatalogItemKind = (value: string | undefined): value is CatalogItemKind =>
+  value === 'vm' || value === 'cluster' || value === 'bm';
 
-/**
- * Returns true if the given tenant may see this catalog item.
- * Items with no `allowed_tenants` (or an empty list) are visible to everyone.
- */
-export const catalogItemIsAllowed = (item: CatalogItemForDisplay, tenantId: string): boolean => {
-  const list = item.allowed_tenants;
-  if (!list || list.length === 0) {
-    return true;
+export type CatalogItemKind = 'vm' | 'bm' | 'cluster';
+
+export type CatalogItem =
+  | ClusterCatalogItem
+  | BareMetalInstanceCatalogItem
+  | ComputeInstanceCatalogItem;
+
+export const catalogItemTypeBadgeLabel = (kind: CatalogItem, t: TFunction): string => {
+  switch (kind.$typeName) {
+    case 'osac.public.v1.ComputeInstanceCatalogItem':
+      return t('Virtual Machine');
+    case 'osac.public.v1.BareMetalInstanceCatalogItem':
+      return t('Bare Metal');
+    case 'osac.public.v1.ClusterCatalogItem':
+      return t('Cluster');
+    default:
+      return t('Unknown');
   }
-  return list.includes(tenantId);
 };
-
-export type CatalogItemKind = 'vm' | 'cluster' | 'baremetal' | 'maas';
-
-export const inferCatalogItemKind = (item: CatalogItemForDisplay): CatalogItemKind => {
-  if (
-    catalogItemFieldDefinitions(item).some((def) => isClusterCatalogItemResourceFieldPath(def.path))
-  ) {
-    return 'cluster';
-  }
-  return 'vm';
-};
-
-export const catalogFieldDefault = (item: CatalogItemForDisplay, path: string): unknown => {
-  const def = catalogItemFieldDefinitions(item).find((entry) => entry.path === path);
-  return def ? resolvedFieldDefault(def) : undefined;
-};
-
-export const catalogItemSubtitle = (item: CatalogItemForDisplay): string => {
-  const description = item.description?.trim();
-  if (description) {
-    return description.length <= 120 ? description : `${description.slice(0, 119)}…`;
-  }
-  return item.metadata?.name ?? item.id;
-};
-
-/** Keys handled with dedicated UI treatment — excluded from the generic label chips. */
-const HIDDEN_LABEL_KEYS = new Set([
-  'price_per_hour',
-  'price_per_input_token',
-  'price_per_output_token',
-]);
 
 export const catalogItemMetadataLabelEntries = (
-  item: CatalogItemForDisplay,
+  item: CatalogItem,
 ): Array<{ key: string; value: string }> => {
   const labels = item.metadata?.labels;
   if (!labels) {
     return [];
   }
   return Object.entries(labels)
-    .filter(([key]) => !HIDDEN_LABEL_KEYS.has(key))
     .map(([key, value]) => ({ key, value: value.trim() }))
     .filter(({ value }) => value.length > 0)
     .sort((a, b) => a.key.localeCompare(b.key));
 };
 
-/** Returns formatted price string or undefined if no recognized price label.
- *  - Capacity-based (VM/CaaS/BM): "$0.15/hr"
- *  - Consumption-based (MaaS): "$2.00/1M tokens" (input token rate)
- *
- * Prefers the canonical BillableComponent annotation (osac.io/billable-components)
- * when present, falling back to the legacy price_per_hour / price_per_input_token
- * labels for items created before the BillableComponent model existed.
- */
-export const catalogItemPrice = (item: CatalogItemForDisplay): string | undefined => {
-  const components = readBillableComponents(item);
-  if (components.length > 0) {
-    const hourly = totalHourlyRate(components, undefined);
-    if (hourly > 0) {
-      return `$${hourly.toFixed(2)}/hr`;
-    }
-    const inputComponent = components.find((c) => c.meterKey === 'input-tokens');
-    if (inputComponent) {
-      const num = parseFloat(inputComponent.baseRate);
-      if (!isNaN(num)) {
-        return `$${(num * 1_000_000).toFixed(2)}/1M tokens`;
-      }
-    }
-  }
-
-  const hourly = item.metadata?.labels?.['price_per_hour'];
-  if (hourly) {
-    const num = parseFloat(hourly);
-    if (!isNaN(num)) {
-      return `$${num.toFixed(2)}/hr`;
-    }
-  }
-  const inputToken = item.metadata?.labels?.['price_per_input_token'];
-  if (inputToken) {
-    const num = parseFloat(inputToken);
-    if (!isNaN(num)) {
-      return `$${(num * 1_000_000).toFixed(2)}/1M tokens`;
-    }
-  }
-  return undefined;
-};
-
-export const catalogFieldDefinitionForPath = (
-  item: CatalogItemForDisplay,
-  path: string,
-): CatalogFieldDefinition | undefined => {
-  return catalogItemFieldDefinitions(item).find((def) => def.path === path);
-};
-
 const FALLBACK_RESOURCE_LABELS: Record<CatalogItemResourceFieldPath, string> = {
-  cores: 'vCPU',
+  cores: 'vCPUs',
   memory_gib: 'Memory',
   'boot_disk.size_gib': 'Boot disk',
 };
 
 /** Field definitions shown as resource labels on catalog cards (VM or cluster). */
 export const catalogItemResourceFieldDefinitions = (
-  item: CatalogItemForDisplay,
+  item: CatalogItem,
 ): CatalogFieldDefinition[] => {
   const defs = catalogItemFieldDefinitions(item);
-  const byPath = new Map(defs.map((def) => [def.path, def]));
+  const byNormalizedPath = new Map(defs.map((def) => [normalizeCatalogFieldPath(def.path), def]));
 
   const vmResourceDefs = CATALOG_ITEM_RESOURCE_FIELD_PATHS.flatMap((path) => {
-    const def = byPath.get(path);
+    const def = byNormalizedPath.get(path);
     return def ? [def] : [];
   });
   if (vmResourceDefs.length > 0) {
@@ -169,7 +79,16 @@ export const catalogItemResourceFieldDefinitions = (
   return defs.filter((def) => isClusterCatalogItemResourceFieldPath(def.path));
 };
 
-const formatCatalogResourcePart = (def: CatalogFieldDefinition): string | null => {
+/** Configuration defaults shown on the detail page (excludes resource chips already listed above). */
+export const catalogItemConfigurationFieldDefinitions = (
+  item: CatalogItem,
+): CatalogFieldDefinition[] => {
+  return catalogItemFieldDefinitions(item).filter(
+    (def) => !isCatalogCardResourceFieldPath(def.path),
+  );
+};
+
+export const formatCatalogResourcePart = (def: CatalogFieldDefinition): string | null => {
   if (!isCatalogCardResourceFieldPath(def.path)) {
     return null;
   }
@@ -181,8 +100,9 @@ const formatCatalogResourcePart = (def: CatalogFieldDefinition): string | null =
   if (!value) {
     return null;
   }
+  const normalizedPath = normalizeCatalogFieldPath(def.path);
   const label = isCatalogItemResourceFieldPath(def.path)
-    ? def.displayName || FALLBACK_RESOURCE_LABELS[def.path]
+    ? def.displayName || FALLBACK_RESOURCE_LABELS[normalizedPath as CatalogItemResourceFieldPath]
     : def.displayName;
   if (!label) {
     return null;
@@ -190,18 +110,18 @@ const formatCatalogResourcePart = (def: CatalogFieldDefinition): string | null =
   return `${value} ${label}`;
 };
 
-export const catalogItemResourceParts = (item: CatalogItemForDisplay): string[] => {
+export const catalogItemResourceParts = (item: CatalogItem): string[] => {
   return catalogItemResourceFieldDefinitions(item)
     .map((def) => formatCatalogResourcePart(def))
     .filter((part): part is string => part != null);
 };
 
-export const catalogItemResourceLine = (item: CatalogItemForDisplay): string | undefined => {
+export const catalogItemResourceLine = (item: CatalogItem): string | undefined => {
   const parts = catalogItemResourceParts(item);
   return parts.length ? parts.join(' · ') : undefined;
 };
 
-export const searchableCatalogItemText = (item: CatalogItemForDisplay): string => {
+export const searchableCatalogItemText = (item: CatalogItem): string => {
   const labels = item.metadata?.labels ?? {};
   const fieldText = catalogItemFieldDefinitions(item)
     .map(
@@ -211,7 +131,6 @@ export const searchableCatalogItemText = (item: CatalogItemForDisplay): string =
     .join(' ');
 
   return [
-    item.title,
     item.description,
     item.metadata?.name,
     fieldText,
@@ -222,10 +141,7 @@ export const searchableCatalogItemText = (item: CatalogItemForDisplay): string =
     .toLowerCase();
 };
 
-export const filterCatalogItemsBySearch = <T extends CatalogItemForDisplay>(
-  items: T[],
-  search: string,
-): T[] => {
+export const filterCatalogItemsBySearch = (items: CatalogItem[], search: string): CatalogItem[] => {
   const searchTerm = search.trim().toLowerCase();
   if (!searchTerm) {
     return items;
@@ -233,53 +149,12 @@ export const filterCatalogItemsBySearch = <T extends CatalogItemForDisplay>(
   return items.filter((item) => searchableCatalogItemText(item).includes(searchTerm));
 };
 
-/**
- * Client-side label filter — mirrors the CEL server filter for demo mode.
- * Only entries where value is non-empty are applied.
- */
-export const filterCatalogItemsByLabels = <T extends CatalogItemForDisplay>(
-  items: T[],
-  labelFilters: Record<string, string>,
-): T[] => {
-  const active = Object.entries(labelFilters).filter(([, v]) => Boolean(v));
-  if (active.length === 0) {
-    return items;
-  }
-  return items.filter((item) =>
-    active.every(([key, value]) => item.metadata?.labels?.[key] === value),
-  );
-};
+export type CatalogPublishedFilter = 'published' | 'unpublished';
 
-/**
- * Builds a CEL filter expression for metadata.labels suitable for the
- * fulfillment-service list API `filter` query param.
- * e.g. "metadata.labels['os'] == 'rhel' && metadata.labels['arch'] == 'x86_64'"
- */
-export const buildLabelCelFilter = (labelFilters: Record<string, string>): string | undefined => {
-  const parts = Object.entries(labelFilters)
-    .filter(([, v]) => Boolean(v))
-    .map(([k, v]) => `metadata.labels['${k}'] == '${v}'`);
-  return parts.length ? parts.join(' && ') : undefined;
-};
+export const isCatalogPublishedFilter = (value: string): value is CatalogPublishedFilter =>
+  value === 'published' || value === 'unpublished';
 
-/**
- * Derives unique values for a given label key across all provided catalog item arrays.
- */
-export const collectLabelValues = (
-  items: CatalogItemForDisplay[][],
-  labelKey: string,
-): string[] => {
-  const seen = new Set<string>();
-  for (const list of items) {
-    for (const item of list) {
-      const val = item.metadata?.labels?.[labelKey];
-      if (val) {
-        seen.add(val);
-      }
-    }
-  }
-  return Array.from(seen).sort();
-};
+export const GLOBAL_TENANT_VALUE = 'shared';
 
 export const formatCatalogFieldDefault = (def: CatalogFieldDefinition): string => {
   const defaultValue = resolvedFieldDefault(def);
@@ -287,4 +162,30 @@ export const formatCatalogFieldDefault = (def: CatalogFieldDefinition): string =
     return '—';
   }
   return fieldDefinitionDefaultToInputString(defaultValue) || '—';
+};
+
+export const getCatalogCreateActionPath = (item: CatalogItem) => {
+  switch (item.$typeName) {
+    case 'osac.public.v1.ComputeInstanceCatalogItem':
+      return `/vms/create/${item.id}`;
+    case 'osac.public.v1.ClusterCatalogItem':
+      return `/clusters/create/${item.id}`;
+    case 'osac.public.v1.BareMetalInstanceCatalogItem':
+      return `/bare-metal/create/${item.id}`;
+    default:
+      return '#';
+  }
+};
+
+export const catalogItemDetailsPath = (item: CatalogItem): string => {
+  switch (item.$typeName) {
+    case 'osac.public.v1.ComputeInstanceCatalogItem':
+      return `/catalog/vm/${item.id}`;
+    case 'osac.public.v1.BareMetalInstanceCatalogItem':
+      return `/catalog/bm/${item.id}`;
+    case 'osac.public.v1.ClusterCatalogItem':
+      return `/catalog/cluster/${item.id}`;
+    default:
+      return '#';
+  }
 };
