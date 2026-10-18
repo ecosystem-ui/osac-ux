@@ -17,11 +17,7 @@ interface ClustersTableProps {
   clusters: Cluster[];
 }
 
-export const ClustersTable = ({ clusters }: ClustersTableProps) => {
-  const { t } = useTranslation();
-
-  // Only fetch the versions these clusters reference (by spec.version.name),
-  // in one List call — scales as the catalog grows and paginates.
+export const useClusterVersionLookup = (clusters: Cluster[]) => {
   const versionNames = useMemo(
     () => [
       ...new Set(
@@ -37,11 +33,15 @@ export const ClustersTable = ({ clusters }: ClustersTableProps) => {
     { enabled: versionNames.length > 0 },
   );
 
-  // Clusters reference versions by spec.version.name, so key the catalog by name.
-  const clusterVersionByName = useMemo(
-    () => new Map(clusterVersions.map((cv) => [cv.metadata?.name, cv])),
-    [clusterVersions],
-  );
+  return {
+    clusterVersionByName: new Map(clusterVersions.map((cv) => [cv.metadata?.name, cv])),
+    isClusterVersionsLoading,
+  };
+};
+
+export const ClustersTable = ({ clusters }: ClustersTableProps) => {
+  const { t } = useTranslation();
+  const { clusterVersionByName, isClusterVersionsLoading } = useClusterVersionLookup(clusters);
 
   return (
     <Table aria-label={t('Clusters')} variant="compact">
@@ -49,8 +49,8 @@ export const ClustersTable = ({ clusters }: ClustersTableProps) => {
         <Tr>
           <Th>{t('Name')}</Th>
           <Th>{t('Status')}</Th>
-          <Th>{t('Version')}</Th>
           <Th>{t('Lifecycle')}</Th>
+          <Th>{t('Version')}</Th>
           <Th>{t('API URL')}</Th>
           <Th>{t('Created')}</Th>
           <Th aria-label={t('Actions')} />
@@ -76,19 +76,19 @@ export const ClustersTable = ({ clusters }: ClustersTableProps) => {
               <Td dataLabel={t('Status')}>
                 <ClusterStatusLabel state={cluster.status?.state} />
               </Td>
-              <Td dataLabel={t('Version')}>
-                {isClusterVersionsLoading ? (
-                  <Skeleton width="80px" />
-                ) : (
-                  clusterVersion?.spec?.version || versionRef?.name || '—'
-                )}
-              </Td>
               <Td dataLabel={t('Lifecycle')}>
                 {isClusterVersionsLoading ? (
                   <Skeleton width="80px" />
                 ) : clusterVersion ? (
                   <ClusterVersionLifecycleLabel clusterVersion={clusterVersion} />
                 ) : null}
+              </Td>
+              <Td dataLabel={t('Version')}>
+                {isClusterVersionsLoading ? (
+                  <Skeleton width="80px" />
+                ) : (
+                  clusterVersion?.spec?.version || versionRef?.name || '—'
+                )}
               </Td>
               <Td dataLabel={t('API URL')}>
                 {locked ? '—' : <ExternalLink href={apiUrl} showUnsafeAsText />}

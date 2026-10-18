@@ -1,0 +1,109 @@
+/* ── Left column ─────────────────────────────────────────── */
+
+.project-details-page__column {
+  min-width: 0;
+}
+
+.project-details-page__column .pf-v6-c-description-list {
+  margin-block-start: 0;
+}
+
+/* DL term override → see shared/details-page.css (.details-page__overview) */
+
+.project-details-page__empty {
+  margin: 0;
+  color: var(--pf-t--global--text--color--subtle);
+}
+
+.project-details-page__section-divider {
+  margin-block: var(--pf-t--global--spacer--md);
+}
+
+.project-details-page__nested-projects-table {
+  margin-block-start: var(--pf-t--global--spacer--sm);
+}
+
+.project-details-page__services {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pf-t--global--spacer--sm);
+  margin-block-start: var(--pf-t--global--spacer--sm);
+}
+
+.project-details-page__service {
+  display: flex;
+  align-items: center;
+  gap: var(--pf-t--global--spacer--sm);
+  min-block-size: var(--pf-t--global--spacer--lg);
+}
+
+.project-details-page__service-icon {
+  flex: 0 0 auto;
+  width: var(--pf-t--global--icon--size--sm);
+  height: var(--pf-t--global--icon--size--sm);
+  color: var(--pf-t--global--text--color--subtle);
+}
+
+/* ── Right sidebar card ──────────────────────────────────── */
+
+/* Container + card → see shared/details-page.css (.details-page__sidebar) */
+
+/* ProjectMembership rail header — kept here because ProjectMembershipTable
+   uses a plain <Title> (no sidebar-title class) so we target via descendant. */
+.project-membership__header {
+  padding-block-end: var(--pf-t--global--spacer--sm);
+  border-block-end: var(--pf-t--global--border--width--regular) solid
+    var(--pf-t--global--border--color--default);
+}
+
+.project-membership__header .pf-v6-c-title {
+  margin: 0;
+  color: var(--pf-t--global--text--color--subtle);
+  font-size: var(--pf-t--global--font--size--body--lg);
+  font-weight: var(--pf-t--global--font--weight--heading--bold);
+  line-height: var(--pf-t--global--font--line-height--heading);
+}
+
+/* ── Project membership people list ─────────────────────── */
+
+.project-membership__people {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.project-membership__person {
+  display: flex;
+  align-items: center;
+  gap: var(--pf-t--global--spacer--sm);
+  padding-block: var(--pf-t--global--spacer--md);
+  border-block-end: var(--pf-t--global--border--width--divider--default) solid
+    var(--pf-t--global--border--color--default);
+}
+
+.project-membership__person:last-child {
+  border-block-end: 0;
+}
+
+.project-membership__person-main {
+  display: flex;
+  align-items: center;
+  gap: var(--pf-t--global--spacer--sm);
+  flex: 1;
+  min-width: 0;
+}
+
+.project-membership__person-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.project-membership__primary,
+.project-membership__secondary {
+  margin: 0;
+}
+
+.project-membership__secondary {
+  color: var(--pf-t--global--text--color--subtle);
+  font-size: var(--pf-t--global--font--size--body--sm);
+}

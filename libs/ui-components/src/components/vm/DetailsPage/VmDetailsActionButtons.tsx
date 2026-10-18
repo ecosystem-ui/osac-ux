@@ -1,6 +1,17 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Button, Flex, Stack, StackItem } from '@patternfly/react-core';
+import {
+  Alert,
+  Button,
+  Dropdown,
+  DropdownItem,
+  DropdownList,
+  Flex,
+  FlexItem,
+  MenuToggle,
+  Stack,
+  StackItem,
+} from '@patternfly/react-core';
 import GlobeIcon from '@patternfly/react-icons/dist/esm/icons/globe-icon';
 import PlayIcon from '@patternfly/react-icons/dist/esm/icons/play-icon';
 import StopIcon from '@patternfly/react-icons/dist/esm/icons/stop-icon';
@@ -33,6 +44,7 @@ const VmDetailsActionButtons = ({ vm }: VmDetailsActionButtonsProps) => {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [attachExternalIpOpen, setAttachExternalIpOpen] = useState(false);
   const [detachExternalIpOpen, setDetachExternalIpOpen] = useState(false);
+  const [isActionsOpen, setIsActionsOpen] = useState(false);
   const { runPowerAction } = useVmPowerAction();
   const {
     data: externalIpAttachmentResponse,
@@ -74,6 +86,8 @@ const VmDetailsActionButtons = ({ vm }: VmDetailsActionButtonsProps) => {
     !externalIpAttachmentsError &&
     !externalIpAttachment;
 
+  const vmName = vm.metadata?.name ?? vm.id;
+
   return (
     <>
       {deleteOpen && (
@@ -92,7 +106,9 @@ const VmDetailsActionButtons = ({ vm }: VmDetailsActionButtonsProps) => {
           onClose={() => setDetachExternalIpOpen(false)}
         />
       )}
+
       <Stack hasGutter>
+        {/* Alerts */}
         {Boolean(externalIpAttachmentsError) && hasAttachedExternalIp && (
           <StackItem>
             <Alert variant="danger" isInline title={t('Failed to load external IP attachment')}>
@@ -118,96 +134,120 @@ const VmDetailsActionButtons = ({ vm }: VmDetailsActionButtonsProps) => {
             </Alert>
           </StackItem>
         )}
+
+        {/* Buttons */}
         <StackItem>
-          <Flex
-            justifyContent={{ default: 'justifyContentFlexEnd' }}
-            spaceItems={{ default: 'spaceItemsSm' }}
-            flexWrap={{ default: 'wrap' }}
-          >
-            <Button
-              variant="primary"
-              icon={<PlayIcon />}
-              isDisabled={!canStart}
-              onClick={() => {
-                if (canStart) {
-                  runPowerAction(vm.id, vm.metadata?.name ?? vm.id, 'start');
-                }
-              }}
-            >
-              Start
-            </Button>
-            <Button
-              variant="secondary"
-              icon={<StopIcon />}
-              isDisabled={!canStop}
-              onClick={() => {
-                if (canStop) {
-                  runPowerAction(vm.id, vm.metadata?.name ?? vm.id, 'stop');
-                }
-              }}
-            >
-              Stop
-            </Button>
-            <Button
-              variant="secondary"
-              icon={<SyncAltIcon />}
-              isDisabled={!canRestart}
-              onClick={() => {
-                if (canRestart) {
-                  runPowerAction(vm.id, vm.metadata?.name ?? vm.id, 'restart');
-                }
-              }}
-            >
-              Restart
-            </Button>
-            {!showDetachExternalIp && (
+          <Flex spaceItems={{ default: 'spaceItemsSm' }} flexWrap={{ default: 'wrap' }}>
+            {/* Power actions — always visible */}
+            <FlexItem>
+              <Button
+                variant="primary"
+                icon={<PlayIcon />}
+                isDisabled={!canStart}
+                onClick={() => {
+                  if (canStart) runPowerAction(vm.id, vmName, 'start');
+                }}
+              >
+                {t('Start')}
+              </Button>
+            </FlexItem>
+            <FlexItem>
               <Button
                 variant="secondary"
-                icon={<GlobeIcon />}
-                isDisabled={
-                  isLoadingExternalIpAttachments ||
-                  Boolean(externalIpAttachmentsError) ||
-                  externalIpAttachmentMissing ||
-                  isAttachingExternalIp ||
-                  !canAttachExternalIp
-                }
-                isLoading={isLoadingExternalIpAttachments || isAttachingExternalIp}
-                onClick={() => setAttachExternalIpOpen(true)}
+                icon={<StopIcon />}
+                isDisabled={!canStop}
+                onClick={() => {
+                  if (canStop) runPowerAction(vm.id, vmName, 'stop');
+                }}
               >
-                {t(
-                  isLoadingExternalIpAttachments
-                    ? 'Loading external IP attachment...'
-                    : isAttachingExternalIp
-                      ? 'Attaching External IP...'
-                      : 'Attach external IP',
+                {t('Stop')}
+              </Button>
+            </FlexItem>
+            <FlexItem>
+              <Button
+                variant="secondary"
+                icon={<SyncAltIcon />}
+                isDisabled={!canRestart}
+                onClick={() => {
+                  if (canRestart) runPowerAction(vm.id, vmName, 'restart');
+                }}
+              >
+                {t('Restart')}
+              </Button>
+            </FlexItem>
+
+            {/* Secondary actions menu: External IP + Delete */}
+            <FlexItem>
+              <Dropdown
+                isOpen={isActionsOpen}
+                onOpenChange={setIsActionsOpen}
+                toggle={(ref) => (
+                  <MenuToggle
+                    ref={ref}
+                    variant="secondary"
+                    onClick={() => setIsActionsOpen((o) => !o)}
+                    aria-label={t('Actions for {{name}}', { name: vmName })}
+                  >
+                    {t('Actions')}
+                  </MenuToggle>
                 )}
-              </Button>
-            )}
-            {showDetachExternalIp && externalIpAttachment && (
-              <Button
-                variant="secondary"
-                icon={<GlobeIcon />}
-                isDisabled={
-                  isLoadingExternalIpAttachments ||
-                  Boolean(externalIpAttachmentsError) ||
-                  externalIpAttachmentMissing ||
-                  isDetachingExternalIp
-                }
-                isLoading={isLoadingExternalIpAttachments || isDetachingExternalIp}
-                onClick={() => setDetachExternalIpOpen(true)}
+                popperProps={{ position: 'right' }}
               >
-                {t(isDetachingExternalIp ? 'Detaching external IP' : 'Detach external IP')}
-              </Button>
-            )}
-            <DeleteResourceButton
-              showIcon
-              canDelete={canDelete}
-              onClick={() => {
-                if (canDelete) {
-                  setDeleteOpen(true);
-                }
-              }}
-            />
+                <DropdownList>
+                  {!showDetachExternalIp && (
+                    <DropdownItem
+                      icon={<GlobeIcon />}
+                      isDisabled={
+                        isLoadingExternalIpAttachments ||
+                        Boolean(externalIpAttachmentsError) ||
+                        externalIpAttachmentMissing ||
+                        isAttachingExternalIp ||
+                        !canAttachExternalIp
+                      }
+                      onClick={() => {
+                        setAttachExternalIpOpen(true);
+                        setIsActionsOpen(false);
+                      }}
+                    >
+                      {t(
+                        isLoadingExternalIpAttachments
+                          ? 'Loading external IP attachment...'
+                          : isAttachingExternalIp
+                            ? 'Attaching External IP...'
+                            : 'Attach external IP',
+                      )}
+                    </DropdownItem>
+                  )}
+                  {showDetachExternalIp && externalIpAttachment && (
+                    <DropdownItem
+                      icon={<GlobeIcon />}
+                      isDisabled={
+                        isLoadingExternalIpAttachments ||
+                        Boolean(externalIpAttachmentsError) ||
+                        externalIpAttachmentMissing ||
+                        isDetachingExternalIp
+                      }
+                      onClick={() => {
+                        setDetachExternalIpOpen(true);
+                        setIsActionsOpen(false);
+                      }}
+                    >
+                      {t(isDetachingExternalIp ? 'Detaching external IP' : 'Detach external IP')}
+                    </DropdownItem>
+                  )}
+                  <DeleteResourceButton
+                    isDropdown
+                    canDelete={canDelete}
+                    onClick={() => {
+                      if (canDelete) {
+                        setDeleteOpen(true);
+                        setIsActionsOpen(false);
+                      }
+                    }}
+                  />
+                </DropdownList>
+              </Dropdown>
+            </FlexItem>
           </Flex>
         </StackItem>
       </Stack>

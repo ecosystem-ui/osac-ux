@@ -31,7 +31,7 @@ const makePool = (
 ): ExternalIPPool =>
   create(ExternalIPPoolSchema, {
     id,
-    metadata: { name },
+    metadata: { name, tenant: 'acme-corporation' },
     spec: { cidrs, ipFamily, implementationStrategy: 'metallb-l2' },
     status:
       state !== undefined
@@ -72,6 +72,7 @@ const renderPage = (privateExternalIpPools: ExternalIPPool[] = defaultPools) =>
 describe('ExternalIpPoolsListPage', () => {
   beforeEach(() => {
     mockNavigate.mockReset();
+    localStorage.setItem('admin-external-ip-pools-view-type', 'list');
   });
 
   it('renders the page header', () => {
@@ -92,11 +93,11 @@ describe('ExternalIpPoolsListPage', () => {
     expect(screen.getByRole('columnheader', { name: 'Status' })).toBeInTheDocument();
     expect(screen.queryByRole('columnheader', { name: 'IP family' })).not.toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: 'CIDRs' })).toBeInTheDocument();
-    expect(screen.getByRole('columnheader', { name: 'Available' })).toBeInTheDocument();
-    expect(screen.getByRole('columnheader', { name: 'Total' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Tenant' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Capacity' })).toBeInTheDocument();
   });
 
-  it('renders a row per pool with name, CIDRs, available, and total', async () => {
+  it('renders a row per pool with name, CIDRs, tenant, and capacity', async () => {
     renderPage();
 
     await waitFor(() => {
@@ -104,8 +105,8 @@ describe('ExternalIpPoolsListPage', () => {
     });
     expect(screen.queryByText('IPv4')).not.toBeInTheDocument();
     expect(screen.getByText('192.168.1.0/24')).toBeInTheDocument();
-    expect(screen.getByText('200')).toBeInTheDocument();
-    expect(screen.getByText('256')).toBeInTheDocument();
+    expect(screen.getAllByText('acme-corporation').length).toBeGreaterThan(0);
+    expect(screen.getByText('200 of 256 available')).toBeInTheDocument();
     expect(screen.getByText('dev-v6')).toBeInTheDocument();
     expect(screen.queryByText('IPv6')).not.toBeInTheDocument();
     expect(screen.getByText('2001:db8::/64')).toBeInTheDocument();
@@ -132,7 +133,7 @@ describe('ExternalIpPoolsListPage', () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByText('Ready')).toBeInTheDocument();
+    expect(screen.getAllByText('Ready').length).toBeGreaterThan(1);
     });
     expect(screen.getByText('Provisioning')).toBeInTheDocument();
   });

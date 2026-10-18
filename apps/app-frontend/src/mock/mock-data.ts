@@ -58,6 +58,7 @@ import {
   GuestOSFamily,
   InstanceTypeState,
   NATGatewayState,
+  ProjectMembershipRole,
   ProjectState,
   Protocol,
   StorageTierState as PublicStorageTierState,
@@ -79,6 +80,7 @@ import type {
 } from '@osac/types/private';
 import {
   ExternalIPPoolState,
+  IPFamily,
   StorageTierState as PrivateStorageTierState,
   StorageBackendState,
   TenantConditionType,
@@ -577,6 +579,100 @@ const clusters: Cluster[] = [
       ],
     },
   } as unknown as Cluster,
+  {
+    id: 'cluster-2',
+    metadata: {
+      name: 'north-summit-staging',
+      project: 'platform.staging',
+      creator: 'bob@example.com',
+      creationTimestamp: { seconds: BigInt(1720000000), nanos: 0 },
+    },
+    spec: {
+      catalogItem: {
+        id: 'cci-standard',
+        name: 'OpenShift Cluster',
+        project: 'platform',
+        shared: false,
+      },
+      version: { id: 'cv-4-16', name: '4.16' },
+      nodeSets: {
+        controlPlane: {
+          hostType: { id: 'ht-general', name: 'general-purpose' },
+          size: 3,
+          fabricInterface: 'eno1',
+          baremetalInstanceType: { id: 'bm-type-general', name: 'General purpose bare metal' },
+        },
+        workers: {
+          hostType: { id: 'ht-compute', name: 'compute-optimized' },
+          size: 2,
+          fabricInterface: 'eno1',
+          baremetalInstanceType: { id: 'bm-type-gpu', name: 'GPU bare metal' },
+        },
+      },
+      network: { podCidr: '10.132.0.0/14', serviceCidr: '172.31.0.0/16' },
+    },
+    status: {
+      state: ClusterState.PROGRESSING,
+      conditions: [],
+      consoleUrl: 'https://console.north-summit-staging.example.com',
+      nodeSets: {
+        controlPlane: { hostType: { id: 'ht-general', name: 'general-purpose' }, size: 3 },
+        workers: { hostType: { id: 'ht-compute', name: 'compute-optimized' }, size: 2 },
+      },
+      stateTransitionTime: { seconds: BigInt(1720000300), nanos: 0 },
+    },
+  } as unknown as Cluster,
+  {
+    id: 'cluster-3',
+    metadata: {
+      name: 'research-ocp',
+      project: 'research',
+      creator: 'carol@example.com',
+      creationTimestamp: { seconds: BigInt(1723000000), nanos: 0 },
+    },
+    spec: {
+      catalogItem: {
+        id: 'cci-standard',
+        name: 'OpenShift Cluster',
+        project: 'research',
+        shared: false,
+      },
+      version: { id: 'cv-4-17', name: '4.17' },
+      nodeSets: {
+        controlPlane: {
+          hostType: { id: 'ht-general', name: 'general-purpose' },
+          size: 3,
+          fabricInterface: 'eno1',
+          baremetalInstanceType: { id: 'bm-type-general', name: 'General purpose bare metal' },
+        },
+        workers: {
+          hostType: { id: 'ht-compute', name: 'compute-optimized' },
+          size: 6,
+          fabricInterface: 'eno1',
+          baremetalInstanceType: { id: 'bm-type-gpu', name: 'GPU bare metal' },
+        },
+      },
+      network: { podCidr: '10.136.0.0/14', serviceCidr: '172.32.0.0/16' },
+    },
+    status: {
+      state: ClusterState.FAILED,
+      conditions: [
+        {
+          type: ClusterConditionType.FAILED,
+          status: ConditionStatus.TRUE,
+          lastTransitionTime: { seconds: BigInt(1723000400), nanos: 0 },
+          reason: 'ProvisioningFailed',
+          message: 'The cluster could not be provisioned.',
+        },
+      ],
+      consoleUrl: 'https://console.research-ocp.example.com',
+      nodeSets: {
+        controlPlane: { hostType: { id: 'ht-general', name: 'general-purpose' }, size: 3 },
+        workers: { hostType: { id: 'ht-compute', name: 'compute-optimized' }, size: 6 },
+      },
+      stateTransitionTime: { seconds: BigInt(1723000400), nanos: 0 },
+    },
+  } as unknown as Cluster,
 ];
 
 // ---------------------------------------------------------------------------
@@ -677,10 +773,44 @@ const bareMetalInstances: BareMetalInstance[] = [
 const virtualNetworks: VirtualNetwork[] = [
   {
     id: 'vnet-1',
-    metadata: { name: 'main-network' },
-    spec: { ipv4Cidr: '10.0.0.0/16' },
-    status: { state: VirtualNetworkState.READY },
+    metadata: {
+      name: 'main-network',
+      creator: 'alice@example.com',
+      tenant: 'acme-corporation',
+      labels: { environment: 'production', region: 'us-east' },
+      annotations: { 'osac.io/network-class': 'udn-net' },
+      version: 1,
+      project: 'project-alpha',
+      displayName: 'Main production network',
+      description: 'Primary virtual network for production workloads.',
+      creationTimestamp: { seconds: BigInt(1717000000), nanos: 0 },
+    },
+    spec: { ipv4Cidr: '10.0.0.0/16', ipv6Cidr: '' },
+    status: { state: VirtualNetworkState.READY, message: 'Network ready for compute instances.' },
   } as unknown as VirtualNetwork,
+  ...Array.from({ length: 4 }, (_, index) => {
+    const number = index + 2;
+    return {
+      id: `vnet-${number}`,
+      metadata: {
+        name: `tenant-network-${String(number).padStart(2, '0')}`,
+        creator: number % 2 === 0 ? 'alice@example.com' : 'bob@example.com',
+        tenant: number % 2 === 0 ? 'acme-corporation' : 'north-summit-bank',
+        labels: {
+          environment: number % 3 === 0 ? 'development' : 'production',
+          region: number % 2 === 0 ? 'us-east' : 'eu-west',
+        },
+        annotations: { 'osac.io/network-class': 'udn-net' },
+        version: 1,
+        project: number % 2 === 0 ? 'project-alpha' : 'project-beta',
+        displayName: `Tenant network ${String(number).padStart(2, '0')}`,
+        description: `Virtual network for tenant workloads ${String(number).padStart(2, '0')}.`,
+        creationTimestamp: { seconds: BigInt(1717000000 + number * 3600), nanos: 0 },
+      },
+      spec: { ipv4Cidr: `10.${number}.0.0/16`, ipv6Cidr: '' },
+      status: { state: VirtualNetworkState.READY, message: 'Network ready for compute instances.' },
+    } as unknown as VirtualNetwork;
+  }),
 ];
 
 const subnets: Subnet[] = [
@@ -942,32 +1072,90 @@ const publicStorageTiers: PublicStorageTier[] = [
 const projects: Project[] = [
   {
     id: 'project-alpha',
-    metadata: { name: 'project-alpha' },
+    metadata: {
+      name: 'project-alpha',
+      annotations: {
+        'osac.io/services': 'VMaaS, BMaaS, CaaS',
+        'osac.io/project-members': '4',
+        'osac.io/ip-pool': 'primary-pool',
+        'osac.io/instance-quota': '8 / 20 instances',
+      },
+    },
     spec: { title: 'Project Alpha', description: 'Primary application environment.' },
     status: { state: ProjectState.ACTIVE },
   } as unknown as Project,
   {
     id: 'project-alpha-platform',
-    metadata: { name: 'project-alpha.platform', project: 'project-alpha' },
+    metadata: {
+      name: 'project-alpha.platform',
+      project: 'project-alpha',
+      annotations: {
+        'osac.io/services': 'VMaaS, CaaS',
+        'osac.io/project-members': '3',
+        'osac.io/ip-pool': 'platform-pool',
+        'osac.io/instance-quota': '5 / 12 instances',
+      },
+    },
     spec: { title: 'Platform', description: 'Platform services for Project Alpha.' },
     status: { state: ProjectState.ACTIVE },
   } as unknown as Project,
   {
     id: 'project-alpha-platform-baremetal',
-    metadata: { name: 'project-alpha.platform.baremetal', project: 'project-alpha.platform' },
+    metadata: {
+      name: 'project-alpha.platform.baremetal',
+      project: 'project-alpha.platform',
+      annotations: {
+        'osac.io/services': 'BMaaS',
+        'osac.io/project-members': '2',
+        'osac.io/ip-pool': 'baremetal-pool',
+        'osac.io/instance-quota': '2 / 8 instances',
+      },
+    },
     spec: { title: 'Bare Metal', description: 'Bare metal workloads for the platform team.' },
     status: { state: ProjectState.ACTIVE },
   } as unknown as Project,
   {
     id: 'project-beta',
-    metadata: { name: 'project-beta' },
+    metadata: {
+      name: 'project-beta',
+      annotations: {
+        'osac.io/services': 'VMaaS, CaaS',
+        'osac.io/project-members': '6',
+        'osac.io/ip-pool': 'secondary-pool',
+        'osac.io/instance-quota': '12 / 30 instances',
+      },
+    },
     spec: { title: 'Project Beta', description: 'Secondary application environment.' },
     status: { state: ProjectState.ACTIVE },
   } as unknown as Project,
   {
     id: 'project-beta-data',
-    metadata: { name: 'project-beta.data', project: 'project-beta' },
+    metadata: {
+      name: 'project-beta.data',
+      project: 'project-beta',
+      annotations: {
+        'osac.io/services': 'VMaaS',
+        'osac.io/project-members': '3',
+        'osac.io/ip-pool': 'data-pool',
+        'osac.io/instance-quota': '4 / 10 instances',
+      },
+    },
     spec: { title: 'Data', description: 'Data services for Project Beta.' },
+    status: { state: ProjectState.ACTIVE },
+  } as unknown as Project,
+  {
+    id: 'project-beta-data-analytics',
+    metadata: {
+      name: 'project-beta.data.analytics',
+      project: 'project-beta.data',
+      annotations: {
+        'osac.io/services': 'VMaaS',
+        'osac.io/project-members': '2',
+        'osac.io/ip-pool': 'analytics-pool',
+        'osac.io/instance-quota': '2 / 6 instances',
+      },
+    },
+    spec: { title: 'Analytics', description: 'Analytics workloads for Project Beta.' },
     status: { state: ProjectState.ACTIVE },
   } as unknown as Project,
 ];
@@ -975,11 +1163,13 @@ const projects: Project[] = [
 const projectMemberships: ProjectMembership[] = [
   {
     id: 'pm-1',
-    spec: { project: { id: 'project-alpha' }, user: { id: 'user-1' } },
+    metadata: { name: 'alice-project-membership', project: 'project-alpha' },
+    spec: { role: ProjectMembershipRole.MANAGER, users: [{ id: 'user-1' }] },
   } as unknown as ProjectMembership,
   {
     id: 'pm-2',
-    spec: { project: { id: 'project-beta' }, user: { id: 'user-2' } },
+    metadata: { name: 'bob-project-membership', project: 'project-beta' },
+    spec: { role: ProjectMembershipRole.VIEWER, users: [{ id: 'user-2' }] },
   } as unknown as ProjectMembership,
 ];
 
@@ -1029,6 +1219,20 @@ const secrets: Secret[] = [
       password: new TextEncoder().encode('mock-registry-password'),
     },
     type: SecretType.OPAQUE,
+  } as unknown as Secret,
+  {
+    id: 'secret-ssh-1',
+    metadata: {
+      name: 'alice-laptop-key',
+      project: 'project-alpha',
+      creationTimestamp: { seconds: BigInt(1718546400), nanos: 0 },
+    },
+    data: {
+      public_key: new TextEncoder().encode(
+        'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIVmMockSshKey alice@example.com',
+      ),
+    },
+    type: SecretType.SSH_PUBLIC_KEY,
   } as unknown as Secret,
   {
     id: 'secret-pull',
@@ -1083,6 +1287,8 @@ const tenants: PrivateTenant[] = [
         'osac.io/customer-id': 'acme-001',
         'osac.io/billing-account': 'acme-enterprise-billing',
         'osac.io/billing-account-id': 'acme-001',
+        'osac.io/company-logo': '/red-hat-logo.svg',
+        'osac.io/company-logo-filename': 'acme-corporation-logo.svg',
       },
       version: 3,
       project: '',
@@ -1215,9 +1421,23 @@ const privateStorageTiers: PrivateStorageTier[] = [
 const privateExternalIpPools: ExternalIPPool[] = [
   {
     id: 'eip-pool-priv-1',
-    metadata: { name: 'primary-pool' },
-    spec: { cidr: '203.0.113.0/24' },
-    status: { state: ExternalIPPoolState.EXTERNAL_IP_POOL_STATE_READY },
+    metadata: {
+      name: 'primary-pool',
+      tenant: 'acme-corporation',
+      description: 'Routable address pool for Acme Corporation tenant edge exposure.',
+      creationTimestamp: { seconds: BigInt(1786798800), nanos: 0 },
+    },
+    spec: {
+      cidrs: ['198.51.100.64/26'],
+      ipFamily: IPFamily.IP_FAMILY_IPV4,
+    },
+    status: {
+      state: ExternalIPPoolState.EXTERNAL_IP_POOL_STATE_READY,
+      total: 62n,
+      allocated: 0n,
+      available: 62n,
+      hub: 'hub-east-1',
+    },
   } as unknown as ExternalIPPool,
 ];
 

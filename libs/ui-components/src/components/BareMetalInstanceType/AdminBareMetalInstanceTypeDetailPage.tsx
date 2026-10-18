@@ -1,188 +1,187 @@
-import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  ActionList,
-  ActionListGroup,
-  ActionListItem,
-  Breadcrumb,
-  BreadcrumbItem,
-  Button,
-  Card,
-  CardBody,
-  CardTitle,
   DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
+  Divider,
+  Flex,
+  FlexItem,
   Grid,
   GridItem,
+  PageSection,
+  Stack,
+  StackItem,
+  Title,
 } from '@patternfly/react-core';
 
-import { BareMetalInstanceType, BareMetalInstanceTypes } from '@osac/types/private';
+import { BareMetalInstanceTypes } from '@osac/types/private';
+import type { BareMetalInstanceType } from '@osac/types/private';
 import { useGetResource } from '@osac/ui-components/api/use-resource';
-import DeleteResourceButton from '@osac/ui-components/components/Resource/DeleteResourceButton';
 import { displayValue } from '@osac/ui-components/utils/detailFormatters';
 
+import AdminBareMetalInstanceTypeActionsMenu from './AdminBareMetalInstanceTypeActionsMenu';
 import { BAREMETAL_INSTANCE_TYPES_LIST_ROUTE } from './AdminBareMetalInstanceTypeListPage';
-import BareMetalInstanceTypeDeleteModal from './BareMetalInstanceTypeDeleteModal';
+import AdminBareMetalInstanceTypeSidebarSection from './AdminBareMetalInstanceTypeSidebarSection';
 import { useTranslation } from '../../hooks/useTranslation';
-import ListPage from '../Page/ListPage';
-import ListPageBody from '../Page/ListPageBody';
 import { Timestamp } from '../Primitives/Timestamp';
+import { ResourceDetailHeader } from '../Resource/ResourceDetailHeader';
+import ResourceDetailsPage from '../Resource/ResourceDetailsPage';
 
-interface BareMetalInstanceTypeDetailsProps {
-  bareMetalInstanceType: BareMetalInstanceType;
-}
+import './AdminBareMetalInstanceTypeDetailsPage.css';
+import '../shared/details-page.css';
 
 const formatItems = (items: string[]): string => (items.length > 0 ? items.join(', ') : '—');
 
-const formatLabels = (labels: Record<string, string> | undefined): string =>
-  formatItems(Object.entries(labels ?? {}).map(([key, value]) => `${key}=${value}`));
+interface DetailsContentProps {
+  instanceType: BareMetalInstanceType;
+}
 
-const BareMetalInstanceTypeDetails = ({
-  bareMetalInstanceType,
-}: BareMetalInstanceTypeDetailsProps) => {
+const DetailsContent = ({ instanceType }: DetailsContentProps) => {
   const { t } = useTranslation();
-  const { metadata, spec } = bareMetalInstanceType;
+  const { metadata, spec } = instanceType;
   const hardware = spec?.hardware;
 
   return (
-    <Grid hasGutter>
-      <GridItem md={6}>
-        <Card isFullHeight>
-          <CardTitle>{t('Details')}</CardTitle>
-          <CardBody>
-            <DescriptionList isCompact>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Name')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {displayValue(metadata?.name)}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Description')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {displayValue(spec?.description)}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Host labels')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {formatLabels(spec?.hostLabelSelector?.matchLabels)}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Created')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  <Timestamp value={metadata?.creationTimestamp} />
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Creator')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {displayValue(metadata?.creator)}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-            </DescriptionList>
-          </CardBody>
-        </Card>
-      </GridItem>
-      <GridItem md={6}>
-        <Card isFullHeight>
-          <CardTitle>{t('CPU & Memory')}</CardTitle>
-          <CardBody>
-            <DescriptionList isCompact>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Cores')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {hardware?.cpu?.cores ?? '—'}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Architecture')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {displayValue(hardware?.cpu?.architecture)}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Model')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {displayValue(hardware?.cpu?.model)}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Threads per core')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {hardware?.cpu?.threadsPerCore ?? '—'}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Memory')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {hardware?.memory
-                    ? `${hardware.memory.totalGb} GB · ${displayValue(hardware.memory.type)}`
-                    : '—'}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-            </DescriptionList>
-          </CardBody>
-        </Card>
-      </GridItem>
-      <GridItem md={6}>
-        <Card isFullHeight>
-          <CardTitle>{t('Hardware')}</CardTitle>
-          <CardBody>
-            <DescriptionList isCompact>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Accelerators')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {formatItems(
-                    (hardware?.accelerators ?? []).map((accelerator) =>
-                      [
-                        accelerator.type,
-                        accelerator.model,
-                        accelerator.vendor,
-                        accelerator.memoryGb === undefined
-                          ? undefined
-                          : `${accelerator.memoryGb} GB`,
-                      ]
-                        .filter(Boolean)
-                        .join(' · '),
-                    ),
-                  )}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Disks')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {formatItems(
-                    (hardware?.disks ?? []).map(
-                      (disk) => `${disk.type} · ${disk.capacityGb} GB · ${disk.interface}`,
-                    ),
-                  )}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Network ports')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {formatItems(
-                    (hardware?.networkPorts ?? []).map((port) =>
-                      [port.name, port.role, port.type, port.speed].filter(Boolean).join(' · '),
-                    ),
-                  )}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Capabilities')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {formatLabels(hardware?.capabilities)}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-            </DescriptionList>
-          </CardBody>
-        </Card>
-      </GridItem>
-    </Grid>
+    <Stack hasGutter>
+      <StackItem>
+        <Title headingLevel="h2" size="lg">
+          {t('Overview')}
+        </Title>
+      </StackItem>
+      <StackItem>
+        <DescriptionList
+          isCompact
+          className="admin-bm-instance-type-details-overview"
+          aria-label={t('Bare metal instance type overview')}
+        >
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Name')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              {displayValue(metadata?.name)}
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Description')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              {displayValue(spec?.description)}
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Created')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              <Timestamp value={metadata?.creationTimestamp} />
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Creator')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              {displayValue(metadata?.creator)}
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+        </DescriptionList>
+      </StackItem>
+
+      <StackItem>
+        <Divider />
+      </StackItem>
+
+      <StackItem>
+        <Title headingLevel="h2" size="lg">
+          {t('Compute')}
+        </Title>
+      </StackItem>
+      <StackItem>
+        <DescriptionList
+          isCompact
+          className="admin-bm-instance-type-details-overview"
+          aria-label={t('Bare metal instance type compute')}
+        >
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Cores')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              {hardware?.cpu?.cores ?? '—'}
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Architecture')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              {displayValue(hardware?.cpu?.architecture)}
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Model')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              {displayValue(hardware?.cpu?.model)}
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Threads per core')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              {hardware?.cpu?.threadsPerCore ?? '—'}
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Memory')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              {hardware?.memory
+                ? `${hardware.memory.totalGb} GB · ${displayValue(hardware.memory.type)}`
+                : '—'}
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+        </DescriptionList>
+      </StackItem>
+
+      <StackItem>
+        <Divider />
+      </StackItem>
+
+      <StackItem>
+        <Title headingLevel="h2" size="lg">
+          {t('Hardware')}
+        </Title>
+      </StackItem>
+      <StackItem>
+        <DescriptionList
+          isCompact
+          className="admin-bm-instance-type-details-overview"
+          aria-label={t('Bare metal instance type hardware')}
+        >
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Accelerators')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              {formatItems(
+                (hardware?.accelerators ?? []).map((a) =>
+                  [a.type, a.model, a.vendor, a.memoryGb === undefined ? undefined : `${a.memoryGb} GB`]
+                    .filter(Boolean)
+                    .join(' · '),
+                ),
+              )}
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Disks')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              {formatItems(
+                (hardware?.disks ?? []).map(
+                  (d) => `${d.type} · ${d.capacityGb} GB · ${d.interface}`,
+                ),
+              )}
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Network ports')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              {formatItems(
+                (hardware?.networkPorts ?? []).map((p) =>
+                  [p.name, p.role, p.type, p.speed].filter(Boolean).join(' · '),
+                ),
+              )}
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+        </DescriptionList>
+      </StackItem>
+    </Stack>
   );
 };
 
@@ -190,68 +189,73 @@ const AdminBareMetalInstanceTypeDetailPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { id = '' } = useParams<{ id: string }>();
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const {
-    data: bareMetalInstanceType,
-    isLoading,
-    error,
-  } = useGetResource(BareMetalInstanceTypes, { id });
-  const name = bareMetalInstanceType?.object?.metadata?.name ?? id;
+  const { data, isLoading, error, refetch } = useGetResource(BareMetalInstanceTypes, { id });
+  const instanceType = data?.object;
 
   return (
-    <>
-      {deleteOpen && bareMetalInstanceType?.object && (
-        <BareMetalInstanceTypeDeleteModal
-          instanceType={bareMetalInstanceType?.object}
-          onClose={() => setDeleteOpen(false)}
-          onSuccess={() => navigate(BAREMETAL_INSTANCE_TYPES_LIST_ROUTE)}
-        />
-      )}
+    <ResourceDetailsPage
+      error={error}
+      found={!!instanceType}
+      isLoading={isLoading}
+      parentLabel={t('Bare metal instance types')}
+      parentTo={BAREMETAL_INSTANCE_TYPES_LIST_ROUTE}
+      refetch={refetch}
+      resourceLabel={t('bare metal instance type')}
+      cardCount={2}
+    >
+      {instanceType ? (
+        <>
+          <PageSection hasBodyWrapper={false}>
+            <Stack hasGutter>
+              <StackItem>
+                <Flex
+                  justifyContent={{ default: 'justifyContentSpaceBetween' }}
+                  alignItems={{ default: 'alignItemsFlexStart' }}
+                  flexWrap={{ default: 'wrap' }}
+                  spaceItems={{ default: 'spaceItemsMd' }}
+                >
+                  <FlexItem>
+                    <ResourceDetailHeader
+                      parentTo={BAREMETAL_INSTANCE_TYPES_LIST_ROUTE}
+                      parentLabel={t('Bare metal instance types')}
+                      resourceName={instanceType.metadata?.name ?? instanceType.id}
+                      titleSize="3xl"
+                      description={instanceType.spec?.description}
+                    />
+                  </FlexItem>
+                  <FlexItem>
+                    <AdminBareMetalInstanceTypeActionsMenu
+                      instanceType={instanceType}
+                      showLabel
+                      onDeleteSuccess={() => navigate(BAREMETAL_INSTANCE_TYPES_LIST_ROUTE)}
+                    />
+                  </FlexItem>
+                </Flex>
+              </StackItem>
+              <StackItem>
+                <Divider />
+              </StackItem>
+            </Stack>
+          </PageSection>
 
-      <ListPage
-        title={name}
-        description={bareMetalInstanceType?.object?.spec?.description}
-        actions={
-          bareMetalInstanceType && (
-            <ActionList>
-              <ActionListGroup>
-                <ActionListItem>
-                  <Button
-                    variant="secondary"
-                    onClick={() => navigate(`${BAREMETAL_INSTANCE_TYPES_LIST_ROUTE}/${id}/edit`)}
-                  >
-                    {t('Edit')}
-                  </Button>
-                </ActionListItem>
-                <ActionListItem>
-                  <DeleteResourceButton onClick={() => setDeleteOpen(true)} />
-                </ActionListItem>
-              </ActionListGroup>
-            </ActionList>
-          )
-        }
-        breadcrumb={
-          <Breadcrumb>
-            <BreadcrumbItem>
-              <Button
-                variant="link"
-                isInline
-                onClick={() => navigate(BAREMETAL_INSTANCE_TYPES_LIST_ROUTE)}
-              >
-                {t('Bare metal instance types')}
-              </Button>
-            </BreadcrumbItem>
-            <BreadcrumbItem isActive>{name}</BreadcrumbItem>
-          </Breadcrumb>
-        }
-      >
-        <ListPageBody isLoading={isLoading} error={error}>
-          {bareMetalInstanceType?.object && (
-            <BareMetalInstanceTypeDetails bareMetalInstanceType={bareMetalInstanceType.object} />
-          )}
-        </ListPageBody>
-      </ListPage>
-    </>
+          <PageSection hasBodyWrapper={false}>
+            <Grid hasGutter className="details-page__content-grid">
+              <GridItem md={8} className="details-page__column">
+                <DetailsContent instanceType={instanceType} />
+              </GridItem>
+
+              <GridItem md={4} className="details-page__column">
+                <Stack hasGutter>
+                  <StackItem>
+                    <AdminBareMetalInstanceTypeSidebarSection instanceType={instanceType} />
+                  </StackItem>
+                </Stack>
+              </GridItem>
+            </Grid>
+          </PageSection>
+        </>
+      ) : null}
+    </ResourceDetailsPage>
   );
 };
 

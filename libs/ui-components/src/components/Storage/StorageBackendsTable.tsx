@@ -7,6 +7,8 @@ import StorageBackendActionsMenu from './StorageBackendActionsMenu';
 import StorageBackendStatusLabel from './StorageBackendStatusLabel';
 import { useTranslation } from '../../hooks/useTranslation';
 
+import './StorageTables.css';
+
 interface StorageBackendsTableProps {
   backends: StorageBackend[];
 }
@@ -32,6 +34,7 @@ export const StorageBackendsTable = ({ backends }: StorageBackendsTableProps) =>
               <ResourceNameField
                 resource={backend}
                 detailsUrl={`/admin/infrastructure/storage/backends/${encodeURIComponent(backend.id)}`}
+                nameLinkClassName="storage-resource-link"
               />
             </Td>
             <Td dataLabel={t('Status')}>

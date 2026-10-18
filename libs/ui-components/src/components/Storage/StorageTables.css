@@ -1,0 +1,12 @@
+.storage-resource-link {
+  color: var(--pf-t--global--text--color--link--default);
+  font-size: var(--pf-t--global--font--size--body--sm);
+  font-weight: var(--pf-t--global--font--weight--body--default);
+  text-decoration: none;
+}
+
+.storage-resource-link:hover,
+.storage-resource-link:focus {
+  color: var(--pf-t--global--text--color--link--hover);
+  text-decoration: none;
+}

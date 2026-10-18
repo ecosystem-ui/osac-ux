@@ -47,8 +47,8 @@ const getIdpLinks = (t: TFunction): NavRow[] => [
 const getIdpManagerNav = (t: TFunction): NavRow[] => [...getIdpLinks(t), getSecretsNav(t)];
 
 const getAdminNav = (t: TFunction): NavRow[] => [
-  getCatalogNav(t),
   getProjectsNav(t),
+  getCatalogNav(t),
   {
     kind: 'section',
     id: 'nav-administration',
@@ -102,9 +102,12 @@ const getAdminNav = (t: TFunction): NavRow[] => [
 ];
 
 const getTenantAdminNav = (t: TFunction): NavRow[] => [
-  ...getBaseNav(t),
-  ...getIdpLinks(t),
+  getProjectsNav(t),
+  getCatalogNav(t),
+  getServicesNav(t),
+  getStorageNav(t),
   getNetworkNav(t),
+  getIdentityNav(t),
   getSecretsNav(t),
 ];
 
@@ -191,11 +194,18 @@ const getNetworkNav = (t: TFunction): NavRow => ({
   ],
 });
 
-const getBaseNav = (t: TFunction): NavRow[] => [
+const getIdentityNav = (t: TFunction): NavRow => ({
+  kind: 'section',
+  id: 'nav-tenant-identity',
+  label: t('Identity'),
+  children: getIdpLinks(t),
+});
+
+const getTenantUserNav = (t: TFunction): NavRow[] => [
+  getProjectsNav(t),
   getCatalogNav(t),
   getServicesNav(t),
   getStorageNav(t),
-  getProjectsNav(t),
 ];
 
 export const navRowsForRole = (
@@ -213,7 +223,7 @@ export const navRowsForRole = (
     rows = getTenantAdminNav(t);
   } else {
     // 'tenant-user'
-    rows = [...getBaseNav(t), getNetworkNav(t), getSecretsNav(t)];
+    rows = [...getTenantUserNav(t), getNetworkNav(t), getSecretsNav(t)];
   }
 
   return filterNavRowsByServices(rows, enabledServices);

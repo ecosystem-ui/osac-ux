@@ -1,0 +1,9 @@
+/* Volume-specific details-page overrides.
+ * Shared layout utilities live in ../shared/details-page.css — import both files
+ * wherever the VolumeDetails component is rendered.
+ */
+
+.volume-details-overview .pf-v6-c-description-list__term {
+  font-size: var(--pf-t--global--font--size--body--sm);
+  font-weight: var(--pf-t--global--font--weight--body--default);
+}

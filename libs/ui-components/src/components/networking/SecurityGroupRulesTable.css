@@ -1,0 +1,12 @@
+.security-group-rules-table__toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.security-group-rules-table__toolbar--table {
+  margin-block-end: var(--pf-t--global--spacer--md);
+}
+
+.security-group-rules-table__toolbar--empty {
+  margin-block-start: var(--pf-t--global--spacer--md);
+}

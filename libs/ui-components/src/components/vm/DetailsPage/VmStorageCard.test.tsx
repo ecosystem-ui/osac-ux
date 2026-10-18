@@ -21,6 +21,7 @@ describe('VmStorageCard', () => {
     renderWithProviders(<VmStorageCard vm={vm} />);
 
     expect(screen.getByText('Storage')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add disk' })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: 'Name' })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: 'Size' })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: 'Storage tier' })).toBeInTheDocument();

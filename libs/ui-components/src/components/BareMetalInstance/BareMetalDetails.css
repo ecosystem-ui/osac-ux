@@ -1,0 +1,28 @@
+/* .bm-details__content-grid, __main-column, __rail-column → see shared/details-page.css */
+
+.bm-details__network-link {
+  color: var(--pf-t--global--text--color--link--default);
+  text-decoration: none;
+}
+
+.bm-details__network-link:hover,
+.bm-details__network-link:focus {
+  color: var(--pf-t--global--text--color--link--hover);
+  text-decoration: none;
+}
+
+/* DL term override → see shared/details-page.css (.details-page__overview) */
+
+/* .bm-details__content-grid responsive, .bm-details__rail-card → see shared/details-page.css */
+
+.bm-details__disk-image-value {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pf-t--global--spacer--xs);
+}
+
+.bm-details__disk-image-icon {
+  font-size: var(--pf-t--global--font--size--body--sm);
+  color: var(--pf-t--global--icon--color--subtle);
+  flex-shrink: 0;
+}

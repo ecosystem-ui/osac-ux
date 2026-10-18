@@ -48,24 +48,18 @@ const attachment = {
 } as unknown as ExternalIPAttachment;
 
 describe('ClusterDetailsPageContent', () => {
-  it('shows conditions only on Overview and External IP endpoints in the Networking side card', async () => {
-    const { user } = renderWithProviders(<ClusterDetailsPageContent cluster={cluster} />, {
+  it('shows all cluster detail sections on the main page', async () => {
+    renderWithProviders(<ClusterDetailsPageContent cluster={cluster} />, {
       apiFixtures: { externalIpAttachments: [] },
     });
 
+    expect(screen.getByText('Overview')).toBeInTheDocument();
+    expect(screen.getByText('Lifecycle')).toBeInTheDocument();
+    expect(screen.getByText('Networking')).toBeInTheDocument();
+    expect(screen.getByText('Node sets')).toBeInTheDocument();
     expect(screen.getByText('Conditions')).toBeInTheDocument();
-    expect(screen.queryByText('External IP endpoints')).not.toBeInTheDocument();
-
-    await user.click(screen.getByRole('tab', { name: 'Networking' }));
-
-    expect(screen.queryByText('Conditions')).not.toBeInTheDocument();
     expect(screen.getByText('External IP endpoints')).toBeInTheDocument();
-
-    await user.click(screen.getByRole('tab', { name: 'Node sets' }));
-
-    expect(screen.queryByText('Conditions')).not.toBeInTheDocument();
-    expect(screen.queryByText('External IP endpoints')).not.toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'Node sets' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument();
   });
 
   it('opens the endpoint attach modal from the Networking side card', async () => {
@@ -73,7 +67,6 @@ describe('ClusterDetailsPageContent', () => {
       apiFixtures: { externalIps: [externalIp], externalIpAttachments: [] },
     });
 
-    await user.click(screen.getByRole('tab', { name: 'Networking' }));
     await waitFor(() => {
       expect(screen.getAllByRole('button', { name: 'Attach External IP' })).toHaveLength(2);
     });
@@ -89,7 +82,6 @@ describe('ClusterDetailsPageContent', () => {
       apiFixtures: { externalIpAttachments: [attachment] },
     });
 
-    await user.click(screen.getByRole('tab', { name: 'Networking' }));
     await waitFor(() => {
       expect(
         screen.getByRole('button', { name: 'Detach External IP from API endpoint' }),

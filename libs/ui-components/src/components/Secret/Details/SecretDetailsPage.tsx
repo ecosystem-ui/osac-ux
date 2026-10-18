@@ -39,6 +39,8 @@ interface SecretDetailsPageContentProps {
   secret: Secret;
 }
 
+const FIELD_LABEL_CLASS = 'pf-v6-u-font-size-sm pf-v6-u-font-weight-normal';
+
 const SecretDetailsPageContent = ({ secret }: SecretDetailsPageContentProps) => {
   const { t } = useTranslation();
   const [showValues, setShowValues] = useState(false);
@@ -63,6 +65,11 @@ const SecretDetailsPageContent = ({ secret }: SecretDetailsPageContentProps) => 
                   parentTo="/secrets"
                   parentLabel={t('Secrets')}
                   resourceName={secretName}
+                  titleSize="3xl"
+                  description={
+                    secret.metadata?.description ||
+                    t('Secure credentials and configuration data for this project.')
+                  }
                 />
               </FlexItem>
               <FlexItem>
@@ -89,19 +96,25 @@ const SecretDetailsPageContent = ({ secret }: SecretDetailsPageContentProps) => 
               <StackItem>
                 <DescriptionList>
                   <DescriptionListGroup>
-                    <DescriptionListTerm>{t('Project')}</DescriptionListTerm>
+                    <DescriptionListTerm className={FIELD_LABEL_CLASS}>
+                      {t('Project')}
+                    </DescriptionListTerm>
                     <DescriptionListDescription>
                       {secret.metadata?.project || t('Default')}
                     </DescriptionListDescription>
                   </DescriptionListGroup>
                   <DescriptionListGroup>
-                    <DescriptionListTerm>{t('Type')}</DescriptionListTerm>
+                    <DescriptionListTerm className={FIELD_LABEL_CLASS}>
+                      {t('Type')}
+                    </DescriptionListTerm>
                     <DescriptionListDescription>
                       {secretTypes[secret.type] || secretTypes[SecretType.UNSPECIFIED]}
                     </DescriptionListDescription>
                   </DescriptionListGroup>
                   <DescriptionListGroup>
-                    <DescriptionListTerm>{t('Created')}</DescriptionListTerm>
+                    <DescriptionListTerm className={FIELD_LABEL_CLASS}>
+                      {t('Created')}
+                    </DescriptionListTerm>
                     <DescriptionListDescription>
                       <Timestamp value={secret.metadata?.creationTimestamp} />
                     </DescriptionListDescription>
@@ -133,11 +146,15 @@ const SecretDetailsPageContent = ({ secret }: SecretDetailsPageContentProps) => 
                   {dataEntries.map((entry) => (
                     <React.Fragment key={entry.key}>
                       <DescriptionListGroup>
-                        <DescriptionListTerm>{t('Key')}</DescriptionListTerm>
+                        <DescriptionListTerm className={FIELD_LABEL_CLASS}>
+                          {t('Key')}
+                        </DescriptionListTerm>
                         <DescriptionListDescription>{entry.key}</DescriptionListDescription>
                       </DescriptionListGroup>
                       <DescriptionListGroup>
-                        <DescriptionListTerm>{t('Value')}</DescriptionListTerm>
+                        <DescriptionListTerm className={FIELD_LABEL_CLASS}>
+                          {t('Value')}
+                        </DescriptionListTerm>
                         <DescriptionListDescription>
                           {showValues ? (
                             decodeSecretValue(entry.value) !== undefined ? (

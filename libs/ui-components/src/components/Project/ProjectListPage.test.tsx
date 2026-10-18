@@ -63,7 +63,11 @@ describe('ProjectListPage', () => {
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'Projects' })).toBeInTheDocument();
     });
-    expect(screen.getByText('Organize resources with hierarchical projects.')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Carve your tenant workspace into isolated projects and grant team members scoped access.',
+      ),
+    ).toBeInTheDocument();
   });
 
   it('renders project rows with names and statuses', async () => {
@@ -75,6 +79,23 @@ describe('ProjectListPage', () => {
     expect(screen.getByText('backend')).toBeInTheDocument();
     expect(screen.getByText('Active')).toBeInTheDocument();
     expect(screen.getByText('Pending')).toBeInTheDocument();
+  });
+
+  it('shows service counts instead of service names', async () => {
+    const baseProject = makeProject('p-services', 'services');
+    const project = {
+      ...baseProject,
+      metadata: {
+        ...baseProject.metadata,
+        annotations: { 'osac.io/services': 'VMaaS, BMaaS, CaaS' },
+      },
+    } as Project;
+    renderPage([project]);
+
+    await waitFor(() => {
+      expect(screen.getByText('3 services')).toBeInTheDocument();
+    });
+    expect(screen.queryByText('VMaaS, BMaaS, CaaS')).not.toBeInTheDocument();
   });
 
   it('shows the Create project link for tenant-admin', async () => {
@@ -156,5 +177,27 @@ describe('ProjectListPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Default')).toBeInTheDocument();
     });
+  });
+
+  it('builds the tree from dotted project names', async () => {
+    const rootProject = makeProject('p-root', 'root');
+    const nestedProject = {
+      ...makeProject('p-child', 'root.child'),
+      metadata: {
+        ...makeProject('p-child', 'root.child').metadata,
+        project: 'unrelated-parent',
+      },
+    } as Project;
+
+    const { user } = renderPage([rootProject, nestedProject]);
+
+    await waitFor(() => {
+      expect(screen.getByText('root')).toBeInTheDocument();
+      expect(screen.getByText('root.child')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Collapse root' }));
+
+    expect(screen.queryByText('root.child')).not.toBeInTheDocument();
   });
 });

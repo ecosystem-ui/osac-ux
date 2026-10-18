@@ -1,0 +1,90 @@
+.virtual-network-card {
+  width: 100%;
+  height: auto;
+  align-self: start;
+  transition: box-shadow 0.18s ease;
+}
+
+.virtual-network-card:hover {
+  z-index: 1;
+  box-shadow: var(--pf-t--global--box-shadow--md);
+}
+
+.virtual-network-card__header {
+  --pf-v6-c-card__actions--MarginBlockStart: 0;
+  align-items: center;
+  padding-block-end: 0;
+}
+
+.virtual-network-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  flex-shrink: 0;
+  border-radius: var(--pf-t--global--border--radius--medium);
+  background-color: var(--pf-t--global--background--color--secondary--default);
+  color: var(--pf-t--global--text--color--regular);
+  font-family: var(--pf-t--global--font--family--heading);
+  font-weight: var(--pf-t--global--font--weight--heading--bold);
+}
+
+.virtual-network-card__icon svg {
+  width: var(--pf-t--global--icon--size--lg);
+  height: var(--pf-t--global--icon--size--lg);
+}
+
+.virtual-network-card .pf-v6-c-card__body {
+  display: flex;
+  flex-direction: column;
+  padding-block-end: 0;
+}
+
+.virtual-network-card__main {
+  flex: 1 1 auto;
+}
+
+.virtual-network-card__name {
+  padding-block-start: var(--pf-t--global--spacer--sm);
+}
+
+.virtual-network-card .pf-v6-c-description-list__term {
+  color: var(--pf-t--global--text--color--subtle);
+  font-size: var(--pf-t--global--font--size--body--sm);
+  font-weight: var(--pf-t--global--font--weight--body--bold);
+}
+
+.virtual-network-card .pf-v6-c-description-list__description {
+  font-size: var(--pf-t--global--font--size--body--sm);
+}
+
+.virtual-network-card__footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--pf-t--global--spacer--md);
+  box-sizing: border-box;
+  width: calc(
+    100% + var(--pf-v6-c-card--child--PaddingInlineStart) +
+      var(--pf-v6-c-card--child--PaddingInlineEnd)
+  );
+  margin-block-start: var(--pf-t--global--spacer--md);
+  margin-inline: calc(-1 * var(--pf-v6-c-card--child--PaddingInlineStart))
+    calc(-1 * var(--pf-v6-c-card--child--PaddingInlineEnd));
+  padding-block: var(--pf-t--global--spacer--md);
+  padding-inline: var(--pf-v6-c-card--child--PaddingInlineStart)
+    var(--pf-v6-c-card--child--PaddingInlineEnd);
+  border-block-start: var(--pf-t--global--border--width--divider--default) solid
+    var(--pf-t--global--border--color--default);
+}
+
+.virtual-network-card__footer-label {
+  color: var(--pf-t--global--text--color--subtle);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .virtual-network-card {
+    transition: none;
+  }
+}

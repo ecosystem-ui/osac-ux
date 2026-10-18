@@ -1,0 +1,11 @@
+/* Current-phase label to the right of the section title */
+.bm-provisioning-progress__phase.pf-v6-c-content--p {
+  margin: 0;
+  color: var(--pf-t--global--text--color--subtle);
+  font-size: var(--pf-t--global--font--size--body--sm);
+}
+
+/* Give the centered stepper a little breathing room */
+.bm-provisioning-progress__stepper.pf-v6-c-progress-stepper {
+  padding-block: var(--pf-t--global--spacer--sm);
+}

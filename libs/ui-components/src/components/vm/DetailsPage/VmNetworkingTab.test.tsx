@@ -18,9 +18,13 @@ describe('VmNetworkingTab', () => {
   it('renders resolved networking names', () => {
     vi.mocked(useVmNetworkAttachmentRows).mockReturnValue([
       {
-        virtualNetwork: 'prod-vn',
-        subnet: 'prod-subnet',
-        securityGroups: 'web-sg, default-sg',
+        virtualNetwork: { id: 'vn-1', name: 'prod-vn' },
+        subnet: { id: 'subnet-1', name: 'prod-subnet' },
+        virtualNetworkId: 'vn-1',
+        securityGroups: [
+          { id: 'sg-1', name: 'web-sg' },
+          { id: 'sg-2', name: 'default-sg' },
+        ],
       },
     ]);
 
@@ -38,9 +42,23 @@ describe('VmNetworkingTab', () => {
 
     renderTab(vm);
 
-    expect(screen.getByText('prod-vn')).toBeInTheDocument();
-    expect(screen.getByText('prod-subnet')).toBeInTheDocument();
-    expect(screen.getByText('web-sg, default-sg')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add network' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'prod-vn' })).toHaveAttribute(
+      'href',
+      '/networking/virtual-networks/vn-1',
+    );
+    expect(screen.getByRole('link', { name: 'prod-subnet' })).toHaveAttribute(
+      'href',
+      '/networking/virtual-networks/vn-1',
+    );
+    expect(screen.getByRole('link', { name: 'web-sg' })).toHaveAttribute(
+      'href',
+      '/networking/security-groups/sg-1',
+    );
+    expect(screen.getByRole('link', { name: 'default-sg' })).toHaveAttribute(
+      'href',
+      '/networking/security-groups/sg-2',
+    );
   });
 
   it('shows empty state when there are no attachments', () => {

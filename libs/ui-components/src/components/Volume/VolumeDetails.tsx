@@ -1,8 +1,5 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Card,
-  CardBody,
   DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
@@ -10,23 +7,27 @@ import {
   Divider,
   Flex,
   FlexItem,
+  Grid,
+  GridItem,
   PageSection,
   Stack,
   StackItem,
+  Title,
 } from '@patternfly/react-core';
 
 import type { Volume } from '@osac/types';
-import { VolumeState } from '@osac/types';
-import DeleteResourceButton from '@osac/ui-components/components/Resource/DeleteResourceButton';
 
 import { VOLUMES_LIST_PATH } from './values';
-import { VolumeAccessModeLabel } from './VolumeAccessModeLabel';
-import VolumeDeleteConfirmModal from './VolumeDeleteConfirmModal';
+import VolumeActionsMenu from './VolumeActionsMenu';
+import VolumeSidebarSection from './VolumeSidebarSection';
 import { VolumeStatusLabel } from './VolumeStatusLabel';
 import { useTranslation } from '../../hooks/useTranslation';
 import { displayValue } from '../../utils/detailFormatters';
 import { Timestamp } from '../Primitives/Timestamp';
 import { ResourceDetailHeader } from '../Resource/ResourceDetailHeader';
+
+import './VolumeDetailsPage.css';
+import '../shared/details-page.css';
 
 interface VolumeDetailsProps {
   volume: Volume;
@@ -38,21 +39,9 @@ const formatSizeGib = (sizeGib: bigint | undefined): string =>
 const VolumeDetails = ({ volume }: VolumeDetailsProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [deleteOpen, setDeleteOpen] = useState(false);
-
-  const state = volume.status?.state;
-  const canDelete = state === VolumeState.AVAILABLE || state === VolumeState.FAILED;
 
   return (
     <>
-      {deleteOpen && (
-        <VolumeDeleteConfirmModal
-          volume={volume}
-          onClose={() => setDeleteOpen(false)}
-          onSuccess={() => navigate(VOLUMES_LIST_PATH)}
-        />
-      )}
-
       <PageSection hasBodyWrapper={false}>
         <Stack hasGutter>
           <StackItem>
@@ -68,21 +57,16 @@ const VolumeDetails = ({ volume }: VolumeDetailsProps) => {
                   parentLabel={t('Volumes')}
                   resourceName={volume.metadata?.name ?? volume.id}
                   titleAddon={<VolumeStatusLabel state={volume.status?.state} />}
+                  titleSize="3xl"
+                  description={t('Review storage configuration and access details for this volume.')}
                 />
               </FlexItem>
               <FlexItem>
-                <Flex spaceItems={{ default: 'spaceItemsSm' }} flexWrap={{ default: 'wrap' }}>
-                  <FlexItem>
-                    <DeleteResourceButton
-                      canDelete={canDelete}
-                      onClick={() => {
-                        if (canDelete) {
-                          setDeleteOpen(true);
-                        }
-                      }}
-                    />
-                  </FlexItem>
-                </Flex>
+                <VolumeActionsMenu
+                  volume={volume}
+                  showLabel
+                  onDeleteSuccess={() => navigate(VOLUMES_LIST_PATH)}
+                />
               </FlexItem>
             </Flex>
           </StackItem>
@@ -93,60 +77,63 @@ const VolumeDetails = ({ volume }: VolumeDetailsProps) => {
       </PageSection>
 
       <PageSection hasBodyWrapper={false}>
-        <Card>
-          <CardBody>
-            <DescriptionList isHorizontal>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Name')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {displayValue(volume.metadata?.name)}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
+        <Grid hasGutter className="details-page__content-grid">
+          <GridItem md={8} className="details-page__column">
+            <Stack hasGutter>
+              <StackItem>
+                <Title headingLevel="h2" size="lg">
+                  {t('Overview')}
+                </Title>
+              </StackItem>
+              <StackItem>
+                <DescriptionList
+                  isCompact
+                  className="volume-details-overview"
+                  aria-label={t('Volume overview')}
+                >
+                  <DescriptionListGroup>
+                    <DescriptionListTerm>{t('Name')}</DescriptionListTerm>
+                    <DescriptionListDescription>
+                      {displayValue(volume.metadata?.name)}
+                    </DescriptionListDescription>
+                  </DescriptionListGroup>
+                  <DescriptionListGroup>
+                    <DescriptionListTerm>{t('Status')}</DescriptionListTerm>
+                    <DescriptionListDescription>
+                      <VolumeStatusLabel state={volume.status?.state} />
+                    </DescriptionListDescription>
+                  </DescriptionListGroup>
+                  <DescriptionListGroup>
+                    <DescriptionListTerm>{t('Storage tier')}</DescriptionListTerm>
+                    <DescriptionListDescription>
+                      {displayValue(volume.spec?.storageTier)}
+                    </DescriptionListDescription>
+                  </DescriptionListGroup>
+                  <DescriptionListGroup>
+                    <DescriptionListTerm>{t('Size')}</DescriptionListTerm>
+                    <DescriptionListDescription>
+                      {formatSizeGib(volume.spec?.sizeGib)}
+                    </DescriptionListDescription>
+                  </DescriptionListGroup>
+                  <DescriptionListGroup>
+                    <DescriptionListTerm>{t('Created')}</DescriptionListTerm>
+                    <DescriptionListDescription>
+                      <Timestamp value={volume.metadata?.creationTimestamp} />
+                    </DescriptionListDescription>
+                  </DescriptionListGroup>
+                </DescriptionList>
+              </StackItem>
+            </Stack>
+          </GridItem>
 
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Storage Tier')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {displayValue(volume.spec?.storageTier)}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Size')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {formatSizeGib(volume.spec?.sizeGib)}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Access Mode')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  <VolumeAccessModeLabel accessMode={volume.spec?.accessMode} />
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Tenant')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {displayValue(volume.metadata?.tenant)}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Created')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  <Timestamp value={volume.metadata?.creationTimestamp} />
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-
-              {volume.status?.message ? (
-                <DescriptionListGroup>
-                  <DescriptionListTerm>{t('Message')}</DescriptionListTerm>
-                  <DescriptionListDescription>{volume.status.message}</DescriptionListDescription>
-                </DescriptionListGroup>
-              ) : null}
-            </DescriptionList>
-          </CardBody>
-        </Card>
+          <GridItem md={4} className="details-page__column">
+            <Stack hasGutter>
+              <StackItem>
+                <VolumeSidebarSection volume={volume} />
+              </StackItem>
+            </Stack>
+          </GridItem>
+        </Grid>
       </PageSection>
     </>
   );

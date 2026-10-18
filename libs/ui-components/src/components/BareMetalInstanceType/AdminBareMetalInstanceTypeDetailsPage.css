@@ -1,0 +1,8 @@
+/* Bare metal instance type details — page-specific overrides.
+ * Shared layout utilities live in ../shared/details-page.css.
+ */
+
+.admin-bm-instance-type-details-overview .pf-v6-c-description-list__term {
+  font-size: var(--pf-t--global--font--size--body--sm);
+  font-weight: var(--pf-t--global--font--weight--body--default);
+}

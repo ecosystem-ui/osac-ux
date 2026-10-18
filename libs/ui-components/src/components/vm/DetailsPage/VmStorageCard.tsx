@@ -1,4 +1,5 @@
-import { Card, CardBody, CardTitle } from '@patternfly/react-core';
+import { Button, Flex, FlexItem, Stack, StackItem, Title } from '@patternfly/react-core';
+import PlusCircleIcon from '@patternfly/react-icons/dist/esm/icons/plus-circle-icon';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
 import type { ComputeInstance } from '@osac/types';
@@ -15,9 +16,31 @@ const VmStorageCard = ({ vm }: VmStorageCardProps) => {
   const storageRows = getVmStorageRows(t, vm.spec?.bootDisk, vm.spec?.additionalDisks);
 
   return (
-    <Card isFullHeight>
-      <CardTitle>{t('Storage')}</CardTitle>
-      <CardBody>
+    <Stack hasGutter className="vm-details__storage">
+      <StackItem>
+        <Flex
+          alignItems={{ default: 'alignItemsCenter' }}
+          justifyContent={{ default: 'justifyContentSpaceBetween' }}
+          flexWrap={{ default: 'wrap' }}
+        >
+          <FlexItem>
+            <Title headingLevel="h2" size="lg">
+              {t('Storage')}
+            </Title>
+          </FlexItem>
+          <FlexItem>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<PlusCircleIcon />}
+              aria-label={t('Add disk')}
+            >
+              {t('Add disk')}
+            </Button>
+          </FlexItem>
+        </Flex>
+      </StackItem>
+      <StackItem>
         <Table aria-label={t('Storage')} variant="compact">
           <Thead>
             <Tr>
@@ -36,8 +59,8 @@ const VmStorageCard = ({ vm }: VmStorageCardProps) => {
             ))}
           </Tbody>
         </Table>
-      </CardBody>
-    </Card>
+      </StackItem>
+    </Stack>
   );
 };
 

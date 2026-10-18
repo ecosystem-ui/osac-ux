@@ -1,0 +1,74 @@
+/* -----------------------------------------------------------------------
+ * Header section — no bottom padding so the Divider sits flush
+ * ----------------------------------------------------------------------- */
+.cluster-details-page__header-section {
+  padding-block-end: 0;
+}
+
+/* -----------------------------------------------------------------------
+ * Two-column body grid: 2fr main | 1fr rail → see shared/details-page.css
+ *   (.details-page__content-grid, .details-page__column)
+ * ----------------------------------------------------------------------- */
+
+.cluster-details-page__network-link {
+  color: var(--pf-t--global--text--color--link--default);
+  text-decoration: none;
+}
+
+.cluster-details-page__network-link:hover,
+.cluster-details-page__network-link:focus {
+  color: var(--pf-t--global--text--color--link--hover);
+  text-decoration: none;
+}
+
+/* DL term override → see shared/details-page.css (.details-page__overview) */
+
+/* -----------------------------------------------------------------------
+ * Overview row — 2 equal columns inside the main column
+ * ----------------------------------------------------------------------- */
+.cluster-details-page__overview-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cluster-details-page__overview-grid > .pf-v6-l-grid__item {
+  grid-column: auto;
+}
+
+/* -----------------------------------------------------------------------
+ * Rail column cards → see shared/details-page.css (.details-page__rail-card)
+ * ----------------------------------------------------------------------- */
+
+/* External IP card also adopts rail styling */
+.cluster-details-page__rail-column .pf-v6-c-card {
+  border: 0;
+  border-radius: var(--pf-t--global--border--radius--medium);
+  background-color: var(--pf-t--global--background--color--secondary--default);
+}
+
+.cluster-details-page__rail-column .pf-v6-c-card__title {
+  color: var(--pf-t--global--text--color--regular);
+  font-size: var(--pf-t--global--font--size--heading--md);
+}
+
+/* -----------------------------------------------------------------------
+ * SSH key — truncate long keys gracefully
+ * ----------------------------------------------------------------------- */
+.cluster-details-page__ssh-key {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  font-size: var(--pf-t--global--font--size--body--sm);
+}
+
+/* -----------------------------------------------------------------------
+ * Responsive: stack columns on smaller viewports
+ * ----------------------------------------------------------------------- */
+@media (max-width: 992px) {
+  /* .cluster-details-page__content-grid responsive → see shared/details-page.css */
+
+  .cluster-details-page__overview-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

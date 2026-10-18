@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Flex } from '@patternfly/react-core';
-import PencilAltIcon from '@patternfly/react-icons/dist/esm/icons/pencil-alt-icon';
+import { Dropdown, DropdownItem, DropdownList, MenuToggle } from '@patternfly/react-core';
 
 import { Secret } from '@osac/types';
 import DeleteResourceButton from '@osac/ui-components/components/Resource/DeleteResourceButton';
@@ -16,6 +15,7 @@ interface SecretDetailsActionButtonsProps {
 const SecretDetailsActionButtons = ({ secret }: SecretDetailsActionButtonsProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   return (
@@ -27,20 +27,36 @@ const SecretDetailsActionButtons = ({ secret }: SecretDetailsActionButtonsProps)
           onSuccess={() => navigate('/secrets', { replace: true })}
         />
       )}
-      <Flex
-        justifyContent={{ default: 'justifyContentFlexEnd' }}
-        spaceItems={{ default: 'spaceItemsSm' }}
-        flexWrap={{ default: 'wrap' }}
+      <Dropdown
+        isOpen={isOpen}
+        onOpenChange={setIsOpen}
+        onSelect={() => setIsOpen(false)}
+        popperProps={{ position: 'right' }}
+        toggle={(toggleRef) => (
+          <MenuToggle
+            ref={toggleRef}
+            variant="secondary"
+            isExpanded={isOpen}
+            onClick={() => setIsOpen((open) => !open)}
+            aria-label={t('Actions')}
+          >
+            {t('Actions')}
+          </MenuToggle>
+        )}
       >
-        <Button
-          variant="secondary"
-          icon={<PencilAltIcon />}
-          onClick={() => navigate(`/secrets/${secret.id}/edit`)}
-        >
-          {t('Edit')}
-        </Button>
-        <DeleteResourceButton showIcon onClick={() => setDeleteOpen(true)} />
-      </Flex>
+        <DropdownList>
+          <DropdownItem value="edit" onClick={() => navigate(`/secrets/${secret.id}/edit`)}>
+            {t('Edit')}
+          </DropdownItem>
+          <DeleteResourceButton
+            isDropdown
+            onClick={() => {
+              setDeleteOpen(true);
+              setIsOpen(false);
+            }}
+          />
+        </DropdownList>
+      </Dropdown>
     </>
   );
 };

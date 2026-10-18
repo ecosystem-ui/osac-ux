@@ -1,0 +1,16 @@
+/* Overview DL term override → see shared/details-page.css (.details-page__overview) */
+
+.virtual-network-details-security-group-link {
+  font-size: calc(
+    (var(--pf-t--global--font--size--body--sm) + var(--pf-t--global--font--size--body--md)) / 2
+  );
+  font-weight: var(--pf-t--global--font--weight--body--default);
+  text-decoration: none;
+}
+
+.virtual-network-details-security-group-link:hover,
+.virtual-network-details-security-group-link:focus {
+  text-decoration: none;
+}
+
+/* NAT gateway sidebar card → see shared/details-page.css (.details-page__sidebar, etc.) */

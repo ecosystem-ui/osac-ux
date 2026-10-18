@@ -15,14 +15,6 @@ vi.mock('./VmDetailsActionButtons', () => ({
   default: () => <div>Action buttons</div>,
 }));
 
-vi.mock('./VmDetailsSummary', () => ({
-  default: () => <div>VM summary</div>,
-}));
-
-vi.mock('./VmDetailsOverviewTab', () => ({
-  default: () => <div>Overview tab</div>,
-}));
-
 vi.mock('./VmNetworkingTab', () => ({
   default: () => <div>Networking tab</div>,
 }));
@@ -44,7 +36,11 @@ const { useInstanceType } = await import('../../../api/v1/instance-types');
 const vm = {
   id: 'vm-1',
   metadata: { name: 'web-01' },
-  spec: { instanceType: { id: 'standard-4-8' } },
+  spec: {
+    instanceType: { id: 'standard-4-8' },
+    catalogItem: { id: 'catalog-vm-1', name: 'General purpose VM' },
+    sshKey: { id: 'secret-ssh-1', name: 'alice-laptop-key' },
+  },
   status: { state: ComputeInstanceState.RUNNING },
 } as ComputeInstance;
 
@@ -59,12 +55,21 @@ describe('VmDetails', () => {
     } as ReturnType<typeof useInstanceType>);
   });
 
-  it('renders the Console tab alongside Overview and Networking', () => {
+  it('renders the reference-style overview, networking, and console sections', () => {
     renderDetails();
 
-    expect(screen.getByRole('tab', { name: 'Overview' })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'Networking' })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'Console' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Overview' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Lifecycle' })).toBeInTheDocument();
+    expect(screen.getByText('Networking tab')).toBeInTheDocument();
+    expect(screen.getByText('Console')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'General purpose VM' })).toHaveAttribute(
+      'href',
+      '/vms/create/catalog-vm-1',
+    );
+    expect(screen.getByRole('link', { name: 'alice-laptop-key' })).toHaveAttribute(
+      'href',
+      '/secrets/secret-ssh-1',
+    );
   });
 
   it('shows an alert and still renders the page when instance type lookup fails', () => {
@@ -79,6 +84,6 @@ describe('VmDetails', () => {
     expect(screen.getByText('Could not load instance types')).toBeInTheDocument();
     expect(screen.getByText('Instance type unavailable')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'web-01' })).toBeInTheDocument();
-    expect(screen.getByText('VM summary')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Overview' })).toBeInTheDocument();
   });
 });

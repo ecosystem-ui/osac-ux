@@ -82,11 +82,11 @@ describe('AdminInstanceTypeDetailPage', () => {
     renderDetailPage(makeInstanceType());
 
     expect(screen.getByRole('heading', { name: 'gp-small' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Instance types' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Instance types' })).toBeInTheDocument();
     expect(screen.getByText('General purpose instance type')).toBeInTheDocument();
     expect(screen.getByText('4')).toBeInTheDocument();
     expect(screen.getByText('16')).toBeInTheDocument();
-    expect(screen.getByText('Active')).toBeInTheDocument();
+    expect(screen.getAllByText('Active').length).toBeGreaterThan(0);
     expect(screen.getByText('This instance type has no GPU attached.')).toBeInTheDocument();
   });
 
@@ -104,12 +104,12 @@ describe('AdminInstanceTypeDetailPage', () => {
     expect(screen.getByText('2')).toBeInTheDocument();
   });
 
-  it('navigates back to the list when the breadcrumb link is clicked', async () => {
-    const { user } = renderDetailPage(makeInstanceType());
+  it('has a breadcrumb link back to the instance types list', () => {
+    renderDetailPage(makeInstanceType());
 
-    await user.click(screen.getByRole('button', { name: 'Instance types' }));
-
-    expect(mockNavigate).toHaveBeenCalledWith(LIST_ROUTE);
+    const link = screen.getByRole('link', { name: 'Instance types' });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', LIST_ROUTE);
   });
 
   it('shows a loading spinner while the query is in flight', () => {
@@ -146,23 +146,26 @@ describe('AdminInstanceTypeDetailPage', () => {
     expect(screen.getByText('Instance type unavailable')).toBeInTheDocument();
   });
 
-  it('shows Deprecate and Mark obsolete buttons (not a kebab menu) for an active instance type', () => {
-    renderDetailPage(makeInstanceType(InstanceTypeState.ACTIVE));
+  it('shows an Actions menu with Deprecate and Obsolete for an active instance type', async () => {
+    const { user } = renderDetailPage(makeInstanceType(InstanceTypeState.ACTIVE));
 
-    expect(screen.getByRole('button', { name: 'Deprecate' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Obsolete' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Reactivate' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /Actions for/ })).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /Actions for/ }));
+
+    expect(screen.getByRole('menuitem', { name: 'Deprecate' })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'Obsolete' })).toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Reactivate' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Delete' })).not.toBeInTheDocument();
   });
 
-  it('shows Deprecate, Reactivate, and Delete buttons for an obsolete instance type', () => {
-    renderDetailPage(makeInstanceType(InstanceTypeState.OBSOLETE));
+  it('shows Reactivate and Delete in the Actions menu for an obsolete instance type', async () => {
+    const { user } = renderDetailPage(makeInstanceType(InstanceTypeState.OBSOLETE));
 
-    expect(screen.getByRole('button', { name: 'Deprecate' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Reactivate' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Obsolete' })).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /Actions for/ }));
+
+    expect(screen.getByRole('menuitem', { name: 'Deprecate' })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'Reactivate' })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'Delete' })).toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Obsolete' })).not.toBeInTheDocument();
   });
 
   it('deletes the instance type and navigates back to the list', async () => {
@@ -175,7 +178,8 @@ describe('AdminInstanceTypeDetailPage', () => {
       },
     });
 
-    await user.click(screen.getByRole('button', { name: 'Delete' }));
+    await user.click(screen.getByRole('button', { name: /Actions for/ }));
+    await user.click(screen.getByRole('menuitem', { name: 'Delete' }));
     const dialog = screen.getByRole('dialog');
     await user.click(within(dialog).getByRole('button', { name: 'Delete' }));
 
