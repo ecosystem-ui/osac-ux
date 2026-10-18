@@ -13,6 +13,7 @@ export interface ResourceNameFieldProps {
   title?: string; // Used to override the name/id used as the title
   subTitle?: string;
   detailsUrl?: string;
+  nameLinkClassName?: string;
   maxCharsDisplayed?: number;
 }
 
@@ -21,6 +22,7 @@ const ResourceNameField = ({
   title,
   subTitle,
   detailsUrl,
+  nameLinkClassName,
   maxCharsDisplayed = 0,
 }: ResourceNameFieldProps) => {
   const titleValue = title ?? (resource.metadata?.name || resource.id);
@@ -35,7 +37,7 @@ const ResourceNameField = ({
     <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsSm' }}>
       <FlexItem className="pf-v6-u-font-size-md">
         {detailsUrl ? (
-          <Link className="pf-v6-u-font-weight-bold" to={detailsUrl}>
+          <Link className={nameLinkClassName ?? 'pf-v6-u-font-weight-bold'} to={detailsUrl}>
             {renderContent(titleValue)}
           </Link>
         ) : (

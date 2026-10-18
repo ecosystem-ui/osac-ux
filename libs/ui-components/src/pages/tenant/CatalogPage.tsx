@@ -3,8 +3,6 @@ import { useSearchParams } from 'react-router-dom';
 import {
   Button,
   Content,
-  EmptyState,
-  EmptyStateBody,
   Flex,
   FlexItem,
   SearchInput,
@@ -33,6 +31,7 @@ import CatalogTenantFilter from '@osac/ui-components/components/catalog/CatalogT
 import ListPage from '@osac/ui-components/components/Page/ListPage';
 import FieldSeparator from '@osac/ui-components/components/Primitives/FieldSeparator';
 import ViewSwitcher from '@osac/ui-components/components/Primitives/ViewSwitcher';
+import { SubtleContent } from '@osac/ui-components/components/SubtleContent/SubtleContent';
 import { useCatalogItems } from '@osac/ui-components/hooks/use-catalog-items';
 import {
   SEARCH_PARAM,
@@ -245,25 +244,21 @@ const CatalogPage = () => {
   const renderEmptyState = () => {
     if (unfilteredTotalItems === 0) {
       return (
-        <EmptyState titleText={t('No catalog items found')} headingLevel="h2">
-          {enabledServices.length === 0 ? (
-            <EmptyStateBody>{t('No catalog services are enabled.')}</EmptyStateBody>
-          ) : (
-            <EmptyStateBody>{t('No catalog items are available yet.')}</EmptyStateBody>
-          )}
-        </EmptyState>
+        <SubtleContent component="p">
+          {enabledServices.length === 0
+            ? t('No catalog services are enabled.')
+            : t('No catalog items yet. Create one to get started.')}
+        </SubtleContent>
       );
     }
 
     return (
-      <EmptyState titleText={t('No catalog items match your filters')} headingLevel="h2">
-        <EmptyStateBody>
-          {t('Try a different service, publish status, tenant, or search term.')}{' '}
-          <Button variant="link" isInline onClick={clearAllFilters}>
-            {t('Clear all filters')}
-          </Button>
-        </EmptyStateBody>
-      </EmptyState>
+      <SubtleContent component="p">
+        {t('No catalog items match your search.')}{' '}
+        <Button variant="link" isInline onClick={clearAllFilters}>
+          {t('Clear all filters')}
+        </Button>
+      </SubtleContent>
     );
   };
   const selectedTypeOptions: ServiceTier[] = useMemo(() => {
@@ -302,39 +297,41 @@ const CatalogPage = () => {
         <StackItem>
           <Toolbar>
             <ToolbarContent>
-              <ToolbarItem>
-                <CatalogServiceTierFilter
-                  selectedTypeOptions={selectedTypeOptions}
-                  typeCounts={typeCounts}
-                  toggleTypeFilter={toggleTypeFilter}
-                />
-              </ToolbarItem>
-              {role === 'admin' || role === 'tenant-admin' ? (
+              <ToolbarGroup>
                 <ToolbarItem>
-                  <CatalogPublishedStatusFilter
-                    selected={publishedFilter}
-                    onChange={(value) => setPublishedFilterParam(value ?? '')}
+                  <CatalogServiceTierFilter
+                    selectedTypeOptions={selectedTypeOptions}
+                    typeCounts={typeCounts}
+                    toggleTypeFilter={toggleTypeFilter}
                   />
                 </ToolbarItem>
-              ) : null}
-              {role === 'admin' ? (
+                {role === 'admin' || role === 'tenant-admin' ? (
+                  <ToolbarItem>
+                    <CatalogPublishedStatusFilter
+                      selected={publishedFilter}
+                      onChange={(value) => setPublishedFilterParam(value ?? '')}
+                    />
+                  </ToolbarItem>
+                ) : null}
+                {role === 'admin' ? (
+                  <ToolbarItem>
+                    <CatalogTenantFilter
+                      selected={tenantFilter}
+                      onChange={(value) => setTenantFilter(value ?? '')}
+                    />
+                  </ToolbarItem>
+                ) : null}
                 <ToolbarItem>
-                  <CatalogTenantFilter
-                    selected={tenantFilter}
-                    onChange={(value) => setTenantFilter(value ?? '')}
+                  <SearchInput
+                    placeholder={t('Search catalog items')}
+                    value={searchFilter}
+                    onChange={(_event, value) => setSearchFilter(value)}
+                    onClear={() => setSearchFilter('')}
+                    aria-label={t('Filter catalog by keyword')}
+                    isDisabled={!hasSuccessfulQuery}
                   />
                 </ToolbarItem>
-              ) : null}
-              <ToolbarItem>
-                <SearchInput
-                  placeholder={t('Search catalog items')}
-                  value={searchFilter}
-                  onChange={(_event, value) => setSearchFilter(value)}
-                  onClear={() => setSearchFilter('')}
-                  aria-label={t('Filter catalog by keyword')}
-                  isDisabled={!hasSuccessfulQuery}
-                />
-              </ToolbarItem>
+              </ToolbarGroup>
               <ToolbarGroup align={{ default: 'alignEnd' }}>
                 <ToolbarItem>
                   <ViewSwitcher pageKey={CATALOG_ITEMS_VIEW_KEY} />

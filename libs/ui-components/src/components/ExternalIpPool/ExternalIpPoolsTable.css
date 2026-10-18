@@ -1,0 +1,23 @@
+.external-ip-pools-table__name-link {
+  color: var(--pf-t--global--text--color--link--default);
+  font-weight: var(--pf-t--global--font--weight--body--bold);
+  text-decoration: none;
+}
+
+.external-ip-pools-table__name-link:hover,
+.external-ip-pools-table__name-link:focus {
+  color: var(--pf-t--global--text--color--link--hover);
+  text-decoration: underline;
+}
+
+.external-ip-pools-table__name-meta {
+  color: var(--pf-t--global--text--color--subtle);
+  font-size: var(--pf-t--global--font--size--body--sm);
+  line-height: var(--pf-t--global--font--line-height--body);
+}
+
+.external-ip-pools-table__meta {
+  color: var(--pf-t--global--text--color--subtle);
+  font-size: var(--pf-t--global--font--size--body--sm);
+  line-height: var(--pf-t--global--font--line-height--body);
+}

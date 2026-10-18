@@ -1,4 +1,6 @@
+import { Flex, FlexItem } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { Link } from 'react-router-dom';
 
 import { Secret, SecretType } from '@osac/types';
 import SecretActionsMenu from '@osac/ui-components/components/Secret/SecretActionsMenu';
@@ -6,7 +8,8 @@ import { useTranslation } from '@osac/ui-components/hooks/useTranslation';
 
 import { getSecretType } from './utils.ts';
 import { Timestamp } from '../Primitives/Timestamp.tsx';
-import ResourceNameField from '../Resource/ResourceNameField.tsx';
+
+import './SecretTable.css';
 
 interface SecretTableProps {
   items: Secret[];
@@ -17,45 +20,53 @@ interface SecretTableProps {
 const SecretTable = ({ items, onEdit, onDelete }: SecretTableProps) => {
   const { t } = useTranslation();
   const secretTypes = getSecretType(t);
-  const nameLabel = t('Name');
-  const projectLabel = t('Project');
-  const typeLabel = t('Type');
-  const createdLabel = t('Created');
-  const actionsLabel = t('Actions');
 
   return (
     <Table aria-label={t('Secrets')} variant="compact">
       <Thead>
         <Tr>
-          <Th>{nameLabel}</Th>
-          <Th>{projectLabel}</Th>
-          <Th>{typeLabel}</Th>
-          <Th>{createdLabel}</Th>
-          <Th aria-label={actionsLabel} />
+          <Th>{t('Name')}</Th>
+          <Th>{t('Project')}</Th>
+          <Th>{t('Type')}</Th>
+          <Th>{t('Created')}</Th>
+          <Th aria-label={t('Actions')} />
         </Tr>
       </Thead>
       <Tbody>
-        {items.map((secret) => (
-          <Tr key={secret.id}>
-            <Td dataLabel={nameLabel}>
-              <ResourceNameField resource={secret} detailsUrl={`/secrets/${secret.id}`} />
-            </Td>
-            <Td dataLabel={projectLabel}>{secret.metadata?.project || t('Default')}</Td>
-            <Td dataLabel={typeLabel}>
-              {secretTypes[secret.type] || secretTypes[SecretType.UNSPECIFIED]}
-            </Td>
-            <Td dataLabel={createdLabel}>
-              <Timestamp value={secret.metadata?.creationTimestamp} />
-            </Td>
-            <Td dataLabel={actionsLabel} isActionCell>
-              <SecretActionsMenu
-                secret={secret}
-                onEdit={() => onEdit(secret)}
-                onDelete={() => onDelete(secret)}
-              />
-            </Td>
-          </Tr>
-        ))}
+        {items.map((secret) => {
+          const name = secret.metadata?.name || secret.id;
+
+          return (
+            <Tr key={secret.id}>
+              <Td dataLabel={t('Name')}>
+                <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsXs' }}>
+                  <FlexItem>
+                    <Link
+                      to={`/secrets/${encodeURIComponent(secret.id)}`}
+                      className="secrets-table__name-link"
+                    >
+                      {name}
+                    </Link>
+                  </FlexItem>
+                </Flex>
+              </Td>
+              <Td dataLabel={t('Project')}>{secret.metadata?.project || t('Default')}</Td>
+              <Td dataLabel={t('Type')}>
+                {secretTypes[secret.type] || secretTypes[SecretType.UNSPECIFIED]}
+              </Td>
+              <Td dataLabel={t('Created')}>
+                <Timestamp value={secret.metadata?.creationTimestamp} />
+              </Td>
+              <Td dataLabel={t('Actions')} isActionCell>
+                <SecretActionsMenu
+                  secret={secret}
+                  onEdit={() => onEdit(secret)}
+                  onDelete={() => onDelete(secret)}
+                />
+              </Td>
+            </Tr>
+          );
+        })}
       </Tbody>
     </Table>
   );

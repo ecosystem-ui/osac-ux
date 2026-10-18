@@ -31,6 +31,9 @@ import { Timestamp } from '../Primitives/Timestamp';
 import { ResourceDetailHeader } from '../Resource/ResourceDetailHeader';
 import ResourceDetailsPage from '../Resource/ResourceDetailsPage';
 
+import './TenantDetailsPage.css';
+import '../shared/details-page.css';
+
 const TENANTS_LIST_PATH = '/admin/tenants';
 
 const SETUP_CONDITION_TYPES = [
@@ -122,6 +125,8 @@ const TenantDetailsContent = ({ tenant }: TenantDetailsContentProps) => {
   const { t } = useTranslation();
   const domains = tenant.spec?.domains ?? [];
   const credentialsSecret = tenant.spec?.breakGlassCredentialsSecret;
+  const companyLogoSrc = tenant.metadata?.annotations?.['osac.io/company-logo'];
+  const companyLogoFileName = tenant.metadata?.annotations?.['osac.io/company-logo-filename'];
 
   return (
     <PageSection hasBodyWrapper={false}>
@@ -140,13 +145,28 @@ const TenantDetailsContent = ({ tenant }: TenantDetailsContentProps) => {
                     <StackItem>
                       <DescriptionList
                         isCompact
-                        className="tenant-details-overview"
+                        className="details-page__overview"
                         aria-label={t('Tenant overview')}
                       >
                         <DescriptionListGroup>
                           <DescriptionListTerm>{t('Status')}</DescriptionListTerm>
                           <DescriptionListDescription>
                             <TenantStatusLabel state={tenant.status?.state} />
+                          </DescriptionListDescription>
+                        </DescriptionListGroup>
+                        <DescriptionListGroup>
+                          <DescriptionListTerm>{t('Company logo')}</DescriptionListTerm>
+                          <DescriptionListDescription>
+                            {companyLogoSrc ? (
+                              <div className="tenant-details__logo-preview">
+                                <img
+                                  src={companyLogoSrc}
+                                  alt={companyLogoFileName || tenant.metadata?.name || t('Company logo')}
+                                />
+                              </div>
+                            ) : (
+                              '—'
+                            )}
                           </DescriptionListDescription>
                         </DescriptionListGroup>
                         <DescriptionListGroup>

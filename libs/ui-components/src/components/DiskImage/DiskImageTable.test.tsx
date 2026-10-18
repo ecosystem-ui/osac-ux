@@ -120,11 +120,11 @@ describe('DiskImageTable', () => {
     expect(screen.getByRole('heading', { name: 'Disk image detail page' })).toBeInTheDocument();
   });
 
-  it('shows the empty state when no disk images are returned', () => {
+  it('renders an empty table body when no disk images are provided', () => {
     renderTableWithRoutes([]);
 
-    expect(screen.getByText('No disk images yet.')).toBeInTheDocument();
     expect(screen.getByRole('grid', { name: 'Disk images' })).toBeInTheDocument();
+    expect(screen.queryByText(/No disk images yet/i)).not.toBeInTheDocument();
   });
 
   it("wires each row's actions menu to that row's own disk image", async () => {

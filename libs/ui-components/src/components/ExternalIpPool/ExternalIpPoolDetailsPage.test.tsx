@@ -61,34 +61,33 @@ describe('ExternalIpPoolDetailsPage', () => {
     mockNavigate.mockReset();
   });
 
-  it('renders pool details in overview, capacity, and CIDRs columns', async () => {
+  it('renders pool details in overview, capacity, and CIDR columns', async () => {
     renderPage('p-1', [makePool('p-1', 'prod-v4', IPFamily.IP_FAMILY_IPV4, ['192.168.1.0/24'])]);
 
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'prod-v4' })).toBeInTheDocument();
     });
     expect(screen.getByRole('heading', { name: 'Overview' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Capacity' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'CIDRs' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'IPs' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'CIDR' })).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Assignment' })).not.toBeInTheDocument();
-    expect(
-      screen.queryByText('Routable address pool for tenant edge exposure.'),
-    ).not.toBeInTheDocument();
     expect(screen.queryByText('Name')).not.toBeInTheDocument();
     expect(screen.getByLabelText('External IP pool overview').textContent).toMatch(
       /Status.*Created.*Tenant/s,
     );
     expect(screen.queryByText('IP family')).not.toBeInTheDocument();
-    expect(screen.queryByText('IPv4')).not.toBeInTheDocument();
+    expect(screen.getByText('IPv4')).toBeInTheDocument();
     expect(screen.getByText('Available')).toBeInTheDocument();
     expect(screen.getByText('200')).toBeInTheDocument();
     expect(screen.getByText('Total')).toBeInTheDocument();
     expect(screen.getByText('256')).toBeInTheDocument();
-    expect(screen.queryByText('Allocated')).not.toBeInTheDocument();
+    expect(screen.getByText('In use')).toBeInTheDocument();
+    expect(screen.getByText('56')).toBeInTheDocument();
     expect(screen.queryByText('Implementation strategy')).not.toBeInTheDocument();
     expect(screen.getByText('Ready')).toBeInTheDocument();
     expect(screen.getByText('Shared')).toBeInTheDocument();
     expect(screen.getByText('Shared').closest('.pf-v6-c-label')).toBeNull();
+    expect(screen.getByText('56 of 256 addresses allocated')).toBeInTheDocument();
   });
 
   it('shows one CIDR and a more button when the pool has more than one CIDR', async () => {
@@ -103,7 +102,7 @@ describe('ExternalIpPoolDetailsPage', () => {
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'multi' })).toBeInTheDocument();
     });
-    expect(screen.getByRole('heading', { name: 'CIDRs' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'CIDR' })).toBeInTheDocument();
     expect(screen.getByText('192.168.1.0/24')).toBeInTheDocument();
     expect(screen.queryByText('10.0.5.0/28')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'More' })).toBeInTheDocument();
@@ -111,13 +110,18 @@ describe('ExternalIpPoolDetailsPage', () => {
 
   it('shows the tenant id when the pool is not in the shared tenant', async () => {
     renderPage('p-4', [
-      makePool('p-4', 'tenant-pool', IPFamily.IP_FAMILY_IPV4, ['10.0.0.0/24'], 'acme'),
+      makePool('p-4', 'tenant-pool', IPFamily.IP_FAMILY_IPV4, ['10.0.0.0/24'], 'acme-corporation'),
     ]);
 
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'tenant-pool' })).toBeInTheDocument();
     });
-    expect(screen.getByText('acme')).toBeInTheDocument();
+    expect(screen.getByText('acme-corporation')).toBeInTheDocument();
+    expect(screen.getByText('acme.example.com')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'acme-corporation' })).toHaveAttribute(
+      'href',
+      '/admin/tenants/tenant-acme',
+    );
     expect(screen.queryByText('Shared')).not.toBeInTheDocument();
   });
 
@@ -149,16 +153,20 @@ describe('ExternalIpPoolDetailsPage', () => {
     });
   });
 
-  it('offers a danger Delete button instead of an Actions menu', async () => {
-    renderPage('p-1', [makePool('p-1', 'prod-v4', IPFamily.IP_FAMILY_IPV4, ['192.168.1.0/24'])]);
+  it('offers an Actions menu with a delete option', async () => {
+    const { user } = renderPage('p-1', [
+      makePool('p-1', 'prod-v4', IPFamily.IP_FAMILY_IPV4, ['192.168.1.0/24']),
+    ]);
 
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'prod-v4' })).toBeInTheDocument();
     });
 
-    expect(screen.queryByRole('button', { name: 'Actions' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('menuitem', { name: 'Edit' })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Delete' })).toHaveClass('pf-m-danger');
+    expect(screen.getByRole('button', { name: 'Actions for prod-v4' })).toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Delete' })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Actions for prod-v4' }));
+    expect(screen.getByRole('menuitem', { name: 'Delete' })).toBeInTheDocument();
   });
 
   it('navigates to the list after a successful delete', async () => {
@@ -170,7 +178,8 @@ describe('ExternalIpPoolDetailsPage', () => {
       expect(screen.getByRole('heading', { name: 'prod-v4' })).toBeInTheDocument();
     });
 
-    await user.click(screen.getByRole('button', { name: 'Delete' }));
+    await user.click(screen.getByRole('button', { name: 'Actions for prod-v4' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Delete' }));
     await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: /^Delete$/i }));
 
     await waitFor(() => {

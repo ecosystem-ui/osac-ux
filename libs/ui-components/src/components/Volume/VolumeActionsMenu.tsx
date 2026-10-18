@@ -11,15 +11,20 @@ import { useTranslation } from '../../hooks/useTranslation';
 
 interface VolumeActionsMenuProps {
   volume: Volume;
+  showLabel?: boolean;
+  onDeleteSuccess?: () => void;
 }
 
-const VolumeActionsMenu = ({ volume }: VolumeActionsMenuProps) => {
+const canDeleteVolume = (state: VolumeState | undefined): boolean =>
+  state === VolumeState.AVAILABLE || state === VolumeState.FAILED;
+
+const VolumeActionsMenu = ({ volume, showLabel = false, onDeleteSuccess }: VolumeActionsMenuProps) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const isDeleting = volume.status?.state === VolumeState.DELETING;
-
+  const state = volume.status?.state;
+  const canDelete = canDeleteVolume(state);
   const name = volume.metadata?.name ?? volume.id;
 
   return (
@@ -28,7 +33,10 @@ const VolumeActionsMenu = ({ volume }: VolumeActionsMenuProps) => {
         <VolumeDeleteConfirmModal
           volume={volume}
           onClose={() => setDeleteOpen(false)}
-          onSuccess={() => setDeleteOpen(false)}
+          onSuccess={() => {
+            setDeleteOpen(false);
+            onDeleteSuccess?.();
+          }}
         />
       )}
       <Dropdown
@@ -37,11 +45,11 @@ const VolumeActionsMenu = ({ volume }: VolumeActionsMenuProps) => {
         toggle={(ref) => (
           <MenuToggle
             ref={ref}
-            variant="plain"
+            variant={showLabel ? 'secondary' : 'plain'}
             onClick={() => setOpen((o) => !o)}
             aria-label={t('Actions for {{name}}', { name })}
           >
-            <EllipsisVIcon />
+            {showLabel ? t('Actions') : <EllipsisVIcon />}
           </MenuToggle>
         )}
         popperProps={{ position: 'right' }}
@@ -49,11 +57,11 @@ const VolumeActionsMenu = ({ volume }: VolumeActionsMenuProps) => {
         <DropdownList>
           <DeleteResourceButton
             isDropdown
-            canDelete={!isDeleting}
+            canDelete={canDelete}
             value="delete"
-            isDisabled={isDeleting}
+            isDisabled={!canDelete}
             onClick={() => {
-              if (isDeleting) {
+              if (!canDelete) {
                 return;
               }
               setDeleteOpen(true);

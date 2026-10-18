@@ -1,9 +1,8 @@
-import { Bullseye, EmptyState, EmptyStateBody, EmptyStateVariant } from '@patternfly/react-core';
-import SearchIcon from '@patternfly/react-icons/dist/esm/icons/search-icon';
+import { Flex, FlexItem } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { Link } from 'react-router-dom';
 
 import type { Volume } from '@osac/types';
-import ResourceNameField from '@osac/ui-components/components/Resource/ResourceNameField.tsx';
 
 import { VolumeAccessModeLabel } from './VolumeAccessModeLabel';
 import VolumeActionsMenu from './VolumeActionsMenu';
@@ -11,7 +10,7 @@ import { VolumeStatusLabel } from './VolumeStatusLabel';
 import { useTranslation } from '../../hooks/useTranslation';
 import { Timestamp } from '../Primitives/Timestamp';
 
-const EMPTY_STATE_COLUMN_SPAN = 7;
+import './VolumeTable.css';
 
 interface VolumeTableProps {
   volumes: Volume[];
@@ -41,26 +40,22 @@ export const VolumeTable = ({ volumes }: VolumeTableProps) => {
         </Tr>
       </Thead>
       <Tbody>
-        {volumes.length === 0 ? (
-          <Tr>
-            <Td colSpan={EMPTY_STATE_COLUMN_SPAN}>
-              <Bullseye>
-                <EmptyState
-                  headingLevel="h2"
-                  titleText={t('No volumes found')}
-                  icon={SearchIcon}
-                  variant={EmptyStateVariant.sm}
-                >
-                  <EmptyStateBody>{t('Create a volume or adjust your filters.')}</EmptyStateBody>
-                </EmptyState>
-              </Bullseye>
-            </Td>
-          </Tr>
-        ) : (
-          volumes.map((volume) => (
+        {volumes.map((volume) => {
+          const name = volume.metadata?.name || volume.id;
+
+          return (
             <Tr key={volume.id}>
               <Td dataLabel={t('Name')}>
-                <ResourceNameField resource={volume} detailsUrl={`/storage/volumes/${volume.id}`} />
+                <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsXs' }}>
+                  <FlexItem>
+                    <Link
+                      to={`/storage/volumes/${encodeURIComponent(volume.id)}`}
+                      className="volumes-table__name-link"
+                    >
+                      {name}
+                    </Link>
+                  </FlexItem>
+                </Flex>
               </Td>
               <Td dataLabel={t('State')}>
                 <VolumeStatusLabel state={volume.status?.state} />
@@ -77,8 +72,8 @@ export const VolumeTable = ({ volumes }: VolumeTableProps) => {
                 <VolumeActionsMenu volume={volume} />
               </Td>
             </Tr>
-          ))
-        )}
+          );
+        })}
       </Tbody>
     </Table>
   );

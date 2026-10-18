@@ -1,0 +1,32 @@
+.clusters-page__toolbar {
+  margin-block-end: var(--pf-t--global--spacer--lg);
+}
+
+.clusters-page__toolbar .pf-v6-c-toolbar__content {
+  align-items: center;
+}
+
+.clusters-page__toolbar .pf-v6-c-menu-toggle:not(.pf-m-plain):not(.pf-m-icon-only),
+.clusters-page__toolbar .pf-v6-c-form-control,
+.clusters-page__toolbar .pf-v6-c-text-input-group {
+  border-radius: var(--pf-t--global--border--radius--small);
+}
+
+.clusters-page__toolbar .pf-v6-c-menu-toggle:not(.pf-m-plain):not(.pf-m-icon-only) {
+  --pf-v6-c-menu-toggle--BorderRadius: var(--pf-t--global--border--radius--small);
+  min-inline-size: 14rem;
+  justify-content: space-between;
+}
+
+.clusters-page__status-toggle {
+  min-inline-size: 10.5rem !important;
+}
+
+.clusters-page__search {
+  inline-size: 15rem;
+  max-inline-size: 15rem;
+}
+
+.clusters-page__search .pf-v6-c-text-input-group {
+  inline-size: 100%;
+}

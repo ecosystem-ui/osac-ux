@@ -93,22 +93,30 @@ describe('SecurityGroupDetailPage', () => {
     expect(screen.getByRole('heading', { name: 'sg-web' })).toBeInTheDocument();
   });
 
-  it('renders three tabs: Inbound Rules, Outbound Rules, Details', () => {
+  it('renders details, inbound rules, and outbound rules sections', () => {
     renderPage();
 
-    expect(screen.getByRole('tab', { name: /Inbound Rules/i })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /Outbound Rules/i })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /Details/i })).toBeInTheDocument();
+    expect(
+      screen.getByText('Overview', { selector: '.pf-v6-c-card__title-text' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Inbound Rules', { selector: '.pf-v6-c-card__title-text' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Outbound Rules', { selector: '.pf-v6-c-card__title-text' }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument();
   });
 
-  it('displays inbound rules in SecurityGroupRulesTable on Inbound Rules tab', () => {
+  it('displays inbound and outbound rules below the details section', () => {
     renderPage();
 
-    const tabPanel = within(screen.getByRole('tabpanel'));
-    expect(tabPanel.getByText('Protocol')).toBeInTheDocument();
-    expect(tabPanel.getAllByText('TCP')).toHaveLength(2);
-    expect(tabPanel.getByText('80')).toBeInTheDocument();
-    expect(tabPanel.getByText('443')).toBeInTheDocument();
+    const inboundTable = within(screen.getByRole('grid', { name: 'ingress rules' }));
+    expect(inboundTable.getByText('Protocol')).toBeInTheDocument();
+    expect(inboundTable.getAllByText('TCP')).toHaveLength(2);
+    expect(inboundTable.getByText('80')).toBeInTheDocument();
+    expect(inboundTable.getByText('443')).toBeInTheDocument();
+    expect(screen.getByRole('grid', { name: 'egress rules' })).toBeInTheDocument();
   });
 
   it('shows FAILED alert when status is FAILED', () => {
@@ -134,8 +142,8 @@ describe('SecurityGroupDetailPage', () => {
       const user = userEvent.setup();
       renderPage();
 
-      const tabPanel = within(screen.getByRole('tabpanel'));
-      const deleteButtons = tabPanel.getAllByRole('button', { name: /^Delete$/i });
+      const inboundTable = within(screen.getByRole('grid', { name: 'ingress rules' }));
+      const deleteButtons = inboundTable.getAllByRole('button', { name: /^Delete$/i });
       await user.click(deleteButtons[0]);
 
       const dialog = within(screen.getByRole('dialog'));
@@ -163,10 +171,8 @@ describe('SecurityGroupDetailPage', () => {
       const user = userEvent.setup();
       renderPage();
 
-      await user.click(screen.getByRole('tab', { name: /Outbound Rules/i }));
-
-      const tabPanel = within(screen.getByRole('tabpanel'));
-      const deleteButtons = tabPanel.getAllByRole('button', { name: /^Delete$/i });
+      const egressTable = within(screen.getByRole('grid', { name: 'egress rules' }));
+      const deleteButtons = egressTable.getAllByRole('button', { name: /^Delete$/i });
       await user.click(deleteButtons[0]);
 
       const dialog = within(screen.getByRole('dialog'));
@@ -195,8 +201,8 @@ describe('SecurityGroupDetailPage', () => {
       const user = userEvent.setup();
       renderPage();
 
-      const tabPanel = within(screen.getByRole('tabpanel'));
-      const deleteButtons = tabPanel.getAllByRole('button', { name: /^Delete$/i });
+      const inboundTable = within(screen.getByRole('grid', { name: 'ingress rules' }));
+      const deleteButtons = inboundTable.getAllByRole('button', { name: /^Delete$/i });
       await user.click(deleteButtons[0]);
 
       expect(screen.getByRole('dialog')).toBeInTheDocument();

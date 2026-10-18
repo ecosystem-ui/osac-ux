@@ -3,8 +3,10 @@ import {
   Alert,
   Bullseye,
   Button,
+  Content,
   Flex,
   FlexItem,
+  Label,
   Spinner,
   Stack,
   StackItem,
@@ -27,7 +29,17 @@ import { Timestamp } from '../Primitives/Timestamp';
 import { getFullProjectPath } from '../Project/utils';
 import { SubtleContent } from '../SubtleContent/SubtleContent';
 
-const ProjectMembership = ({ project }: { project: Project }) => {
+interface ProjectMembershipProps {
+  project: Project;
+  showTitle?: boolean;
+  variant?: 'table' | 'rail';
+}
+
+const ProjectMembership = ({
+  project,
+  showTitle = true,
+  variant = 'table',
+}: ProjectMembershipProps) => {
   const navigate = useNavigate();
   const { role } = useSession();
   const { t } = useTranslation();
@@ -52,46 +64,81 @@ const ProjectMembership = ({ project }: { project: Project }) => {
     );
   }
 
-  const content = data?.length ? (
-    <Table aria-label={t('Project memberships')} variant="compact">
-      <Thead>
-        <Tr>
-          <Th>{t('Name')}</Th>
-          <Th>{t('Role')}</Th>
-          <Th>{t('Users')}</Th>
-          <Th>{t('Created')}</Th>
-          {role === 'tenant-admin' && <Th aria-label={t('Actions')} />}
-        </Tr>
-      </Thead>
-      <Tbody>
-        {data?.map((pm) => (
-          <Tr key={pm.id}>
-            <Td dataLabel={t('Name')}>
-              <ResourceNameField resource={pm} />
-            </Td>
-            <Td dataLabel={t('Role')}>{pm.spec?.role ? getRoleLabel(t)[pm.spec.role] : '-'}</Td>
-            <Td dataLabel={t('Users')}>
-              {pm.spec?.users ? t('{{count}} user', { count: pm.spec?.users.length }) : '-'}
-            </Td>
-            <Td dataLabel={t('Created')}>
-              <Timestamp value={pm.metadata?.creationTimestamp} />
-            </Td>
-            {role === 'tenant-admin' && (
-              <Td isActionCell>
-                <ProjectMembershipActionsMenu projectMembership={pm} projectId={project.id} />
-              </Td>
-            )}
+  const content =
+    data?.length && variant === 'table' ? (
+      <Table aria-label={t('Project memberships')} variant="compact">
+        <Thead>
+          <Tr>
+            <Th>{t('Name')}</Th>
+            <Th>{t('Role')}</Th>
+            <Th>{t('Users')}</Th>
+            <Th>{t('Created')}</Th>
+            {role === 'tenant-admin' && <Th aria-label={t('Actions')} />}
           </Tr>
-        ))}
-      </Tbody>
-    </Table>
-  ) : (
-    <SubtleContent>{t('No project memberships yet')}</SubtleContent>
-  );
+        </Thead>
+        <Tbody>
+          {data?.map((pm) => (
+            <Tr key={pm.id}>
+              <Td dataLabel={t('Name')}>
+                <ResourceNameField resource={pm} />
+              </Td>
+              <Td dataLabel={t('Role')}>{pm.spec?.role ? getRoleLabel(t)[pm.spec.role] : '-'}</Td>
+              <Td dataLabel={t('Users')}>
+                {pm.spec?.users ? t('{{count}} user', { count: pm.spec?.users.length }) : '-'}
+              </Td>
+              <Td dataLabel={t('Created')}>
+                <Timestamp value={pm.metadata?.creationTimestamp} />
+              </Td>
+              {role === 'tenant-admin' && (
+                <Td isActionCell>
+                  <ProjectMembershipActionsMenu projectMembership={pm} projectId={project.id} />
+                </Td>
+              )}
+            </Tr>
+          ))}
+        </Tbody>
+      </Table>
+    ) : variant === 'rail' ? (
+      data?.length ? (
+        <ul className="project-membership__people" aria-label={t('Project members')}>
+          {data.map((pm) => {
+            const userCount = pm.spec?.users?.length ?? 0;
+            const memberName = pm.metadata?.name || pm.id;
+
+            return (
+              <li key={pm.id} className="project-membership__person">
+                <div className="project-membership__person-main">
+                  <div className="project-membership__person-copy">
+                    <Content component="p" className="project-membership__primary">
+                      {memberName}
+                    </Content>
+                    <Content component="p" className="project-membership__secondary">
+                      {userCount === 1
+                        ? t('{{count}} user', { count: userCount })
+                        : t('{{count}} users', { count: userCount })}
+                    </Content>
+                  </div>
+                  <Label isCompact color="blue">
+                    {pm.spec?.role ? getRoleLabel(t)[pm.spec.role] : t('Unspecified')}
+                  </Label>
+                </div>
+                {role === 'tenant-admin' && (
+                  <ProjectMembershipActionsMenu projectMembership={pm} projectId={project.id} />
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <SubtleContent>{t('No project memberships yet')}</SubtleContent>
+      )
+    ) : (
+      <SubtleContent>{t('No project memberships yet')}</SubtleContent>
+    );
 
   return (
-    <>
-      <Stack>
+    <Stack>
+      {showTitle && variant === 'table' && (
         <StackItem>
           <Flex
             alignItems={{ default: 'alignItemsBaseline' }}
@@ -113,9 +160,42 @@ const ProjectMembership = ({ project }: { project: Project }) => {
             )}
           </Flex>
         </StackItem>
-        <StackItem>{content}</StackItem>
-      </Stack>
-    </>
+      )}
+      <StackItem>
+        {variant === 'rail' && (
+          <Flex
+            alignItems={{ default: 'alignItemsBaseline' }}
+            justifyContent={{ default: 'justifyContentSpaceBetween' }}
+            className="project-membership__header"
+          >
+            <Title headingLevel="h2" size="md">
+              {t('Project members')} ({data?.length ?? 0})
+            </Title>
+            {role === 'tenant-admin' && (
+              <Button
+                variant="link"
+                icon={<PlusCircleIcon />}
+                onClick={() => navigate(`/project-membership/create/${project.id}`)}
+              >
+                {t('Add')}
+              </Button>
+            )}
+          </Flex>
+        )}
+        {variant === 'table' && !showTitle && role === 'tenant-admin' && (
+          <Flex justifyContent={{ default: 'justifyContentFlexEnd' }}>
+            <Button
+              variant="link"
+              icon={<PlusCircleIcon />}
+              onClick={() => navigate(`/project-membership/create/${project.id}`)}
+            >
+              {t('Create project membership')}
+            </Button>
+          </Flex>
+        )}
+        {content}
+      </StackItem>
+    </Stack>
   );
 };
 

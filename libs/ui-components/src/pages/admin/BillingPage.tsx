@@ -26,7 +26,7 @@ import ListPage from '@osac/ui-components/components/Page/ListPage';
 import ListPageBody from '@osac/ui-components/components/Page/ListPageBody';
 import { useTranslation } from '@osac/ui-components/hooks/useTranslation';
 
-import { type BillingAccount, predictedBillingAccounts } from './billingMockData';
+import { type BillingAccount, MISSING_billingAccounts } from './billingMockData';
 
 import './BillingPage.css';
 
@@ -58,12 +58,12 @@ const BillingPage = () => {
   const tenants = tenantsResponse?.items ?? [];
   const linkedAccounts = useMemo(
     () =>
-      predictedBillingAccounts
+      MISSING_billingAccounts
         .filter((account) => account.externalId.trim())
         .sort((left, right) => left.accountName.localeCompare(right.accountName)),
     [],
   );
-  const activeCount = predictedBillingAccounts.filter(
+  const activeCount = MISSING_billingAccounts.filter(
     (account) => account.accountStatus === 'Active',
   ).length;
   const tenantById = new Map(tenants.map((tenant) => [tenant.id, tenant]));

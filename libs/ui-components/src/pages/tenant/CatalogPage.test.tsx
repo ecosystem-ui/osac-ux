@@ -416,7 +416,7 @@ describe('CatalogPage', () => {
     renderCatalogPage(createCatalogPageTransport({ requestCounts }));
 
     expect(
-      await screen.findByRole('heading', { name: 'No catalog items found' }),
+      await screen.findByText('No catalog items yet. Create one to get started.'),
     ).toBeInTheDocument();
     expect(
       screen.getByText('Create catalog items from master templates, then attach them to tenants.'),
@@ -441,13 +441,10 @@ describe('CatalogPage', () => {
     const requestCounts = createRequestCounts();
     renderCatalogPage(createCatalogPageTransport({ requestCounts }));
 
-    expect(
-      await screen.findByRole('heading', { name: 'No catalog items found' }),
-    ).toBeInTheDocument();
+    expect(await screen.findByText('No catalog services are enabled.')).toBeInTheDocument();
     expect(
       screen.getByText('Create catalog items from master templates, then attach them to tenants.'),
     ).toBeInTheDocument();
-    expect(screen.getByText('No catalog services are enabled.')).toBeInTheDocument();
     expect(requestCounts).toEqual({ capabilities: 0, vm: 0, cluster: 0, bm: 0 });
     expect(
       screen.queryByRole('group', { name: 'Filter catalog by resource type' }),
@@ -580,11 +577,9 @@ describe('CatalogPage', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole('heading', { name: 'No catalog items found', level: 2 }),
+        screen.getByText('No catalog items yet. Create one to get started.'),
       ).toBeInTheDocument();
     });
-
-    expect(screen.getByText('No catalog items are available yet.')).toBeInTheDocument();
   });
 
   it('filters catalog items by the search keyword', async () => {
@@ -628,13 +623,8 @@ describe('CatalogPage', () => {
     });
 
     await waitFor(() => {
-      expect(
-        screen.getByRole('heading', { name: 'No catalog items match your filters', level: 2 }),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/No catalog items match your search/i)).toBeInTheDocument();
     });
-    expect(
-      screen.getByText('Try a different service, publish status, tenant, or search term.'),
-    ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Clear all filters' })).toBeInTheDocument();
   });
 
@@ -647,9 +637,7 @@ describe('CatalogPage', () => {
     });
 
     await waitFor(() => {
-      expect(
-        screen.getByRole('heading', { name: 'No catalog items match your filters', level: 2 }),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/No catalog items match your search/i)).toBeInTheDocument();
     });
 
     expect(screen.getByRole('button', { name: /Clusters/ })).toHaveAttribute(

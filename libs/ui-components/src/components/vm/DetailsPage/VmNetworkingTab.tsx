@@ -1,4 +1,6 @@
-import { Card, CardBody, CardTitle } from '@patternfly/react-core';
+import { Link } from 'react-router-dom';
+import { Button, Flex, FlexItem, Stack, StackItem, Title } from '@patternfly/react-core';
+import PlusCircleIcon from '@patternfly/react-icons/dist/esm/icons/plus-circle-icon';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
 import type { ComputeInstance } from '@osac/types';
@@ -16,11 +18,33 @@ const VmNetworkingTab = ({ vm }: VmNetworkingTabProps) => {
   const rows = useVmNetworkAttachmentRows(vm);
 
   return (
-    <Card isFullHeight>
-      <CardTitle>{t('Networking')}</CardTitle>
-      <CardBody>
+    <Stack hasGutter className="vm-details__networking">
+      <StackItem>
+        <Flex
+          alignItems={{ default: 'alignItemsCenter' }}
+          justifyContent={{ default: 'justifyContentSpaceBetween' }}
+          flexWrap={{ default: 'wrap' }}
+        >
+          <FlexItem>
+            <Title headingLevel="h2" size="lg">
+              {t('Networking')}
+            </Title>
+          </FlexItem>
+          <FlexItem>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<PlusCircleIcon />}
+              aria-label={t('Add network')}
+            >
+              {t('Add network')}
+            </Button>
+          </FlexItem>
+        </Flex>
+      </StackItem>
+      <StackItem>
         {rows.length > 0 ? (
-          <Table aria-label={t('Networking')} variant="compact" borders>
+          <Table aria-label={t('Networking')} variant="compact">
             <Thead>
               <Tr>
                 <Th>{t('Virtual network')}</Th>
@@ -31,9 +55,45 @@ const VmNetworkingTab = ({ vm }: VmNetworkingTabProps) => {
             <Tbody>
               {rows.map((row, index) => (
                 <Tr key={`network-attachment-${index}`}>
-                  <Td dataLabel={t('Virtual network')}>{row.virtualNetwork}</Td>
-                  <Td dataLabel={t('Subnet')}>{row.subnet}</Td>
-                  <Td dataLabel={t('Security groups')}>{row.securityGroups}</Td>
+                  <Td dataLabel={t('Virtual network')}>
+                    {row.virtualNetwork.id ? (
+                      <Link
+                        className="vm-details__network-link"
+                        to={`/networking/virtual-networks/${encodeURIComponent(row.virtualNetwork.id)}`}
+                      >
+                        {row.virtualNetwork.name}
+                      </Link>
+                    ) : (
+                      row.virtualNetwork.name
+                    )}
+                  </Td>
+                  <Td dataLabel={t('Subnet')}>
+                    {row.subnet.id && row.virtualNetworkId ? (
+                      <Link
+                        className="vm-details__network-link"
+                        to={`/networking/virtual-networks/${encodeURIComponent(row.virtualNetworkId)}`}
+                      >
+                        {row.subnet.name}
+                      </Link>
+                    ) : (
+                      row.subnet.name
+                    )}
+                  </Td>
+                  <Td dataLabel={t('Security groups')}>
+                    {row.securityGroups.length > 0
+                      ? row.securityGroups.map((securityGroup, securityGroupIndex) => (
+                          <span key={securityGroup.id}>
+                            {securityGroupIndex > 0 ? ', ' : null}
+                            <Link
+                              className="vm-details__network-link"
+                              to={`/networking/security-groups/${encodeURIComponent(securityGroup.id)}`}
+                            >
+                              {securityGroup.name}
+                            </Link>
+                          </span>
+                        ))
+                      : '—'}
+                  </Td>
                 </Tr>
               ))}
             </Tbody>
@@ -41,8 +101,8 @@ const VmNetworkingTab = ({ vm }: VmNetworkingTabProps) => {
         ) : (
           <SubtleContent component="p">{t('No virtual networks configured.')}</SubtleContent>
         )}
-      </CardBody>
-    </Card>
+      </StackItem>
+    </Stack>
   );
 };
 

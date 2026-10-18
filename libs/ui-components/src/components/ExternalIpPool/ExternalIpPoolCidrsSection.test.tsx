@@ -8,7 +8,7 @@ describe('ExternalIpPoolCidrsSection', () => {
   it('renders a single CIDR without a more button', () => {
     renderWithProviders(<ExternalIpPoolCidrsSection cidrs={['192.168.1.0/24']} />);
 
-    expect(screen.getByRole('heading', { name: 'CIDRs' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'CIDR' })).toBeInTheDocument();
     expect(screen.getByText('192.168.1.0/24')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /more/i })).not.toBeInTheDocument();
   });

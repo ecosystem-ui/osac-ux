@@ -13,6 +13,7 @@ import {
 
 import ClusterDetailsActionButtons from './ClusterDetailsActionButtons';
 import * as clusterApi from '../../../api/v1/cluster';
+import * as maasApi from '../../../api/v1/maas';
 
 vi.mock('../../../api/v1/cluster', async (importOriginal) => {
   const actual = await importOriginal<typeof clusterApi>();
@@ -20,6 +21,14 @@ vi.mock('../../../api/v1/cluster', async (importOriginal) => {
     ...actual,
     useDownloadKubeconfig: vi.fn(),
     useFetchClusterPassword: vi.fn(),
+  };
+});
+
+vi.mock('../../../api/v1/maas', async (importOriginal) => {
+  const actual = await importOriginal<typeof maasApi>();
+  return {
+    ...actual,
+    useFetchAiGridUrl: vi.fn(),
   };
 });
 
@@ -87,6 +96,10 @@ describe('ClusterDetailsActionButtons', () => {
       password: undefined,
       retry: vi.fn(),
     });
+    vi.mocked(maasApi.useFetchAiGridUrl).mockReturnValue({
+      mutate: vi.fn(),
+      isPending: false,
+    } as ReturnType<typeof maasApi.useFetchAiGridUrl>);
   });
 
   const renderButtons = (state: ClusterState = ClusterState.READY) =>
@@ -96,43 +109,58 @@ describe('ClusterDetailsActionButtons', () => {
       </MemoryRouter>,
     );
 
-  it('renders download kubeconfig, view password, and delete buttons', () => {
+  const openActions = async (user: ReturnType<typeof userEvent.setup>) => {
+    await user.click(screen.getByRole('button', { name: /Actions for/i }));
+  };
+
+  it('renders download kubeconfig, view password, and delete buttons', async () => {
+    const user = userEvent.setup();
     renderButtons();
+    await openActions(user);
 
-    expect(screen.getByRole('button', { name: /Download kubeconfig/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /View password/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Delete/i })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: /Download kubeconfig/i })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: /View password/i })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: /Delete/i })).toBeInTheDocument();
   });
 
-  it('disables download kubeconfig when cluster is not ready', () => {
+  it('disables download kubeconfig when cluster is not ready', async () => {
+    const user = userEvent.setup();
     renderButtons(ClusterState.PROGRESSING);
+    await openActions(user);
 
-    expect(screen.getByRole('button', { name: /Download kubeconfig/i })).toBeDisabled();
+    expect(screen.getByRole('menuitem', { name: /Download kubeconfig/i })).toBeDisabled();
   });
 
-  it('disables view password when cluster is not ready', () => {
+  it('disables view password when cluster is not ready', async () => {
+    const user = userEvent.setup();
     renderButtons(ClusterState.PROGRESSING);
+    await openActions(user);
 
-    expect(screen.getByRole('button', { name: /View password/i })).toBeDisabled();
+    expect(screen.getByRole('menuitem', { name: /View password/i })).toBeDisabled();
   });
 
-  it('enables download kubeconfig when cluster is ready', () => {
+  it('enables download kubeconfig when cluster is ready', async () => {
+    const user = userEvent.setup();
     renderButtons(ClusterState.READY);
+    await openActions(user);
 
-    expect(screen.getByRole('button', { name: /Download kubeconfig/i })).toBeEnabled();
+    expect(screen.getByRole('menuitem', { name: /Download kubeconfig/i })).toBeEnabled();
   });
 
-  it('enables view password when cluster is ready', () => {
+  it('enables view password when cluster is ready', async () => {
+    const user = userEvent.setup();
     renderButtons(ClusterState.READY);
+    await openActions(user);
 
-    expect(screen.getByRole('button', { name: /View password/i })).toBeEnabled();
+    expect(screen.getByRole('menuitem', { name: /View password/i })).toBeEnabled();
   });
 
   it('calls download when download kubeconfig is clicked', async () => {
     const user = userEvent.setup();
     renderButtons();
+    await openActions(user);
 
-    await user.click(screen.getByRole('button', { name: /Download kubeconfig/i }));
+    await user.click(screen.getByRole('menuitem', { name: /Download kubeconfig/i }));
 
     expect(download).toHaveBeenCalledWith('kubeconfig-secret-123', 'my-cluster');
   });
@@ -158,8 +186,9 @@ describe('ClusterDetailsActionButtons', () => {
   it('opens password modal when view password is clicked', async () => {
     const user = userEvent.setup();
     renderButtons();
+    await openActions(user);
 
-    await user.click(screen.getByRole('button', { name: /View password/i }));
+    await user.click(screen.getByRole('menuitem', { name: /View password/i }));
 
     expect(screen.getByText('Cluster password')).toBeInTheDocument();
   });

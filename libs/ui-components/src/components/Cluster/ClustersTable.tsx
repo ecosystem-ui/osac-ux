@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
-import { Skeleton } from '@patternfly/react-core';
+import { Flex, FlexItem, Skeleton } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { Link } from 'react-router-dom';
 
 import { type Cluster, ClusterState } from '@osac/types';
-import ResourceNameField from '@osac/ui-components/components/Resource/ResourceNameField.tsx';
 
 import ClusterActionsMenu from './ClusterActionsMenu';
+import ClusterRhoaiLabel from './ClusterRhoaiLabel';
 import { ClusterStatusLabel } from './ClusterStatusLabel';
 import ClusterVersionLifecycleLabel from './ClusterVersionLifecycleLabel';
 import { clusterVersionNamesFilter, useClusterVersions } from '../../api/v1/cluster-versions';
@@ -13,15 +14,13 @@ import { useTranslation } from '../../hooks/useTranslation';
 import ExternalLink from '../Primitives/ExternalLink';
 import { Timestamp } from '../Primitives/Timestamp';
 
+import './ClustersTable.css';
+
 interface ClustersTableProps {
   clusters: Cluster[];
 }
 
-export const ClustersTable = ({ clusters }: ClustersTableProps) => {
-  const { t } = useTranslation();
-
-  // Only fetch the versions these clusters reference (by spec.version.name),
-  // in one List call — scales as the catalog grows and paginates.
+export const useClusterVersionLookup = (clusters: Cluster[]) => {
   const versionNames = useMemo(
     () => [
       ...new Set(
@@ -37,11 +36,15 @@ export const ClustersTable = ({ clusters }: ClustersTableProps) => {
     { enabled: versionNames.length > 0 },
   );
 
-  // Clusters reference versions by spec.version.name, so key the catalog by name.
-  const clusterVersionByName = useMemo(
-    () => new Map(clusterVersions.map((cv) => [cv.metadata?.name, cv])),
-    [clusterVersions],
-  );
+  return {
+    clusterVersionByName: new Map(clusterVersions.map((cv) => [cv.metadata?.name, cv])),
+    isClusterVersionsLoading,
+  };
+};
+
+export const ClustersTable = ({ clusters }: ClustersTableProps) => {
+  const { t } = useTranslation();
+  const { clusterVersionByName, isClusterVersionsLoading } = useClusterVersionLookup(clusters);
 
   return (
     <Table aria-label={t('Clusters')} variant="compact">
@@ -49,8 +52,8 @@ export const ClustersTable = ({ clusters }: ClustersTableProps) => {
         <Tr>
           <Th>{t('Name')}</Th>
           <Th>{t('Status')}</Th>
-          <Th>{t('Version')}</Th>
           <Th>{t('Lifecycle')}</Th>
+          <Th>{t('Version')}</Th>
           <Th>{t('API URL')}</Th>
           <Th>{t('Created')}</Th>
           <Th aria-label={t('Actions')} />
@@ -68,20 +71,28 @@ export const ClustersTable = ({ clusters }: ClustersTableProps) => {
           return (
             <Tr key={cluster.id}>
               <Td dataLabel={t('Name')}>
-                <ResourceNameField
-                  resource={cluster}
-                  detailsUrl={locked ? undefined : `/clusters/${encodeURIComponent(cluster.id)}`}
-                />
+                <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsXs' }}>
+                  <FlexItem>
+                    {locked ? (
+                      <span className="clusters-table__name-link">
+                        {cluster.metadata?.name || cluster.id}
+                      </span>
+                    ) : (
+                      <Link
+                        to={`/clusters/${encodeURIComponent(cluster.id)}`}
+                        className="clusters-table__name-link"
+                      >
+                        {cluster.metadata?.name || cluster.id}
+                      </Link>
+                    )}
+                  </FlexItem>
+                  <FlexItem>
+                    <ClusterRhoaiLabel cluster={cluster} />
+                  </FlexItem>
+                </Flex>
               </Td>
               <Td dataLabel={t('Status')}>
                 <ClusterStatusLabel state={cluster.status?.state} />
-              </Td>
-              <Td dataLabel={t('Version')}>
-                {isClusterVersionsLoading ? (
-                  <Skeleton width="80px" />
-                ) : (
-                  clusterVersion?.spec?.version || versionRef?.name || '—'
-                )}
               </Td>
               <Td dataLabel={t('Lifecycle')}>
                 {isClusterVersionsLoading ? (
@@ -89,6 +100,13 @@ export const ClustersTable = ({ clusters }: ClustersTableProps) => {
                 ) : clusterVersion ? (
                   <ClusterVersionLifecycleLabel clusterVersion={clusterVersion} />
                 ) : null}
+              </Td>
+              <Td dataLabel={t('Version')}>
+                {isClusterVersionsLoading ? (
+                  <Skeleton width="80px" />
+                ) : (
+                  clusterVersion?.spec?.version || versionRef?.name || '—'
+                )}
               </Td>
               <Td dataLabel={t('API URL')}>
                 {locked ? '—' : <ExternalLink href={apiUrl} showUnsafeAsText />}

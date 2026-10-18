@@ -42,7 +42,12 @@ const makeVolume = (state: VolumeState, overrides: Partial<{ message: string }> 
 
 const renderDetails = (volume: Volume) => renderWithProviders(<VolumeDetails volume={volume} />);
 
-const getDeleteButton = () => screen.getByRole('button', { name: 'Delete' });
+const openActionsMenu = async (
+  user: ReturnType<typeof renderWithProviders>['user'],
+  name = 'test-volume',
+) => {
+  await user.click(screen.getByRole('button', { name: `Actions for ${name}` }));
+};
 
 describe('VolumeDetails', () => {
   describe('header and breadcrumb', () => {
@@ -121,41 +126,61 @@ describe('VolumeDetails', () => {
   });
 
   describe('action buttons', () => {
-    it('renders Delete without Edit when state is AVAILABLE', () => {
+    it('renders an Actions menu', () => {
       renderDetails(makeVolume(VolumeState.AVAILABLE));
 
-      expect(getDeleteButton()).not.toBeDisabled();
-      expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Actions for test-volume' }),
+      ).toBeInTheDocument();
     });
 
-    it('enables Delete when state is FAILED', () => {
-      renderDetails(makeVolume(VolumeState.FAILED));
+    it('shows Delete enabled when state is AVAILABLE', async () => {
+      const { user } = renderDetails(makeVolume(VolumeState.AVAILABLE));
+      await openActionsMenu(user);
 
-      expect(getDeleteButton()).not.toBeDisabled();
+      expect(screen.getByRole('menuitem', { name: 'Delete' })).not.toBeDisabled();
     });
 
-    it('disables Delete when state is CREATING', () => {
-      renderDetails(makeVolume(VolumeState.CREATING));
+    it('shows Delete enabled when state is FAILED', async () => {
+      const { user } = renderDetails(makeVolume(VolumeState.FAILED));
+      await openActionsMenu(user);
 
-      expect(getDeleteButton()).toBeDisabled();
+      expect(screen.getByRole('menuitem', { name: 'Delete' })).not.toBeDisabled();
     });
 
-    it('disables Delete when state is DELETING', () => {
-      renderDetails(makeVolume(VolumeState.DELETING));
+    it('shows Delete disabled when state is CREATING', async () => {
+      const { user } = renderDetails(makeVolume(VolumeState.CREATING));
+      await openActionsMenu(user);
 
-      expect(getDeleteButton()).toBeDisabled();
+      expect(screen.getByRole('menuitem', { name: 'Delete' })).toBeDisabled();
     });
 
-    it('disables Delete when state is DELETED', () => {
-      renderDetails(makeVolume(VolumeState.DELETED));
+    it('shows Delete disabled when state is DELETING', async () => {
+      const { user } = renderDetails(makeVolume(VolumeState.DELETING));
+      await openActionsMenu(user);
 
-      expect(getDeleteButton()).toBeDisabled();
+      expect(screen.getByRole('menuitem', { name: 'Delete' })).toBeDisabled();
     });
 
-    it('disables Delete when state is UNSPECIFIED', () => {
-      renderDetails(makeVolume(VolumeState.UNSPECIFIED));
+    it('shows Delete disabled when state is DELETED', async () => {
+      const { user } = renderDetails(makeVolume(VolumeState.DELETED));
+      await openActionsMenu(user);
 
-      expect(getDeleteButton()).toBeDisabled();
+      expect(screen.getByRole('menuitem', { name: 'Delete' })).toBeDisabled();
+    });
+
+    it('shows Delete disabled when state is UNSPECIFIED', async () => {
+      const { user } = renderDetails(makeVolume(VolumeState.UNSPECIFIED));
+      await openActionsMenu(user);
+
+      expect(screen.getByRole('menuitem', { name: 'Delete' })).toBeDisabled();
+    });
+
+    it('does not show an Edit action', async () => {
+      const { user } = renderDetails(makeVolume(VolumeState.AVAILABLE));
+      await openActionsMenu(user);
+
+      expect(screen.queryByRole('menuitem', { name: 'Edit' })).not.toBeInTheDocument();
     });
   });
 });

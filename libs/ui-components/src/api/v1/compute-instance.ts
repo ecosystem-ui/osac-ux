@@ -119,6 +119,26 @@ export const usePatchComputeInstance = () => {
   });
 };
 
+export type ResizeComputeInstanceInput = {
+  id: string;
+  instanceTypeId: string;
+};
+
+export const useResizeComputeInstance = () => {
+  const client = useApiFetch(ComputeInstances);
+  const qc = useApiQueryClient();
+  return useMutation({
+    mutationFn: ({ id, instanceTypeId }: ResizeComputeInstanceInput) =>
+      client
+        .update({
+          object: { id, spec: { instanceType: { id: instanceTypeId } } },
+          updateMask: { paths: ['spec.instance_type'] },
+        })
+        .then((r) => r.object),
+    onSuccess: () => invalidateComputeInstancesQueries(qc),
+  });
+};
+
 export const useDeleteComputeInstance = () => {
   const client = useApiFetch(ComputeInstances);
   const qc = useApiQueryClient();

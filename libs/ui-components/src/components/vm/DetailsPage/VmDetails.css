@@ -1,0 +1,66 @@
+.vm-details__header-section {
+  padding-block-end: 0;
+}
+
+/* .vm-details__content-grid, __main-column, __rail-column → see shared/details-page.css */
+
+.vm-details__overview-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.vm-details__overview-grid > .pf-v6-l-grid__item {
+  grid-column: auto;
+}
+
+.vm-details__section-title.pf-v6-c-title {
+  margin-block-end: var(--pf-t--global--spacer--md);
+  color: var(--pf-t--global--text--color--regular);
+  font-size: var(--pf-t--global--font--size--heading--md);
+  font-weight: var(--pf-t--global--font--weight--body--default);
+}
+
+/* DL term override → see shared/details-page.css (.details-page__overview) */
+
+.vm-details__catalog-link,
+.vm-details__resource-link {
+  color: var(--pf-t--global--text--color--link--default);
+  font-size: var(--pf-t--global--font--size--body--sm);
+  text-decoration: none;
+}
+
+.vm-details__catalog-link:hover,
+.vm-details__catalog-link:focus,
+.vm-details__resource-link:hover,
+.vm-details__resource-link:focus {
+  color: var(--pf-t--global--text--color--link--hover);
+  text-decoration: underline;
+}
+
+.vm-details__network-link {
+  color: var(--pf-t--global--text--color--link--default);
+  text-decoration: none;
+}
+
+.vm-details__network-link:hover,
+.vm-details__network-link:focus {
+  color: var(--pf-t--global--text--color--link--hover);
+  text-decoration: underline;
+}
+
+/* .vm-details__rail-card → see shared/details-page.css (.details-page__rail-card) */
+
+.vm-details__console-body {
+  min-height: 25rem;
+}
+
+.vm-details__section-divider {
+  margin-block: var(--pf-t--global--spacer--md);
+}
+
+@media (max-width: 992px) {
+  /* .vm-details__content-grid responsive → see shared/details-page.css */
+
+  .vm-details__overview-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

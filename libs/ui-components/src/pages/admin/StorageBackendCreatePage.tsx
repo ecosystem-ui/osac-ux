@@ -8,6 +8,7 @@ import {
   BreadcrumbItem,
   Bullseye,
   Button,
+  ExpandableSection,
   PageSection,
   Spinner,
   Stack,
@@ -44,15 +45,33 @@ interface StorageBackendFormValues {
   endpoint: string;
   description: string;
   credentials: { username: string; password: string };
+  vast: {
+    vipPoolSupernet: string;
+    vipPoolSliceSize: string;
+    vipPoolGwIp: string;
+    vipPoolGwIpv6: string;
+  };
 }
 
-const getInitialValues = (backend?: StorageBackend): StorageBackendFormValues => ({
-  metadata: { name: backend?.metadata?.name ?? '' },
-  provider: backend?.spec?.provider ?? '',
-  endpoint: backend?.spec?.endpoint ?? '',
-  description: backend?.spec?.description ?? '',
-  credentials: { username: '', password: '' },
-});
+const CIDR_REGEX = /^(\d{1,3}\.){3}\d{1,3}\/\d{1,2}$/;
+
+const getInitialValues = (backend?: StorageBackend): StorageBackendFormValues => {
+  const vastConfig =
+    backend?.spec?.providerConfig?.case === 'vast' ? backend.spec.providerConfig.value : undefined;
+  return {
+    metadata: { name: backend?.metadata?.name ?? '' },
+    provider: backend?.spec?.provider ?? '',
+    endpoint: backend?.spec?.endpoint ?? '',
+    description: backend?.spec?.description ?? '',
+    credentials: { username: '', password: '' },
+    vast: {
+      vipPoolSupernet: vastConfig?.vipPoolSupernet ?? '',
+      vipPoolSliceSize: vastConfig?.vipPoolSliceSize ? String(vastConfig.vipPoolSliceSize) : '',
+      vipPoolGwIp: vastConfig?.vipPoolGwIp ?? '',
+      vipPoolGwIpv6: vastConfig?.vipPoolGwIpv6 ?? '',
+    },
+  };
+};
 
 const getStorageBackendSchema = (t: TFunction, isEdit: boolean) => {
   const pairError = t('Enter both username and password, or leave both blank');
@@ -79,6 +98,20 @@ const getStorageBackendSchema = (t: TFunction, isEdit: boolean) => {
           username: Yup.string().required(t('Username is required')),
           password: Yup.string().required(t('Password is required')),
         }),
+    vast: Yup.object({
+      vipPoolSupernet: Yup.string().test(
+        'valid-cidr',
+        t('Must be a valid CIDR block (e.g. 10.100.0.0/22)'),
+        (value) => !value || CIDR_REGEX.test(value),
+      ),
+      vipPoolSliceSize: Yup.number()
+        .integer(t('Must be a whole number'))
+        .min(1, t('Must be at least 1'))
+        .nullable()
+        .transform((v: unknown, orig: unknown) => (orig === '' ? null : v)),
+      vipPoolGwIp: Yup.string(),
+      vipPoolGwIpv6: Yup.string(),
+    }),
   });
 };
 
@@ -97,6 +130,22 @@ const StorageBackendForm = ({ backend }: { backend?: StorageBackend }) => {
   ];
 
   const onSubmit = async (values: StorageBackendFormValues) => {
+    const vastConfig =
+      values.provider === 'vast' &&
+      (values.vast.vipPoolSupernet ||
+        values.vast.vipPoolSliceSize ||
+        values.vast.vipPoolGwIp ||
+        values.vast.vipPoolGwIpv6)
+        ? {
+            vipPoolSupernet: values.vast.vipPoolSupernet || undefined,
+            vipPoolSliceSize: values.vast.vipPoolSliceSize
+              ? Number(values.vast.vipPoolSliceSize)
+              : undefined,
+            vipPoolGwIp: values.vast.vipPoolGwIp || undefined,
+            vipPoolGwIpv6: values.vast.vipPoolGwIpv6 || undefined,
+          }
+        : undefined;
+
     try {
       if (backend) {
         await update({
@@ -105,6 +154,7 @@ const StorageBackendForm = ({ backend }: { backend?: StorageBackend }) => {
           spec: {
             endpoint: values.endpoint,
             description: values.description,
+            ...(vastConfig ? { vast: vastConfig } : {}),
             ...(values.credentials.username && values.credentials.password
               ? {
                   credentials: {
@@ -127,6 +177,7 @@ const StorageBackendForm = ({ backend }: { backend?: StorageBackend }) => {
               username: values.credentials.username,
               password: values.credentials.password,
             },
+            ...(vastConfig ? { vast: vastConfig } : {}),
           },
         });
         navigate(`${BACKENDS_LIST_PATH}/${created.id}`);
@@ -159,7 +210,7 @@ const StorageBackendForm = ({ backend }: { backend?: StorageBackend }) => {
           validationSchema={getStorageBackendSchema(t, isEdit)}
           onSubmit={onSubmit}
         >
-          {({ submitForm, isSubmitting }) => (
+          {({ submitForm, isSubmitting, values }) => (
             <Stack hasGutter>
               <LeaveFormConfirmation />
               <StackItem>
@@ -200,6 +251,44 @@ const StorageBackendForm = ({ backend }: { backend?: StorageBackend }) => {
                     type="password"
                     isRequired={!isEdit}
                   />
+                  {values.provider === 'vast' && (
+                    <ExpandableSection
+                      toggleText={t('VAST VIP Pool configuration')}
+                      isIndented
+                    >
+                      <InputField
+                        name="vast.vipPoolSupernet"
+                        label={t('VIP pool supernet (CIDR)')}
+                        fieldId="storage-backend-vip-pool-supernet"
+                        placeholder="10.100.0.0/22"
+                        helperText={t(
+                          'CIDR block used to carve per-tenant VIP pool IP ranges. Leave empty to require pre-created pools.',
+                        )}
+                      />
+                      <InputField
+                        name="vast.vipPoolSliceSize"
+                        label={t('IPs per tenant')}
+                        fieldId="storage-backend-vip-pool-slice-size"
+                        type="number"
+                        placeholder="4"
+                        helperText={t(
+                          'Number of consecutive IPs allocated per tenant within the supernet. Defaults to 4.',
+                        )}
+                      />
+                      <InputField
+                        name="vast.vipPoolGwIp"
+                        label={t('Gateway IP')}
+                        fieldId="storage-backend-vip-pool-gw-ip"
+                        helperText={t('Optional default gateway IP applied to self-created VIP pools.')}
+                      />
+                      <InputField
+                        name="vast.vipPoolGwIpv6"
+                        label={t('IPv6 gateway')}
+                        fieldId="storage-backend-vip-pool-gw-ipv6"
+                        helperText={t('Optional IPv6 gateway applied to self-created VIP pools.')}
+                      />
+                    </ExpandableSection>
+                  )}
                 </OsacForm>
               </StackItem>
 

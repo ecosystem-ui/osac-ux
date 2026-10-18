@@ -41,7 +41,12 @@ export type ApiRoute =
   | 'v1/roles'
   | 'v1/role_bindings'
   | 'v1/projects'
-  | 'v1/project_memberships';
+  | 'v1/project_memberships'
+  | 'v1/maas/models'
+  | 'v1/maas/subscriptions'
+  | 'v1/maas/policies'
+  | 'v1/maas/keys'
+  | 'v1/quota_snapshots';
 
 /**
  * Strict 3-part tuple that encodes an API address.

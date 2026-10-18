@@ -29,7 +29,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file osac/private/v1/storage_backend_type.proto.
  */
 export const file_osac_private_v1_storage_backend_type: GenFile = /*@__PURE__*/
-  fileDesc("Cipvc2FjL3ByaXZhdGUvdjEvc3RvcmFnZV9iYWNrZW5kX3R5cGUucHJvdG8SD29zYWMucHJpdmF0ZS52MSK7AQoOU3RvcmFnZUJhY2tlbmQSCgoCaWQYASABKAkSKwoIbWV0YWRhdGEYAiABKAsyGS5vc2FjLnByaXZhdGUudjEuTWV0YWRhdGESOQoEc3BlYxgDIAEoCzIjLm9zYWMucHJpdmF0ZS52MS5TdG9yYWdlQmFja2VuZFNwZWNCBrpIA8gBARI1CgZzdGF0dXMYBCABKAsyJS5vc2FjLnByaXZhdGUudjEuU3RvcmFnZUJhY2tlbmRTdGF0dXMiqAEKElN0b3JhZ2VCYWNrZW5kU3BlYxIZCghwcm92aWRlchgBIAEoCUIHukgEcgIQARITCgtkZXNjcmlwdGlvbhgCIAEoCRIZCghlbmRwb2ludBgDIAEoCUIHukgEcgIQARJHCgtjcmVkZW50aWFscxgEIAEoCzIqLm9zYWMucHJpdmF0ZS52MS5TdG9yYWdlQmFja2VuZENyZWRlbnRpYWxzQga6SAPIAQEinAIKGVN0b3JhZ2VCYWNrZW5kQ3JlZGVudGlhbHMSGQoIdXNlcm5hbWUYASABKAlCB7pIBHICEAESEAoIcGFzc3dvcmQYAiABKAkSPgoPcGFzc3dvcmRfc2VjcmV0GAMgASgLMiUub3NhYy5wcml2YXRlLnYxLlNlY3JldExvY2FsUmVmZXJlbmNlOpEBukiNARqKAQoccGFzc3dvcmRfeG9yX3Bhc3N3b3JkX3NlY3JldBI2ZXhhY3RseSBvbmUgb2YgcGFzc3dvcmQgb3IgcGFzc3dvcmRfc2VjcmV0IG11c3QgYmUgc2V0GjIodGhpcy5wYXNzd29yZCAhPSAnJykgIT0gaGFzKHRoaXMucGFzc3dvcmRfc2VjcmV0KSJtChRTdG9yYWdlQmFja2VuZFN0YXR1cxIzCgVzdGF0ZRgBIAEoDjIkLm9zYWMucHJpdmF0ZS52MS5TdG9yYWdlQmFja2VuZFN0YXRlEhQKB21lc3NhZ2UYAiABKAlIAIgBAUIKCghfbWVzc2FnZSpdChNTdG9yYWdlQmFja2VuZFN0YXRlEiUKIVNUT1JBR0VfQkFDS0VORF9TVEFURV9VTlNQRUNJRklFRBAAEh8KG1NUT1JBR0VfQkFDS0VORF9TVEFURV9SRUFEWRABQgaKtRgCCAFiBnByb3RvMw", [file_buf_validate_validate, file_cleanapi_cleanapi, file_osac_private_v1_metadata_type, file_osac_private_v1_secret_type]);
+  fileDesc("Cipvc2FjL3ByaXZhdGUvdjEvc3RvcmFnZV9iYWNrZW5kX3R5cGUucHJvdG8SD29zYWMucHJpdmF0ZS52MSK7AQoOU3RvcmFnZUJhY2tlbmQSCgoCaWQYASABKAkSKwoIbWV0YWRhdGEYAiABKAsyGS5vc2FjLnByaXZhdGUudjEuTWV0YWRhdGESOQoEc3BlYxgDIAEoCzIjLm9zYWMucHJpdmF0ZS52MS5TdG9yYWdlQmFja2VuZFNwZWNCBrpIA8gBARI1CgZzdGF0dXMYBCABKAsyJS5vc2FjLnByaXZhdGUudjEuU3RvcmFnZUJhY2tlbmRTdGF0dXMi9gEKElN0b3JhZ2VCYWNrZW5kU3BlYxIZCghwcm92aWRlchgBIAEoCUIHukgEcgIQARITCgtkZXNjcmlwdGlvbhgCIAEoCRIZCghlbmRwb2ludBgDIAEoCUIHukgEcgIQARJHCgtjcmVkZW50aWFscxgEIAEoCzIqLm9zYWMucHJpdmF0ZS52MS5TdG9yYWdlQmFja2VuZENyZWRlbnRpYWxzQga6SAPIAQESOQoEdmFzdBgFIAEoCzIpLm9zYWMucHJpdmF0ZS52MS5WYXN0U3RvcmFnZUJhY2tlbmRDb25maWdIAEIRCg9wcm92aWRlcl9jb25maWcitgEKGFZhc3RTdG9yYWdlQmFja2VuZENvbmZpZxIZChF2aXBfcG9vbF9zdXBlcm5ldBgBIAEoCRIbChN2aXBfcG9vbF9zbGljZV9zaXplGAIgASgFEhsKDnZpcF9wb29sX2d3X2lwGAMgASgJSACIAQESHQoQdmlwX3Bvb2xfZ3dfaXB2NhgEIAEoCUgBiAEBQhEKD192aXBfcG9vbF9nd19pcEITChFfdmlwX3Bvb2xfZ3dfaXB2NiKcAgoZU3RvcmFnZUJhY2tlbmRDcmVkZW50aWFscxIZCgh1c2VybmFtZRgBIAEoCUIHukgEcgIQARIQCghwYXNzd29yZBgCIAEoCRI+Cg9wYXNzd29yZF9zZWNyZXQYAyABKAsyJS5vc2FjLnByaXZhdGUudjEuU2VjcmV0TG9jYWxSZWZlcmVuY2U6kQG6SI0BGooBChxwYXNzd29yZF94b3JfcGFzc3dvcmRfc2VjcmV0EjZleGFjdGx5IG9uZSBvZiBwYXNzd29yZCBvciBwYXNzd29yZF9zZWNyZXQgbXVzdCBiZSBzZXQaMih0aGlzLnBhc3N3b3JkICE9ICcnKSAhPSBoYXModGhpcy5wYXNzd29yZF9zZWNyZXQpIm0KFFN0b3JhZ2VCYWNrZW5kU3RhdHVzEjMKBXN0YXRlGAEgASgOMiQub3NhYy5wcml2YXRlLnYxLlN0b3JhZ2VCYWNrZW5kU3RhdGUSFAoHbWVzc2FnZRgCIAEoCUgAiAEBQgoKCF9tZXNzYWdlKl0KE1N0b3JhZ2VCYWNrZW5kU3RhdGUSJQohU1RPUkFHRV9CQUNLRU5EX1NUQVRFX1VOU1BFQ0lGSUVEEAASHwobU1RPUkFHRV9CQUNLRU5EX1NUQVRFX1JFQURZEAFCBoq1GAIIAWIGcHJvdG8z", [file_buf_validate_validate, file_cleanapi_cleanapi, file_osac_private_v1_metadata_type, file_osac_private_v1_secret_type]);
 
 /**
  * Represents a registered storage backend in the OSAC platform.
@@ -114,6 +114,22 @@ export type StorageBackendSpec = Message<"osac.private.v1.StorageBackendSpec"> &
    * @generated from field: osac.private.v1.StorageBackendCredentials credentials = 4;
    */
   credentials?: StorageBackendCredentials | undefined;
+
+  /**
+   * Provider-specific configuration. The field that must be set depends on the value of `provider`.
+   * For example, when `provider` is "vast", `vast` must be set.
+   *
+   * @generated from oneof osac.private.v1.StorageBackendSpec.provider_config
+   */
+  providerConfig: {
+    /**
+     * VAST-specific configuration. Required when provider is "vast".
+     *
+     * @generated from field: osac.private.v1.VastStorageBackendConfig vast = 5;
+     */
+    value: VastStorageBackendConfig;
+    case: "vast";
+  } | { case: undefined; value?: undefined };
 };
 
 /**
@@ -122,6 +138,57 @@ export type StorageBackendSpec = Message<"osac.private.v1.StorageBackendSpec"> &
  */
 export const StorageBackendSpecSchema: GenMessage<StorageBackendSpec> = /*@__PURE__*/
   messageDesc(file_osac_private_v1_storage_backend_type, 1);
+
+/**
+ * VAST-specific configuration for a StorageBackend.
+ * Controls per-tenant VIP pool IP allocation during tenant onboarding.
+ *
+ * @generated from message osac.private.v1.VastStorageBackendConfig
+ */
+export type VastStorageBackendConfig = Message<"osac.private.v1.VastStorageBackendConfig"> & {
+  /**
+   * CIDR block from which per-tenant VIP pool IP ranges are carved.
+   *
+   * During tenant onboarding, the system allocates a slice of this supernet
+   * for the tenant, using the VAST tenant ID as the offset:
+   *   slice_start = network_address + (vast_tenant_id * vip_pool_slice_size)
+   *
+   * Example: "10.100.0.0/22". Leave empty to require pre-created pools
+   * (the cloud admin must pre-create a pool named "osac-<tenant>-vippool" manually).
+   *
+   * @generated from field: string vip_pool_supernet = 1;
+   */
+  vipPoolSupernet: string;
+
+  /**
+   * Number of consecutive IP addresses allocated per tenant within the supernet.
+   * Defaults to 4 when not set or zero.
+   *
+   * @generated from field: int32 vip_pool_slice_size = 2;
+   */
+  vipPoolSliceSize: number;
+
+  /**
+   * Optional default gateway IP applied to self-created VIP pools.
+   *
+   * @generated from field: optional string vip_pool_gw_ip = 3;
+   */
+  vipPoolGwIp?: string | undefined;
+
+  /**
+   * Optional default IPv6 gateway applied to self-created VIP pools.
+   *
+   * @generated from field: optional string vip_pool_gw_ipv6 = 4;
+   */
+  vipPoolGwIpv6?: string | undefined;
+};
+
+/**
+ * Describes the message osac.private.v1.VastStorageBackendConfig.
+ * Use `create(VastStorageBackendConfigSchema)` to create a new message.
+ */
+export const VastStorageBackendConfigSchema: GenMessage<VastStorageBackendConfig> = /*@__PURE__*/
+  messageDesc(file_osac_private_v1_storage_backend_type, 2);
 
 /**
  * Credentials for authenticating with a storage backend's management API.
@@ -160,7 +227,7 @@ export type StorageBackendCredentials = Message<"osac.private.v1.StorageBackendC
  * Use `create(StorageBackendCredentialsSchema)` to create a new message.
  */
 export const StorageBackendCredentialsSchema: GenMessage<StorageBackendCredentials> = /*@__PURE__*/
-  messageDesc(file_osac_private_v1_storage_backend_type, 2);
+  messageDesc(file_osac_private_v1_storage_backend_type, 3);
 
 /**
  * Represents the current operational state of a StorageBackend.
@@ -188,7 +255,7 @@ export type StorageBackendStatus = Message<"osac.private.v1.StorageBackendStatus
  * Use `create(StorageBackendStatusSchema)` to create a new message.
  */
 export const StorageBackendStatusSchema: GenMessage<StorageBackendStatus> = /*@__PURE__*/
-  messageDesc(file_osac_private_v1_storage_backend_type, 3);
+  messageDesc(file_osac_private_v1_storage_backend_type, 4);
 
 /**
  * Lifecycle states for StorageBackend resources.

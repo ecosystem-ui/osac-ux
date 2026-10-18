@@ -1,0 +1,23 @@
+.storage-backends-table__name-link,
+.storage-tiers-table__name-link {
+  color: var(--pf-t--global--text--color--link--default);
+  font-weight: var(--pf-t--global--font--weight--body--bold);
+  text-decoration: none;
+}
+
+.storage-backends-table__name-link:hover,
+.storage-backends-table__name-link:focus,
+.storage-tiers-table__name-link:hover,
+.storage-tiers-table__name-link:focus {
+  color: var(--pf-t--global--text--color--link--hover);
+  text-decoration: underline;
+}
+
+.storage-backends-table__name-meta,
+.storage-backends-table__meta,
+.storage-tiers-table__name-meta,
+.storage-tiers-table__meta {
+  color: var(--pf-t--global--text--color--subtle);
+  font-size: var(--pf-t--global--font--size--body--sm);
+  line-height: var(--pf-t--global--font--line-height--body);
+}

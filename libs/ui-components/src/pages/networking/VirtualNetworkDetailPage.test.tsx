@@ -152,7 +152,7 @@ describe('VirtualNetworkDetailPage', () => {
 
     expect(await screen.findByText('nat-egress')).toBeInTheDocument();
     expect(
-      screen.getByText('NAT gateway attachment').closest('.pf-m-secondary'),
+      screen.getByText('NAT gateway attachment').closest('.details-page__sidebar'),
     ).toBeInTheDocument();
     expect(screen.getByText('203.0.113.10')).toBeInTheDocument();
     expect(screen.getAllByText('Ready').length).toBeGreaterThan(0);

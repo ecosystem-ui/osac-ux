@@ -119,14 +119,14 @@ describe('VolumesListPage', () => {
 
     renderPage();
 
-    expect(await screen.findByText('No volumes found')).toBeInTheDocument();
+    expect(await screen.findByText(/No volumes yet/i)).toBeInTheDocument();
   });
 
   it('renders the name search input', async () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search volumes by name…')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Search volumes')).toBeInTheDocument();
     });
   });
 

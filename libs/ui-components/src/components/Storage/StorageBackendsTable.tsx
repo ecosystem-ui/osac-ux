@@ -1,11 +1,14 @@
+import { Flex, FlexItem } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { Link } from 'react-router-dom';
 
 import type { StorageBackend } from '@osac/types/private';
-import ResourceNameField from '@osac/ui-components/components/Resource/ResourceNameField.tsx';
 
 import StorageBackendActionsMenu from './StorageBackendActionsMenu';
 import StorageBackendStatusLabel from './StorageBackendStatusLabel';
 import { useTranslation } from '../../hooks/useTranslation';
+
+import './StorageTables.css';
 
 interface StorageBackendsTableProps {
   backends: StorageBackend[];
@@ -26,24 +29,34 @@ export const StorageBackendsTable = ({ backends }: StorageBackendsTableProps) =>
         </Tr>
       </Thead>
       <Tbody>
-        {backends.map((backend) => (
-          <Tr key={backend.id}>
-            <Td dataLabel={t('Name')}>
-              <ResourceNameField
-                resource={backend}
-                detailsUrl={`/admin/infrastructure/storage/backends/${encodeURIComponent(backend.id)}`}
-              />
-            </Td>
-            <Td dataLabel={t('Status')}>
-              <StorageBackendStatusLabel state={backend.status?.state} />
-            </Td>
-            <Td dataLabel={t('Provider')}>{backend.spec?.provider}</Td>
-            <Td dataLabel={t('Endpoint')}>{backend.spec?.endpoint}</Td>
-            <Td dataLabel={t('Actions')} isActionCell>
-              <StorageBackendActionsMenu backend={backend} />
-            </Td>
-          </Tr>
-        ))}
+        {backends.map((backend) => {
+          const name = backend.metadata?.name || backend.id;
+
+          return (
+            <Tr key={backend.id}>
+              <Td dataLabel={t('Name')}>
+                <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsXs' }}>
+                  <FlexItem>
+                    <Link
+                      to={`/admin/infrastructure/storage/backends/${encodeURIComponent(backend.id)}`}
+                      className="storage-backends-table__name-link"
+                    >
+                      {name}
+                    </Link>
+                  </FlexItem>
+                </Flex>
+              </Td>
+              <Td dataLabel={t('Status')}>
+                <StorageBackendStatusLabel state={backend.status?.state} />
+              </Td>
+              <Td dataLabel={t('Provider')}>{backend.spec?.provider || '—'}</Td>
+              <Td dataLabel={t('Endpoint')}>{backend.spec?.endpoint || '—'}</Td>
+              <Td dataLabel={t('Actions')} isActionCell>
+                <StorageBackendActionsMenu backend={backend} />
+              </Td>
+            </Tr>
+          );
+        })}
       </Tbody>
     </Table>
   );

@@ -213,11 +213,28 @@ describe('navRowsForRole', () => {
     expect(findSection('tenant-idp-manager', 'nav-tenant-storage')).toBeUndefined();
   });
 
-  it('IDP sections show for tenant-idp-manager and tenant-admin', () => {
-    for (const role of ['tenant-idp-manager', 'tenant-admin'] as UserRole[]) {
-      expect(findLink(role, 'idp')).toBeDefined();
-      expect(findLink(role, 'role-bindings')).toBeDefined();
-    }
+  it('IDP sections show for tenant-idp-manager and Identity shows for tenant-admin', () => {
+    expect(findLink('tenant-idp-manager', 'idp')).toBeDefined();
+    expect(findLink('tenant-idp-manager', 'role-bindings')).toBeDefined();
+    expect(findSection('tenant-admin', 'nav-tenant-identity')).toEqual({
+      kind: 'section',
+      id: 'nav-tenant-identity',
+      label: 'Identity',
+      children: [
+        {
+          kind: 'link',
+          id: 'idp',
+          label: 'Identity providers',
+          path: '/tenant/identity-provider',
+        },
+        {
+          kind: 'link',
+          id: 'role-bindings',
+          label: 'Role Bindings',
+          path: '/tenant/role-binding',
+        },
+      ],
+    });
 
     const catalogLink = findLink('tenant-idp-manager', 'catalog');
     expect(catalogLink).toBeUndefined();

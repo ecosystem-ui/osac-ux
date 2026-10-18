@@ -1,7 +1,18 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, AlertActionLink, Button, Flex, Modal } from '@patternfly/react-core';
+import {
+  Alert,
+  AlertActionLink,
+  Button,
+  Dropdown,
+  DropdownItem,
+  DropdownList,
+  Flex,
+  MenuToggle,
+  Modal,
+} from '@patternfly/react-core';
 import DownloadIcon from '@patternfly/react-icons/dist/esm/icons/download-icon';
+import ExternalLinkAltIcon from '@patternfly/react-icons/dist/esm/icons/external-link-alt-icon';
 import KeyIcon from '@patternfly/react-icons/dist/esm/icons/key-icon';
 
 import { type Cluster, ClusterState } from '@osac/types';
@@ -10,19 +21,26 @@ import { getErrorMessage } from '@osac/ui-components/utils/error';
 
 import ClusterPasswordModal from './ClusterPasswordModal';
 import { useDownloadKubeconfig } from '../../../api/v1/cluster';
+import { useFetchAiGridUrl } from '../../../api/v1/maas';
 import { useTranslation } from '../../../hooks/useTranslation';
 import ClusterDeleteConfirmModal from '../ClusterDeleteConfirmModal';
 
 interface ClusterDetailsActionButtonsProps {
   cluster: Cluster;
+  isRhoaiInstalled?: boolean;
 }
 
-const ClusterDetailsActionButtons = ({ cluster }: ClusterDetailsActionButtonsProps) => {
+const ClusterDetailsActionButtons = ({
+  cluster,
+  isRhoaiInstalled = false,
+}: ClusterDetailsActionButtonsProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
+  const [isActionsOpen, setIsActionsOpen] = useState(false);
   const { download, isPending, error, setError } = useDownloadKubeconfig();
+  const { mutate: fetchAiGridUrl, isPending: aiGridPending } = useFetchAiGridUrl();
 
   const isReady = cluster.status?.state === ClusterState.READY;
   const canDelete = cluster.status?.state !== ClusterState.DELETING;
@@ -71,32 +89,69 @@ const ClusterDetailsActionButtons = ({ cluster }: ClusterDetailsActionButtonsPro
         spaceItems={{ default: 'spaceItemsSm' }}
         flexWrap={{ default: 'wrap' }}
       >
-        <Button
-          variant="secondary"
-          icon={<DownloadIcon />}
-          isDisabled={!isReady || !kubeconfigSecretId || isPending}
-          isLoading={isPending}
-          onClick={() => void download(kubeconfigSecretId, clusterName)}
-        >
-          {t('Download kubeconfig')}
-        </Button>
-        <Button
-          variant="secondary"
-          icon={<KeyIcon />}
-          isDisabled={!isReady || !passwordSecretId}
-          onClick={() => setPasswordOpen(true)}
-        >
-          {t('View password')}
-        </Button>
-        <DeleteResourceButton
-          showIcon
-          canDelete={canDelete}
-          onClick={() => {
-            if (canDelete) {
-              setDeleteOpen(true);
+        {isRhoaiInstalled && (
+          <Button
+            variant="primary"
+            icon={<ExternalLinkAltIcon />}
+            isDisabled={!isReady || aiGridPending}
+            isLoading={aiGridPending}
+            onClick={() =>
+              fetchAiGridUrl(cluster.id, {
+                onSuccess: ({ url }) => window.open(url, '_blank', 'noopener,noreferrer'),
+              })
             }
-          }}
-        />
+          >
+            {t('Open AI Grid')}
+          </Button>
+        )}
+        <Dropdown
+          isOpen={isActionsOpen}
+          onOpenChange={setIsActionsOpen}
+          toggle={(ref) => (
+            <MenuToggle
+              ref={ref}
+              variant="secondary"
+              onClick={() => setIsActionsOpen((open) => !open)}
+              aria-label={t('Actions for {{name}}', { name: clusterName })}
+            >
+              {t('Actions')}
+            </MenuToggle>
+          )}
+          popperProps={{ position: 'right' }}
+        >
+          <DropdownList>
+            <DropdownItem
+              icon={<DownloadIcon />}
+              isDisabled={!isReady || !kubeconfigSecretId || isPending}
+              onClick={() => {
+                void download(kubeconfigSecretId, clusterName);
+                setIsActionsOpen(false);
+              }}
+            >
+              {t(isPending ? 'Downloading kubeconfig...' : 'Download kubeconfig')}
+            </DropdownItem>
+            <DropdownItem
+              icon={<KeyIcon />}
+              isDisabled={!isReady || !passwordSecretId}
+              onClick={() => {
+                setPasswordOpen(true);
+                setIsActionsOpen(false);
+              }}
+            >
+              {t('View password')}
+            </DropdownItem>
+            <DeleteResourceButton
+              isDropdown
+              canDelete={canDelete}
+              onClick={() => {
+                if (canDelete) {
+                  setDeleteOpen(true);
+                  setIsActionsOpen(false);
+                }
+              }}
+            />
+          </DropdownList>
+        </Dropdown>
       </Flex>
     </>
   );

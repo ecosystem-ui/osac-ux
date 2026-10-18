@@ -20,6 +20,10 @@ const makeTenant = (): Tenant =>
       creationTimestamp: { seconds: BigInt(1717000000), nanos: 0 },
       creator: 'cloud-provider-admin',
       description: 'Primary tenant for Acme Corporation workloads.',
+      annotations: {
+        'osac.io/company-logo': '/red-hat-logo.svg',
+        'osac.io/company-logo-filename': 'acme-corporation-logo.svg',
+      },
     },
     spec: {
       domains: ['acme.example.com', 'acme-corp.example.com'],
@@ -51,7 +55,7 @@ const makeTenant = (): Tenant =>
         },
       ],
     },
-  }) as Tenant;
+  }) as unknown as Tenant;
 
 const renderPage = (tenant?: Tenant) =>
   renderWithProviders(
@@ -84,6 +88,11 @@ describe('TenantDetailsPage', () => {
     );
     expect(screen.getByRole('heading', { name: 'Acme Corp' })).toBeInTheDocument();
     expect(screen.getByText('acme.example.com')).toBeInTheDocument();
+    expect(screen.getByText('Company logo')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'acme-corporation-logo.svg' })).toHaveAttribute(
+      'src',
+      '/red-hat-logo.svg',
+    );
     expect(screen.getByText('acme-corp.example.com')).toBeInTheDocument();
     expect(screen.getByText('acme-break-glass-credentials')).toBeInTheDocument();
     expect(screen.getByText('Default networking')).toBeInTheDocument();

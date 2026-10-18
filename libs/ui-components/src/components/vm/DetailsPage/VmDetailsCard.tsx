@@ -28,7 +28,7 @@ const VmDetailsCard = ({ vm }: Props) => {
     <Card isFullHeight>
       <CardTitle>{t('Details')}</CardTitle>
       <CardBody>
-        <DescriptionList isCompact>
+        <DescriptionList isCompact className="vm-details-overview" aria-label={t('Virtual machine details')}>
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Catalog item')}</DescriptionListTerm>
             <DescriptionListDescription>

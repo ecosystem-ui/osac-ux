@@ -23,17 +23,19 @@ import { EyeIcon } from '@patternfly/react-icons/dist/esm/icons/eye-icon';
 import { EyeSlashIcon } from '@patternfly/react-icons/dist/esm/icons/eye-slash-icon';
 import { LockIcon } from '@patternfly/react-icons/dist/esm/icons/lock-icon';
 
-import { Secret, SecretType, Secrets } from '@osac/types';
+import { Secret, Secrets } from '@osac/types';
 import { useGetResource } from '@osac/ui-components/api/use-resource';
 import { useTranslation } from '@osac/ui-components/hooks/useTranslation';
 
 import SecretDetailsActionButtons from './SecretDetailsActionButtons';
-import { Timestamp } from '../../Primitives/Timestamp';
+import SecretSidebarSection from './SecretSidebarSection';
 import { ResourceDetailHeader } from '../../Resource/ResourceDetailHeader';
 import ResourceDetailsPage from '../../Resource/ResourceDetailsPage';
 import { SubtleContent } from '../../SubtleContent/SubtleContent';
 import { decodeSecretValue, getDataEntries } from '../CreatePage/values';
-import { downloadSecretBytes, getSecretType } from '../utils';
+import { downloadSecretBytes } from '../utils';
+
+import '../../shared/details-page.css';
 
 interface SecretDetailsPageContentProps {
   secret: Secret;
@@ -44,8 +46,6 @@ const SecretDetailsPageContent = ({ secret }: SecretDetailsPageContentProps) => 
   const [showValues, setShowValues] = useState(false);
   const secretName = secret.metadata?.name || secret.id;
   const dataEntries = getDataEntries(secret.data);
-
-  const secretTypes = getSecretType(t);
 
   return (
     <>
@@ -63,6 +63,11 @@ const SecretDetailsPageContent = ({ secret }: SecretDetailsPageContentProps) => 
                   parentTo="/secrets"
                   parentLabel={t('Secrets')}
                   resourceName={secretName}
+                  titleSize="3xl"
+                  description={
+                    secret.metadata?.description ||
+                    t('Secure credentials and configuration data for this project.')
+                  }
                 />
               </FlexItem>
               <FlexItem>
@@ -77,49 +82,31 @@ const SecretDetailsPageContent = ({ secret }: SecretDetailsPageContentProps) => 
       </PageSection>
 
       <PageSection hasBodyWrapper={false}>
-        <Grid hasGutter>
-          <GridItem md={6}>
+        <Grid hasGutter className="details-page__content-grid">
+          <GridItem md={8} className="details-page__column">
             <Stack hasGutter>
               <StackItem>
-                <Title headingLevel="h5">{t('Overview')}</Title>
-                {secret.metadata?.description && (
-                  <SubtleContent>{secret.metadata?.description}</SubtleContent>
-                )}
-              </StackItem>
-              <StackItem>
-                <DescriptionList>
-                  <DescriptionListGroup>
-                    <DescriptionListTerm>{t('Project')}</DescriptionListTerm>
-                    <DescriptionListDescription>
-                      {secret.metadata?.project || t('Default')}
-                    </DescriptionListDescription>
-                  </DescriptionListGroup>
-                  <DescriptionListGroup>
-                    <DescriptionListTerm>{t('Type')}</DescriptionListTerm>
-                    <DescriptionListDescription>
-                      {secretTypes[secret.type] || secretTypes[SecretType.UNSPECIFIED]}
-                    </DescriptionListDescription>
-                  </DescriptionListGroup>
-                  <DescriptionListGroup>
-                    <DescriptionListTerm>{t('Created')}</DescriptionListTerm>
-                    <DescriptionListDescription>
-                      <Timestamp value={secret.metadata?.creationTimestamp} />
-                    </DescriptionListDescription>
-                  </DescriptionListGroup>
-                </DescriptionList>
-              </StackItem>
-            </Stack>
-          </GridItem>
-          <GridItem md={6}>
-            <Stack hasGutter>
-              <StackItem>
-                <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }}>
+                <Flex
+                  alignItems={{ default: 'alignItemsBaseline' }}
+                  justifyContent={{ default: 'justifyContentSpaceBetween' }}
+                  flexWrap={{ default: 'wrap' }}
+                  spaceItems={{ default: 'spaceItemsSm' }}
+                >
                   <FlexItem>
-                    <Title headingLevel="h5">{t('Secret data')}</Title>
+                    <Flex
+                      alignItems={{ default: 'alignItemsCenter' }}
+                      spaceItems={{ default: 'spaceItemsSm' }}
+                    >
+                      <LockIcon aria-hidden />
+                      <Title headingLevel="h2" size="lg">
+                        {t('Secret data')}
+                      </Title>
+                    </Flex>
                   </FlexItem>
                   <FlexItem>
                     <Button
                       variant="link"
+                      isInline
                       icon={showValues ? <EyeSlashIcon /> : <EyeIcon />}
                       onClick={() => setShowValues((v) => !v)}
                     >
@@ -129,60 +116,80 @@ const SecretDetailsPageContent = ({ secret }: SecretDetailsPageContentProps) => 
                 </Flex>
               </StackItem>
               <StackItem>
-                <DescriptionList>
-                  {dataEntries.map((entry) => (
-                    <React.Fragment key={entry.key}>
-                      <DescriptionListGroup>
-                        <DescriptionListTerm>{t('Key')}</DescriptionListTerm>
-                        <DescriptionListDescription>{entry.key}</DescriptionListDescription>
-                      </DescriptionListGroup>
-                      <DescriptionListGroup>
-                        <DescriptionListTerm>{t('Value')}</DescriptionListTerm>
-                        <DescriptionListDescription>
-                          {showValues ? (
-                            decodeSecretValue(entry.value) !== undefined ? (
-                              <TextArea
-                                id={`secret-value-${entry.key}`}
-                                aria-label={t('Secret value for {{key}}', { key: entry.key })}
-                                value={decodeSecretValue(entry.value)}
-                                readOnly
-                                rows={4}
-                              />
+                {dataEntries.length === 0 ? (
+                  <SubtleContent component="p">{t('No secret data keys.')}</SubtleContent>
+                ) : (
+                  <DescriptionList
+                    isCompact
+                    className="details-page__overview"
+                    aria-label={t('Secret data')}
+                  >
+                    {dataEntries.map((entry) => (
+                      <React.Fragment key={entry.key}>
+                        <DescriptionListGroup>
+                          <DescriptionListTerm>{t('Key')}</DescriptionListTerm>
+                          <DescriptionListDescription>{entry.key}</DescriptionListDescription>
+                        </DescriptionListGroup>
+                        <DescriptionListGroup>
+                          <DescriptionListTerm>{t('Value')}</DescriptionListTerm>
+                          <DescriptionListDescription>
+                            {showValues ? (
+                              decodeSecretValue(entry.value) !== undefined ? (
+                                <TextArea
+                                  id={`secret-value-${entry.key}`}
+                                  aria-label={t('Secret value for {{key}}', { key: entry.key })}
+                                  value={decodeSecretValue(entry.value)}
+                                  readOnly
+                                  rows={4}
+                                />
+                              ) : (
+                                <Stack>
+                                  <StackItem>
+                                    {t(
+                                      'This value contains binary data and cannot be displayed as text. Download it to access the raw data.',
+                                    )}
+                                  </StackItem>
+                                  <StackItem>
+                                    <Button
+                                      variant="link"
+                                      isInline
+                                      icon={<DownloadIcon />}
+                                      onClick={() => {
+                                        if (entry.value) {
+                                          downloadSecretBytes(entry.value, entry.key);
+                                        }
+                                      }}
+                                    >
+                                      {t('Download value')}
+                                    </Button>
+                                  </StackItem>
+                                </Stack>
+                              )
                             ) : (
-                              <Stack>
-                                <StackItem>
-                                  {t(
-                                    'This value contains binary data and cannot be displayed as text. Download it to access the raw data.',
-                                  )}
-                                </StackItem>
-                                <StackItem>
-                                  <Button
-                                    variant="link"
-                                    icon={<DownloadIcon />}
-                                    onClick={() => {
-                                      if (entry.value) {
-                                        downloadSecretBytes(entry.value, entry.key);
-                                      }
-                                    }}
-                                  >
-                                    {t('Download value')}
-                                  </Button>
-                                </StackItem>
-                              </Stack>
-                            )
-                          ) : (
-                            <TextInput
-                              value="********"
-                              type="text"
-                              readOnlyVariant="default"
-                              customIcon={<LockIcon />}
-                            />
-                          )}
-                        </DescriptionListDescription>
-                      </DescriptionListGroup>
-                    </React.Fragment>
-                  ))}
-                </DescriptionList>
+                              <TextInput
+                                value="********"
+                                type="text"
+                                readOnlyVariant="default"
+                                customIcon={<LockIcon />}
+                                aria-label={t('Hidden secret value for {{key}}', {
+                                  key: entry.key,
+                                })}
+                              />
+                            )}
+                          </DescriptionListDescription>
+                        </DescriptionListGroup>
+                      </React.Fragment>
+                    ))}
+                  </DescriptionList>
+                )}
+              </StackItem>
+            </Stack>
+          </GridItem>
+
+          <GridItem md={4} className="details-page__column">
+            <Stack hasGutter>
+              <StackItem>
+                <SecretSidebarSection secret={secret} />
               </StackItem>
             </Stack>
           </GridItem>
@@ -209,6 +216,8 @@ const SecretDetailsPage = () => {
       parentLabel={t('Secrets')}
       parentTo="/secrets"
       refetch={refetch}
+      resourceLabel={t('secret')}
+      cardCount={2}
     >
       {data?.object && <SecretDetailsPageContent secret={data.object} />}
     </ResourceDetailsPage>

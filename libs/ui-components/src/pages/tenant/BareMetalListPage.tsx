@@ -1,39 +1,71 @@
-import { useMemo } from 'react';
 import {
+  FormSelect,
+  FormSelectOption,
   SearchInput,
   Toolbar,
   ToolbarContent,
   ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
-import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
+import { BareMetalInstanceState } from '@osac/types';
 import { useBareMetalInstances } from '@osac/ui-components/api/v1/baremetal-instance';
-import { BareMetalActionsMenu } from '@osac/ui-components/components/BareMetalInstance/BareMetalActionsMenu';
-import { BareMetalStatusLabel } from '@osac/ui-components/components/BareMetalInstance/BareMetalStatusLabel';
+import BareMetalCards from '@osac/ui-components/components/BareMetalInstance/BareMetalCards';
+import { BareMetalTable } from '@osac/ui-components/components/BareMetalInstance/BareMetalTable';
 import ListPage from '@osac/ui-components/components/Page/ListPage';
 import ListPageBody from '@osac/ui-components/components/Page/ListPageBody';
 import ProjectFilter from '@osac/ui-components/components/Page/ProjectFilter';
 import CreateButton from '@osac/ui-components/components/Primitives/CreateButton.tsx';
-import { Timestamp } from '@osac/ui-components/components/Primitives/Timestamp';
-import ResourceNameField from '@osac/ui-components/components/Resource/ResourceNameField.tsx';
+import type { ViewType } from '@osac/ui-components/components/Primitives/ViewSwitcher';
+import {
+  DEFAULT_VIEW_TYPE,
+  getViewTypePrefKey,
+  isViewType,
+} from '@osac/ui-components/components/Primitives/ViewSwitcher';
+import ViewSwitcher from '@osac/ui-components/components/Primitives/ViewSwitcher';
 import { SubtleContent } from '@osac/ui-components/components/SubtleContent/SubtleContent';
 import { SEARCH_PARAM, usePageFilter } from '@osac/ui-components/hooks/use-page-filter';
+import { useUserPreferences } from '@osac/ui-components/hooks/use-user-preferences';
 import { useTranslation } from '@osac/ui-components/hooks/useTranslation';
+
+export const BARE_METAL_VIEW_KEY = 'bare-metal';
+const STATUS_PARAM = 'bare-metal-status';
+
+const STATUS_FILTER_OPTIONS = [
+  { value: 'provisioning', state: BareMetalInstanceState.PROVISIONING },
+  { value: 'running', state: BareMetalInstanceState.RUNNING },
+  { value: 'failed', state: BareMetalInstanceState.FAILED },
+  { value: 'stopped', state: BareMetalInstanceState.STOPPED },
+  { value: 'starting', state: BareMetalInstanceState.STARTING },
+  { value: 'stopping', state: BareMetalInstanceState.STOPPING },
+  { value: 'deleting', state: BareMetalInstanceState.DELETING },
+] as const;
+
+type StatusFilterValue = (typeof STATUS_FILTER_OPTIONS)[number]['value'];
+
+const isStatusFilterValue = (value: string): value is StatusFilterValue =>
+  STATUS_FILTER_OPTIONS.some((option) => option.value === value);
 
 export const BareMetalListPage = () => {
   const { t } = useTranslation();
   const [search, setSearch] = usePageFilter(SEARCH_PARAM);
-
+  const [statusFilter, setStatusFilter] = usePageFilter(STATUS_PARAM);
+  const [viewTypePref] = useUserPreferences(getViewTypePrefKey(BARE_METAL_VIEW_KEY));
+  const viewType: ViewType = isViewType(viewTypePref) ? viewTypePref : DEFAULT_VIEW_TYPE;
   const { data: instances = [], isLoading, error } = useBareMetalInstances();
-
-  const filteredInstances = useMemo(() => {
-    if (!search) {
-      return instances;
-    }
-    const lc = search.toLowerCase();
-    return instances.filter((inst) => (inst.metadata?.name ?? inst.id).toLowerCase().includes(lc));
-  }, [search, instances]);
+  const selectedStatus: StatusFilterValue | 'all' = isStatusFilterValue(statusFilter)
+    ? statusFilter
+    : 'all';
+  const selectedStatusOption = STATUS_FILTER_OPTIONS.find(
+    (option) => option.value === selectedStatus,
+  );
+  const filteredInstances = instances.filter((instance) => {
+    const name = instance.metadata?.name ?? instance.id;
+    const matchesStatus =
+      !selectedStatusOption || instance.status?.state === selectedStatusOption.state;
+    const matchesSearch = !search || name.toLowerCase().includes(search.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
 
   return (
     <ListPage
@@ -49,57 +81,64 @@ export const BareMetalListPage = () => {
               <ToolbarItem>
                 <ProjectFilter />
               </ToolbarItem>
-            </ToolbarGroup>
-            <ToolbarGroup>
+              <ToolbarItem>
+                <FormSelect
+                  id="bare-metal-status-filter"
+                  value={selectedStatus}
+                  onChange={(_event, value) => setStatusFilter(value === 'all' ? '' : value)}
+                  aria-label={t('Filter bare metal instances by status')}
+                >
+                  <FormSelectOption value="all" label={t('All statuses')} />
+                  {STATUS_FILTER_OPTIONS.map((option) => (
+                    <FormSelectOption
+                      key={option.value}
+                      value={option.value}
+                      label={
+                        option.value === 'provisioning'
+                          ? t('Provisioning')
+                          : option.value === 'running'
+                            ? t('Running')
+                            : option.value === 'failed'
+                              ? t('Failed')
+                              : option.value === 'stopped'
+                                ? t('Stopped')
+                                : option.value === 'starting'
+                                  ? t('Starting')
+                                  : option.value === 'stopping'
+                                    ? t('Stopping')
+                                    : t('Deleting')
+                      }
+                    />
+                  ))}
+                </FormSelect>
+              </ToolbarItem>
               <ToolbarItem>
                 <SearchInput
-                  placeholder={t('Search by name')}
+                  placeholder={t('Search bare metal instances by name…')}
                   value={search}
-                  onChange={(_e, v) => setSearch(v)}
+                  onChange={(_event, value) => setSearch(value)}
                   onClear={() => setSearch('')}
-                  aria-label={t('Filter bare metal instances by name')}
+                  aria-label={t('Search bare metal instances')}
                 />
+              </ToolbarItem>
+            </ToolbarGroup>
+            <ToolbarGroup align={{ default: 'alignEnd' }}>
+              <ToolbarItem>
+                <ViewSwitcher pageKey={BARE_METAL_VIEW_KEY} />
               </ToolbarItem>
             </ToolbarGroup>
           </ToolbarContent>
         </Toolbar>
         {filteredInstances.length === 0 ? (
           <SubtleContent component="p">
-            {search
+            {search || selectedStatus !== 'all'
               ? t('No bare metal instances match your search.')
-              : t('No bare metal instances yet.')}
+              : t('No bare metal instances yet. Create one to get started.')}
           </SubtleContent>
+        ) : viewType === 'cards' ? (
+          <BareMetalCards instances={filteredInstances} />
         ) : (
-          <Table aria-label={t('Bare metal instances')} variant="compact" borders>
-            <Thead>
-              <Tr>
-                <Th>{t('Name')}</Th>
-                <Th>{t('Status')}</Th>
-                <Th>{t('Catalog item')}</Th>
-                <Th>{t('Created')}</Th>
-                <Th aria-label={t('Actions')} />
-              </Tr>
-            </Thead>
-            <Tbody>
-              {filteredInstances.map((inst) => (
-                <Tr key={inst.id}>
-                  <Td dataLabel={t('Name')}>
-                    <ResourceNameField resource={inst} detailsUrl={`/bare-metal/${inst.id}`} />
-                  </Td>
-                  <Td dataLabel={t('Status')}>
-                    <BareMetalStatusLabel state={inst.status?.state} />
-                  </Td>
-                  <Td dataLabel={t('Catalog item')}>{inst.spec?.catalogItem?.name ?? '—'}</Td>
-                  <Td dataLabel={t('Created')}>
-                    <Timestamp value={inst.metadata?.creationTimestamp} />
-                  </Td>
-                  <Td dataLabel={t('Actions')} isActionCell>
-                    <BareMetalActionsMenu instance={inst} />
-                  </Td>
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
+          <BareMetalTable instances={filteredInstances} />
         )}
       </ListPageBody>
     </ListPage>

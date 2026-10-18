@@ -6,6 +6,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import {
+  AddOnOperatorInstallState,
   type Cluster,
   ClusterSchema,
   type ClusterVersion,
@@ -138,5 +139,21 @@ describe('ClustersTable version join', () => {
 
     expect(container.querySelectorAll('.pf-v6-c-skeleton').length).toBeGreaterThan(0);
     expect(screen.queryByText('4.17.0')).toBeNull();
+  });
+
+  it('shows the AI Grid indicator for clusters with the installed RHOAI add-on', async () => {
+    renderTable([
+      create(ClusterSchema, {
+        id: 'c-rhoai',
+        metadata: { name: 'c-rhoai' },
+        status: {
+          addOnOperators: [{ name: 'rhoai', state: AddOnOperatorInstallState.INSTALLED }],
+        },
+      }),
+      create(ClusterSchema, { id: 'c-standard', metadata: { name: 'c-standard' } }),
+    ]);
+
+    expect(await screen.findByText('c-rhoai')).toBeInTheDocument();
+    expect(screen.getByText('AI Grid')).toBeInTheDocument();
   });
 });

@@ -1,9 +1,14 @@
 import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { TreeView, TreeViewSearch, type TreeViewDataItem } from '@patternfly/react-core';
-import type { TFunction } from 'i18next';
+import {
+  FormSelect,
+  FormSelectOption,
+  SearchInput,
+  Toolbar,
+  ToolbarContent,
+  ToolbarGroup,
+  ToolbarItem,
+} from '@patternfly/react-core';
 
-import type { Project } from '@osac/types';
 import { useProjects } from '@osac/ui-components/api/v1/project';
 import ListPage from '@osac/ui-components/components/Page/ListPage';
 import ListPageBody from '@osac/ui-components/components/Page/ListPageBody';
@@ -13,84 +18,64 @@ import { SEARCH_PARAM, usePageFilter } from '@osac/ui-components/hooks/use-page-
 import { useSession } from '@osac/ui-components/hooks/use-session';
 import { useTranslation } from '@osac/ui-components/hooks/useTranslation';
 
-import ProjectActionsMenu from './ProjectActionsMenu';
-import ProjectStatusLabel from './ProjectStatusLabel';
-import { getFullProjectPath, getProjectName } from './utils';
+import ProjectTreeTable from './ProjectTreeTable';
+import { getFullProjectPath, getProjectName, getProjectParentPath, isNestedProject } from './utils';
 
-function buildProjectTree(projects: Project[], t: TFunction): TreeViewDataItem[] {
-  // Pass 1: create all nodes keyed by their full dot-separated path
-  const nodeMap = new Map<string, TreeViewDataItem>();
+type ProjectFilter = 'all' | 'root' | 'nested';
 
-  for (const project of projects) {
-    const fullPath = getFullProjectPath(project);
-    const dotIdx = fullPath.lastIndexOf('.');
-    const displayName =
-      dotIdx >= 0 ? fullPath.slice(dotIdx + 1) : fullPath || getProjectName(project, t);
-
-    nodeMap.set(fullPath, {
-      id: project.id,
-      name: (
-        <>
-          <Link to={`/projects/${project.id}`}>{displayName || t('Default')}</Link>{' '}
-          <ProjectStatusLabel project={project} />
-        </>
-      ),
-      action: <ProjectActionsMenu project={project} />,
-    });
-  }
-
-  // Pass 2: link nodes into parent–child relationships
-  const roots: TreeViewDataItem[] = [];
-
-  for (const [fullPath, node] of nodeMap) {
-    const dotIdx = fullPath.lastIndexOf('.');
-    if (dotIdx < 0) {
-      roots.push(node);
-    } else {
-      const parentPath = fullPath.slice(0, dotIdx);
-      const parent = nodeMap.get(parentPath);
-      if (parent) {
-        (parent.children ??= []).push(node);
-      } else {
-        // Parent project not in the list — treat as root
-        roots.push(node);
-      }
-    }
-  }
-
-  // Wrap in a single collapsible root so expand/collapse is always available
-  return [{ name: '', children: roots, defaultExpanded: true }];
-}
+const PROJECT_FILTER_OPTIONS: ReadonlyArray<{ value: ProjectFilter; label: string }> = [
+  { value: 'all', label: 'All projects' },
+  { value: 'root', label: 'Root projects' },
+  { value: 'nested', label: 'Nested projects' },
+];
 
 const ProjectListPage = () => {
   const { t } = useTranslation();
   const { role, tenantId } = useSession();
   const [search, setSearch] = usePageFilter(SEARCH_PARAM);
+  const [projectFilter, setProjectFilter] = usePageFilter('project-filter');
 
   const { data: projects = [], isLoading, error } = useProjects();
 
   const canCreate = role === 'tenant-admin';
 
+  const selectedFilter: ProjectFilter = PROJECT_FILTER_OPTIONS.some(
+    (option) => option.value === projectFilter,
+  )
+    ? (projectFilter as ProjectFilter)
+    : 'all';
   const filteredProjects = useMemo(() => {
-    if (!search) {
-      return projects;
-    }
-    const lowerSearch = search.toLowerCase();
-    return projects.filter((project) => {
-      const fullName = getProjectName(project, t);
-      return fullName.toLowerCase().includes(lowerSearch);
+    const lowerSearch = search.trim().toLowerCase();
+    const matchingProjects = projects.filter((project) => {
+      const isNested = isNestedProject(project);
+      const matchesFilter =
+        selectedFilter === 'all' || (selectedFilter === 'nested' ? isNested : !isNested);
+      const searchableText = `${getProjectName(project, t)} ${getFullProjectPath(project)}`;
+      const matchesSearch = !lowerSearch || searchableText.toLowerCase().includes(lowerSearch);
+      return matchesFilter && matchesSearch;
     });
-  }, [search, projects, t]);
 
-  const projectTree = useMemo(
-    () => (filteredProjects.length > 0 ? buildProjectTree(filteredProjects, t) : []),
-    [filteredProjects, t],
-  );
+    const visiblePaths = new Set(matchingProjects.map(getFullProjectPath));
+    if (selectedFilter !== 'root') {
+      for (const project of matchingProjects) {
+        let parentPath = getProjectParentPath(project);
+        while (parentPath) {
+          visiblePaths.add(parentPath);
+          const parent = projects.find((candidate) => getFullProjectPath(candidate) === parentPath);
+          parentPath = getProjectParentPath(parent);
+        }
+      }
+    }
+
+    return projects.filter((project) => visiblePaths.has(getFullProjectPath(project)));
+  }, [projects, search, selectedFilter, t]);
 
   return (
     <ListPage
       title={t('Projects')}
-      description={t('Organize resources with hierarchical projects.')}
+      description={t(
+        'Carve your tenant workspace into isolated projects and grant team members scoped access.',
+      )}
       error={error}
       actions={
         canCreate && !!tenantId ? (
@@ -99,19 +84,44 @@ const ProjectListPage = () => {
       }
     >
       <ListPageBody isLoading={isLoading} error={error}>
-        <TreeView
-          aria-label={t('Projects')}
-          data={projectTree}
-          defaultAllExpanded
-          toolbar={
-            <TreeViewSearch
-              aria-label={t('Search projects')}
-              placeholder={t('Search projects by name…')}
-              value={search}
-              onSearch={(e) => setSearch(e.target.value)}
-            />
-          }
-        />
+        <Toolbar>
+          <ToolbarContent>
+            <ToolbarGroup>
+              <ToolbarItem>
+                <FormSelect
+                  id="projects-filter"
+                  value={selectedFilter}
+                  onChange={(_event, value) => setProjectFilter(value === 'all' ? '' : value)}
+                  aria-label={t('Filter projects')}
+                >
+                  {PROJECT_FILTER_OPTIONS.map((option) => (
+                    <FormSelectOption
+                      key={option.value}
+                      value={option.value}
+                      label={
+                        option.value === 'all'
+                          ? t('All projects')
+                          : option.value === 'root'
+                            ? t('Root projects')
+                            : t('Nested projects')
+                      }
+                    />
+                  ))}
+                </FormSelect>
+              </ToolbarItem>
+              <ToolbarItem>
+                <SearchInput
+                  aria-label={t('Search projects')}
+                  placeholder={t('Search projects by name…')}
+                  value={search}
+                  onChange={(_event, value) => setSearch(value)}
+                  onClear={() => setSearch('')}
+                />
+              </ToolbarItem>
+            </ToolbarGroup>
+          </ToolbarContent>
+        </Toolbar>
+        {filteredProjects.length > 0 && <ProjectTreeTable projects={filteredProjects} />}
         {filteredProjects.length === 0 && (
           <SubtleContent component="p">
             {search

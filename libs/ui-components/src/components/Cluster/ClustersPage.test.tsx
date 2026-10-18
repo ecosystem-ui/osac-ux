@@ -87,10 +87,11 @@ describe('ClustersPage version join', () => {
       makeCluster('c-obsolete', 'v4.15'),
     ]);
 
-    // Obsolete version resolves from the same single List call.
+    // Obsolete version still resolves from the same single List call.
     expect(await screen.findByText('4.15.0')).toBeInTheDocument();
     expect(screen.getByText('4.17.0')).toBeInTheDocument();
-    expect(screen.getByText('Obsolete')).toBeInTheDocument();
+    expect(screen.getAllByText('Node sets')).toHaveLength(2);
+    expect(screen.getAllByRole('button', { name: 'Console' })).toHaveLength(2);
     expect(screen.getByRole('link', { name: 'Create cluster' })).toHaveAttribute(
       'href',
       '/clusters/create',

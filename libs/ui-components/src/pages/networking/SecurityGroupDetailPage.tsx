@@ -3,20 +3,27 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { type MessageInitShape } from '@bufbuild/protobuf';
 import {
   Alert,
-  Breadcrumb,
-  BreadcrumbItem,
   Button,
-  Card,
-  CardBody,
-  CardTitle,
   DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
-  Tab,
-  TabTitleText,
-  Tabs,
+  Divider,
+  Dropdown,
+  DropdownList,
+  Flex,
+  FlexItem,
+  Grid,
+  GridItem,
+  MenuToggle,
+  PageSection,
+  Stack,
+  StackItem,
+  Title,
 } from '@patternfly/react-core';
+import ArrowCircleDownIcon from '@patternfly/react-icons/dist/esm/icons/arrow-circle-down-icon';
+import ArrowCircleUpIcon from '@patternfly/react-icons/dist/esm/icons/arrow-circle-up-icon';
+import InfoAltIcon from '@patternfly/react-icons/dist/esm/icons/info-alt-icon';
 
 import { type SecurityGroup, SecurityGroupSchema, SecurityGroupState } from '@osac/types';
 import DeleteResourceButton from '@osac/ui-components/components/Resource/DeleteResourceButton';
@@ -28,14 +35,21 @@ import {
   useUpdateSecurityGroup,
   useVirtualNetworks,
 } from '../../api/v1/networking';
+import { SecurityGroupNatGatewaySection } from '../../components/networking/SecurityGroupNatGatewaySection';
 import { SecurityGroupRuleModal } from '../../components/networking/SecurityGroupRuleModal';
 import { SecurityGroupRulesTable } from '../../components/networking/SecurityGroupRulesTable';
 import { toPlainRule } from '../../components/networking/securityGroupRuleUtils';
 import { SecurityGroupStatusLabel } from '../../components/networking/SecurityGroupStatusLabel';
-import ListPage from '../../components/Page/ListPage';
-import ListPageBody from '../../components/Page/ListPageBody';
 import DeleteResourceModal from '../../components/Resource/DeleteResourceModal';
+import { ResourceDetailHeader } from '../../components/Resource/ResourceDetailHeader';
+import ResourceDetailsPage from '../../components/Resource/ResourceDetailsPage';
 import { useTranslation } from '../../hooks/useTranslation';
+import { displayValue } from '../../utils/detailFormatters';
+
+import './SecurityGroupDetailPage.css';
+import '../../components/shared/details-page.css';
+
+const SG_LIST_PATH = '/networking/security-groups';
 
 type RuleTarget = { direction: 'ingress' | 'egress'; ruleIndex?: number };
 
@@ -62,12 +76,12 @@ export const SecurityGroupDetailPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams() as { id: string };
-  const [activeTabKey, setActiveTabKey] = useState<string | number>(0);
   const [ruleEditor, setRuleEditor] = useState<RuleTarget | null>(null);
   const [deleteRuleTarget, setDeleteRuleTarget] = useState<Required<RuleTarget> | null>(null);
   const [showDeleteSgModal, setShowDeleteSgModal] = useState(false);
+  const [isActionsOpen, setIsActionsOpen] = useState(false);
 
-  const { data: sg, isLoading, error } = useSecurityGroup(id);
+  const { data: sg, isLoading, error, refetch } = useSecurityGroup(id);
   const { data: virtualNetworks = [] } = useVirtualNetworks();
   const deleteSecurityGroup = useDeleteSecurityGroup();
   const updateSecurityGroup = useUpdateSecurityGroup();
@@ -80,118 +94,197 @@ export const SecurityGroupDetailPage = () => {
   const vnName = resourceDisplayName(vn?.metadata, vnId);
 
   return (
-    <ListPage
-      title={sgName}
-      actions={<DeleteResourceButton onClick={() => setShowDeleteSgModal(true)} />}
-      breadcrumb={
-        <Breadcrumb>
-          <BreadcrumbItem>
-            <Button variant="link" isInline onClick={() => navigate('/networking/security-groups')}>
-              {t('Security groups')}
-            </Button>
-          </BreadcrumbItem>
-          <BreadcrumbItem isActive>{sgName}</BreadcrumbItem>
-        </Breadcrumb>
-      }
+    <ResourceDetailsPage
+      error={error}
+      found={!!sg}
+      isLoading={isLoading}
+      parentLabel={t('Security groups')}
+      parentTo={SG_LIST_PATH}
+      refetch={refetch}
+      resourceLabel={t('security group')}
+      cardCount={2}
     >
-      <ListPageBody isLoading={isLoading} error={error}>
-        {isFailed && sg?.status?.message && (
-          <Alert
-            variant="danger"
-            title={t('Provisioning failed')}
-            isInline
-            style={{ marginBottom: '1rem' }}
-          >
-            {sg.status.message}
-          </Alert>
-        )}
-
-        <Tabs
-          activeKey={activeTabKey}
-          onSelect={(_event, tabIndex) => setActiveTabKey(tabIndex)}
-          aria-label="Security group tabs"
-        >
-          <Tab eventKey={0} title={<TabTitleText>{t('Details')}</TabTitleText>}>
-            <Card>
-              <CardTitle>{t('Details')}</CardTitle>
-              <CardBody>
-                <DescriptionList isHorizontal>
-                  <DescriptionListGroup>
-                    <DescriptionListTerm>{t('Name')}</DescriptionListTerm>
-                    <DescriptionListDescription>
-                      {sg?.metadata?.name ?? '—'}
-                    </DescriptionListDescription>
-                  </DescriptionListGroup>
-
-                  <DescriptionListGroup>
-                    <DescriptionListTerm>{t('Virtual Network')}</DescriptionListTerm>
-                    <DescriptionListDescription>
-                      {vnId ? (
-                        <Button
-                          variant="link"
-                          isInline
-                          onClick={() => navigate(`/networking/virtual-networks/${vnId}`)}
+      {sg ? (
+        <>
+          <PageSection hasBodyWrapper={false}>
+            <Stack hasGutter>
+              {isFailed && sg.status?.message && (
+                <StackItem>
+                  <Alert variant="danger" title={t('Provisioning failed')} isInline>
+                    {sg.status.message}
+                  </Alert>
+                </StackItem>
+              )}
+              <StackItem>
+                <Flex
+                  justifyContent={{ default: 'justifyContentSpaceBetween' }}
+                  alignItems={{ default: 'alignItemsFlexStart' }}
+                  flexWrap={{ default: 'wrap' }}
+                  spaceItems={{ default: 'spaceItemsMd' }}
+                >
+                  <FlexItem>
+                    <ResourceDetailHeader
+                      parentTo={SG_LIST_PATH}
+                      parentLabel={t('Security groups')}
+                      resourceName={sgName}
+                      titleAddon={<SecurityGroupStatusLabel state={sg.status?.state} />}
+                    />
+                  </FlexItem>
+                  <FlexItem>
+                    <Dropdown
+                      isOpen={isActionsOpen}
+                      onOpenChange={setIsActionsOpen}
+                      toggle={(ref) => (
+                        <MenuToggle
+                          ref={ref}
+                          variant="secondary"
+                          onClick={() => setIsActionsOpen((open) => !open)}
+                          isExpanded={isActionsOpen}
+                          aria-label={t('Actions for {{name}}', { name: sgName })}
                         >
-                          {vnName}
-                        </Button>
-                      ) : (
-                        vnName
+                          {t('Actions')}
+                        </MenuToggle>
                       )}
-                    </DescriptionListDescription>
-                  </DescriptionListGroup>
+                      popperProps={{ position: 'right' }}
+                    >
+                      <DropdownList>
+                        <DeleteResourceButton
+                          isDropdown
+                          onClick={() => {
+                            setShowDeleteSgModal(true);
+                            setIsActionsOpen(false);
+                          }}
+                        />
+                      </DropdownList>
+                    </Dropdown>
+                  </FlexItem>
+                </Flex>
+              </StackItem>
+              <StackItem>
+                <Divider />
+              </StackItem>
+            </Stack>
+          </PageSection>
 
-                  <DescriptionListGroup>
-                    <DescriptionListTerm>{t('Status')}</DescriptionListTerm>
-                    <DescriptionListDescription>
-                      <SecurityGroupStatusLabel state={sg?.status?.state} />
-                    </DescriptionListDescription>
-                  </DescriptionListGroup>
+          <PageSection hasBodyWrapper={false}>
+            <Grid hasGutter>
+              <GridItem md={8}>
+                <Stack hasGutter>
+                  <StackItem>
+                    <Flex
+                      alignItems={{ default: 'alignItemsCenter' }}
+                      spaceItems={{ default: 'spaceItemsSm' }}
+                    >
+                      <InfoAltIcon aria-hidden />
+                      <Title headingLevel="h2" size="lg">
+                        {t('Overview')}
+                      </Title>
+                    </Flex>
+                  </StackItem>
+                  <StackItem>
+                    <DescriptionList
+                      isCompact
+                      className="details-page__overview"
+                      aria-label={t('Security group details')}
+                    >
+                      <DescriptionListGroup>
+                        <DescriptionListTerm>{t('Virtual network')}</DescriptionListTerm>
+                        <DescriptionListDescription>
+                          {vnId ? (
+                            <Button
+                              variant="link"
+                              isInline
+                              onClick={() => navigate(`/networking/virtual-networks/${vnId}`)}
+                            >
+                              {vnName}
+                            </Button>
+                          ) : (
+                            displayValue(vnName)
+                          )}
+                        </DescriptionListDescription>
+                      </DescriptionListGroup>
+                      <DescriptionListGroup>
+                        <DescriptionListTerm>{t('Project')}</DescriptionListTerm>
+                        <DescriptionListDescription>
+                          {displayValue(sg.metadata?.project)}
+                        </DescriptionListDescription>
+                      </DescriptionListGroup>
+                      {sg.status?.message && !isFailed ? (
+                        <DescriptionListGroup>
+                          <DescriptionListTerm>{t('Message')}</DescriptionListTerm>
+                          <DescriptionListDescription>
+                            {displayValue(sg.status.message)}
+                          </DescriptionListDescription>
+                        </DescriptionListGroup>
+                      ) : null}
+                    </DescriptionList>
+                  </StackItem>
 
-                  {sg?.status?.message && (
-                    <DescriptionListGroup>
-                      <DescriptionListTerm>{t('Message')}</DescriptionListTerm>
-                      <DescriptionListDescription>{sg.status.message}</DescriptionListDescription>
-                    </DescriptionListGroup>
-                  )}
-                </DescriptionList>
-              </CardBody>
-            </Card>
-          </Tab>
+                  <StackItem>
+                    <Divider />
+                  </StackItem>
 
-          <Tab eventKey={1} title={<TabTitleText>{t('Inbound Rules')}</TabTitleText>}>
-            <Card>
-              <CardBody>
-                <SecurityGroupRulesTable
-                  rules={sg?.spec?.ingress ?? []}
-                  direction="ingress"
-                  onAddRule={() => setRuleEditor({ direction: 'ingress' })}
-                  onEditRule={(ruleIndex) => setRuleEditor({ direction: 'ingress', ruleIndex })}
-                  onDeleteRule={(ruleIndex) =>
-                    setDeleteRuleTarget({ direction: 'ingress', ruleIndex })
-                  }
-                />
-              </CardBody>
-            </Card>
-          </Tab>
+                  <StackItem>
+                    <Flex
+                      alignItems={{ default: 'alignItemsCenter' }}
+                      spaceItems={{ default: 'spaceItemsSm' }}
+                    >
+                      <ArrowCircleDownIcon aria-hidden />
+                      <Title headingLevel="h2" size="lg">
+                        {t('Inbound rules')}
+                      </Title>
+                    </Flex>
+                  </StackItem>
+                  <StackItem>
+                    <SecurityGroupRulesTable
+                      rules={sg.spec?.ingress ?? []}
+                      direction="ingress"
+                      onAddRule={() => setRuleEditor({ direction: 'ingress' })}
+                      onEditRule={(ruleIndex) => setRuleEditor({ direction: 'ingress', ruleIndex })}
+                      onDeleteRule={(ruleIndex) =>
+                        setDeleteRuleTarget({ direction: 'ingress', ruleIndex })
+                      }
+                    />
+                  </StackItem>
 
-          <Tab eventKey={2} title={<TabTitleText>{t('Outbound Rules')}</TabTitleText>}>
-            <Card>
-              <CardBody>
-                <SecurityGroupRulesTable
-                  rules={sg?.spec?.egress ?? []}
-                  direction="egress"
-                  onAddRule={() => setRuleEditor({ direction: 'egress' })}
-                  onEditRule={(ruleIndex) => setRuleEditor({ direction: 'egress', ruleIndex })}
-                  onDeleteRule={(ruleIndex) =>
-                    setDeleteRuleTarget({ direction: 'egress', ruleIndex })
-                  }
-                />
-              </CardBody>
-            </Card>
-          </Tab>
+                  <StackItem>
+                    <Divider />
+                  </StackItem>
 
-        </Tabs>
-      </ListPageBody>
+                  <StackItem>
+                    <Flex
+                      alignItems={{ default: 'alignItemsCenter' }}
+                      spaceItems={{ default: 'spaceItemsSm' }}
+                    >
+                      <ArrowCircleUpIcon aria-hidden />
+                      <Title headingLevel="h2" size="lg">
+                        {t('Outbound rules')}
+                      </Title>
+                    </Flex>
+                  </StackItem>
+                  <StackItem>
+                    <SecurityGroupRulesTable
+                      rules={sg.spec?.egress ?? []}
+                      direction="egress"
+                      onAddRule={() => setRuleEditor({ direction: 'egress' })}
+                      onEditRule={(ruleIndex) => setRuleEditor({ direction: 'egress', ruleIndex })}
+                      onDeleteRule={(ruleIndex) =>
+                        setDeleteRuleTarget({ direction: 'egress', ruleIndex })
+                      }
+                    />
+                  </StackItem>
+                </Stack>
+              </GridItem>
+
+              {vnId ? (
+                <GridItem md={4}>
+                  <SecurityGroupNatGatewaySection virtualNetworkId={vnId} />
+                </GridItem>
+              ) : null}
+            </Grid>
+          </PageSection>
+        </>
+      ) : null}
 
       {ruleEditor && sg && (
         <SecurityGroupRuleModal
@@ -224,11 +317,11 @@ export const SecurityGroupDetailPage = () => {
           )}
           errorLabel={t('Failed to delete security group')}
           onClose={() => setShowDeleteSgModal(false)}
-          onSuccess={() => navigate('/networking/security-groups')}
+          onSuccess={() => navigate(SG_LIST_PATH)}
           mutation={deleteSecurityGroup}
           variables={id}
         />
       )}
-    </ListPage>
+    </ResourceDetailsPage>
   );
 };

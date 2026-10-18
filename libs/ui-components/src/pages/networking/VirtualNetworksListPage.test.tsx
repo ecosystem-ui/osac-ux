@@ -1,11 +1,16 @@
 import { screen, waitFor, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ExternalIP, NATGateway, Subnet, VirtualNetwork } from '@osac/types';
 import { ExternalIPState, SubnetState, VirtualNetworkState } from '@osac/types';
 
-import { VirtualNetworksListPage } from './VirtualNetworksListPage';
+import { VIRTUAL_NETWORKS_VIEW_KEY, VirtualNetworksListPage } from './VirtualNetworksListPage';
+import { SessionProvider } from '../../hooks/use-session';
 import { renderWithProviders } from '../../test-utils/TestProviders';
+
+vi.mock('../../api/v1/project', () => ({
+  useAllProjects: () => ({ data: [], isLoading: false, error: null }),
+}));
 
 const virtualNetworks = [
   {
@@ -56,19 +61,28 @@ const renderPage = (overrides?: {
   natGateways?: NATGateway[];
   onNatGatewayList?: (req: unknown) => void;
 }) =>
-  renderWithProviders(<VirtualNetworksListPage />, {
-    apiFixtures: {
-      virtualNetworks: overrides?.virtualNetworks ?? virtualNetworks,
-      subnets,
-      natGateways: overrides?.natGateways ?? natGateways,
-      externalIps,
+  renderWithProviders(
+    <SessionProvider role="tenant-user" username="test-user" tenantId="test-tenant">
+      <VirtualNetworksListPage />
+    </SessionProvider>,
+    {
+      apiFixtures: {
+        virtualNetworks: overrides?.virtualNetworks ?? virtualNetworks,
+        subnets,
+        natGateways: overrides?.natGateways ?? natGateways,
+        externalIps,
+      },
+      transportOverrides: {
+        onNatGatewayList: overrides?.onNatGatewayList,
+      },
     },
-    transportOverrides: {
-      onNatGatewayList: overrides?.onNatGatewayList,
-    },
-  });
+  );
 
 describe('VirtualNetworksListPage', () => {
+  beforeEach(() => {
+    localStorage.setItem(`${VIRTUAL_NETWORKS_VIEW_KEY}-view-type`, 'list');
+  });
+
   it('renders the section label, title, and create button', async () => {
     renderPage();
 
@@ -103,11 +117,12 @@ describe('VirtualNetworksListPage', () => {
     expect(prodRow).toBeDefined();
     expect(devRow).toBeDefined();
 
-    const prodNatCell = within(prodRow as HTMLElement).getAllByRole('cell')[4];
+    const prodNatCell = within(prodRow as HTMLElement).getAllByRole('cell')[6];
     expect(within(prodNatCell).getByText('nat-egress')).toBeInTheDocument();
     expect(within(prodNatCell).getByText('203.0.113.10')).toBeInTheDocument();
     expect(within(prodNatCell).queryByText('Ready')).not.toBeInTheDocument();
-    expect(within(devRow as HTMLElement).getByText('—')).toBeInTheDocument();
+    const devNatCell = within(devRow as HTMLElement).getAllByRole('cell')[6];
+    expect(within(devNatCell).getByText('—')).toBeInTheDocument();
   });
 
   it('fetches NAT gateways once for the table', async () => {
@@ -122,5 +137,26 @@ describe('VirtualNetworksListPage', () => {
     await waitFor(() => {
       expect(listCalls).toBe(1);
     });
+  });
+
+  it('supports switching to the card view', async () => {
+    const { user } = renderPage();
+
+    await screen.findByRole('link', { name: 'vn-prod' });
+    await user.click(screen.getByRole('button', { name: 'Card view' }));
+
+    expect(screen.getByRole('link', { name: 'vn-prod' })).toBeInTheDocument();
+    expect(screen.getAllByText('Security groups')).toHaveLength(2);
+    expect(screen.queryByRole('grid')).not.toBeInTheDocument();
+  });
+
+  it('filters virtual networks by status', async () => {
+    const { user } = renderPage();
+
+    await screen.findByRole('link', { name: 'vn-prod' });
+    await user.selectOptions(screen.getByLabelText('Filter virtual networks by status'), 'ready');
+
+    expect(screen.getByRole('link', { name: 'vn-prod' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'vn-dev' })).not.toBeInTheDocument();
   });
 });

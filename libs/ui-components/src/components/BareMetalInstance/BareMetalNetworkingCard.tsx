@@ -1,14 +1,7 @@
 import { useMemo } from 'react';
-import {
-  Alert,
-  Card,
-  CardBody,
-  CardTitle,
-  Label,
-  Spinner,
-  Stack,
-  StackItem,
-} from '@patternfly/react-core';
+import { Link } from 'react-router-dom';
+import { Alert, Flex, Label, Spinner, Stack, StackItem, Title } from '@patternfly/react-core';
+import NetworkWiredIcon from '@patternfly/react-icons/dist/esm/icons/network-wired-icon';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
 import { ExternalIPAttachments } from '@osac/types';
@@ -17,7 +10,6 @@ import type { BareMetalInstance, ExternalIPAttachment } from '@osac/types';
 import { type CelFilter, escapeCelStringLiteral } from '../../api/cel';
 import { useListResource } from '../../api/use-resource';
 import {
-  formatResourceIdsForReview,
   resourceDisplayName,
   useSecurityGroups,
   useSubnets,
@@ -68,16 +60,28 @@ const BareMetalNetworkingCard = ({ instance }: Props) => {
       const status = networkAttachmentStatuses[index];
 
       const subnet = subnets.find((s) => s.id === attachment.subnet?.id);
-      const vn = virtualNetworks.find((v) => v.id === subnet?.spec?.virtualNetwork?.id);
-      const sgNames = formatResourceIdsForReview(
-        attachment.securityGroups?.map((sg) => sg.id ?? '') ?? [],
-        securityGroups,
-      );
+      const virtualNetworkId = subnet?.spec?.virtualNetwork?.id;
+      const vn = virtualNetworks.find((v) => v.id === virtualNetworkId);
+      const securityGroupLinks =
+        attachment.securityGroups?.map((sg) => {
+          const securityGroup = securityGroups.find((item) => item.id === sg.id);
+
+          return {
+            id: sg.id,
+            name: resourceDisplayName(securityGroup?.metadata, sg.id),
+          };
+        }) ?? [];
 
       return {
-        virtualNetwork: resourceDisplayName(vn?.metadata, vn?.id),
-        subnet: resourceDisplayName(subnet?.metadata, subnet?.id),
-        securityGroups: sgNames,
+        virtualNetwork: {
+          id: virtualNetworkId,
+          name: resourceDisplayName(vn?.metadata, virtualNetworkId),
+        },
+        subnet: {
+          id: subnet?.id,
+          name: resourceDisplayName(subnet?.metadata, subnet?.id),
+        },
+        securityGroups: securityGroupLinks,
         internalIp: status?.ipAddress || '—',
       };
     });
@@ -93,9 +97,16 @@ const BareMetalNetworkingCard = ({ instance }: Props) => {
   const error = vnError || subnetError || sgError || eipaError;
 
   return (
-    <Card>
-      <CardTitle>{t('Networking')}</CardTitle>
-      <CardBody>
+    <Stack hasGutter>
+      <StackItem>
+        <Flex alignItems={{ default: 'alignItemsCenter' }} spaceItems={{ default: 'spaceItemsSm' }}>
+          <NetworkWiredIcon aria-hidden />
+          <Title headingLevel="h2" size="lg">
+            {t('Networking')}
+          </Title>
+        </Flex>
+      </StackItem>
+      <StackItem>
         {isLoading ? (
           <Spinner />
         ) : (
@@ -122,9 +133,49 @@ const BareMetalNetworkingCard = ({ instance }: Props) => {
                   <Tbody>
                     {attachmentRows.map((row, index) => (
                       <Tr key={`network-attachment-${index}`}>
-                        <Td dataLabel={t('Virtual network')}>{row.virtualNetwork}</Td>
-                        <Td dataLabel={t('Subnet')}>{row.subnet}</Td>
-                        <Td dataLabel={t('Security groups')}>{row.securityGroups}</Td>
+                        <Td dataLabel={t('Virtual network')}>
+                          {row.virtualNetwork.id ? (
+                            <Link
+                              className="bm-details__network-link"
+                              to={`/networking/virtual-networks/${encodeURIComponent(row.virtualNetwork.id)}`}
+                            >
+                              {row.virtualNetwork.name}
+                            </Link>
+                          ) : (
+                            row.virtualNetwork.name
+                          )}
+                        </Td>
+                        <Td dataLabel={t('Subnet')}>
+                          {row.subnet.id && row.virtualNetwork.id ? (
+                            <Link
+                              className="bm-details__network-link"
+                              to={`/networking/virtual-networks/${encodeURIComponent(row.virtualNetwork.id)}`}
+                            >
+                              {row.subnet.name}
+                            </Link>
+                          ) : (
+                            row.subnet.name
+                          )}
+                        </Td>
+                        <Td dataLabel={t('Security groups')}>
+                          {row.securityGroups.length > 0
+                            ? row.securityGroups.map((securityGroup, securityGroupIndex) => (
+                                <span key={securityGroup.id}>
+                                  {securityGroupIndex > 0 ? ', ' : null}
+                                  {securityGroup.id ? (
+                                    <Link
+                                      className="bm-details__network-link"
+                                      to={`/networking/security-groups/${encodeURIComponent(securityGroup.id)}`}
+                                    >
+                                      {securityGroup.name}
+                                    </Link>
+                                  ) : (
+                                    securityGroup.name
+                                  )}
+                                </span>
+                              ))
+                            : '—'}
+                        </Td>
                         <Td dataLabel={t('Internal IP')}>{row.internalIp}</Td>
                       </Tr>
                     ))}
@@ -147,8 +198,8 @@ const BareMetalNetworkingCard = ({ instance }: Props) => {
             ) : null}
           </Stack>
         )}
-      </CardBody>
-    </Card>
+      </StackItem>
+    </Stack>
   );
 };
 

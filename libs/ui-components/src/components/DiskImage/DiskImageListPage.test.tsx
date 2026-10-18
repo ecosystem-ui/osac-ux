@@ -82,7 +82,8 @@ describe('DiskImageListPage', () => {
 
     renderPage();
 
-    expect(screen.getByText('No disk images yet.')).toBeInTheDocument();
+    expect(screen.getByText(/No disk images yet/i)).toBeInTheDocument();
+    expect(screen.queryByRole('grid', { name: 'Disk images' })).not.toBeInTheDocument();
   });
 
   it('uses the page-level error state when the query fails', () => {

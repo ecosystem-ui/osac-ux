@@ -1,0 +1,120 @@
+/**
+ * Shared styles for resource details pages.
+ *
+ * These classes are used by multiple details-page components to ensure a
+ * consistent 2fr/1fr grid layout, right-rail card appearance, and compact
+ * DescriptionList term style.  Import this file in any component that renders
+ * a details page, then apply the class names listed below.
+ *
+ * Utility classes
+ * ───────────────
+ *  .details-page__content-grid   — outer Grid: 2fr left | 1fr(≥18rem) right
+ *  .details-page__column         — min-width guard for both grid columns
+ *  .details-page__rail-card      — secondary-bg Card with no border (right rail)
+ *  .details-page__sidebar        — secondary-bg <div> sidebar card (no PF Card)
+ *  .details-page__sidebar-header — flex header row with bottom border
+ *  .details-page__sidebar-title  — subtle section title inside sidebar
+ *  .details-page__sidebar-action — link-style action button inside sidebar
+ *  .details-page__sidebar-description — muted helper text inside sidebar
+ *  .details-page__overview       — DescriptionList with subdued term labels
+ */
+
+/* ── 2fr / 1fr content grid ─────────────────────────────────── */
+
+.details-page__content-grid {
+  grid-template-columns: minmax(0, 2fr) minmax(18rem, 1fr);
+  align-items: start;
+}
+
+/* Prevent PatternFly's auto-placement from stacking items unexpectedly */
+.details-page__content-grid > .pf-v6-l-grid__item {
+  grid-column: auto;
+}
+
+/* Both grid columns must guard against content overflow */
+.details-page__column {
+  min-width: 0;
+}
+
+@media (max-width: 992px) {
+  .details-page__content-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ── Right-rail PatternFly Card (variant="secondary") ───────── */
+
+.details-page__rail-card {
+  border: 0;
+  border-radius: var(--pf-t--global--border--radius--medium);
+  background-color: var(--pf-t--global--background--color--secondary--default);
+}
+
+.details-page__rail-card .pf-v6-c-card__header {
+  padding-block-end: 0;
+}
+
+.details-page__rail-card .pf-v6-c-card__title {
+  color: var(--pf-t--global--text--color--regular);
+  font-size: var(--pf-t--global--font--size--heading--md);
+}
+
+.details-page__rail-card .pf-v6-c-card__body {
+  padding-block-start: var(--pf-t--global--spacer--sm);
+}
+
+/* ── Right-rail plain <div> sidebar card ────────────────────── */
+
+.details-page__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pf-t--global--spacer--xl);
+  min-width: 0;
+  padding: var(--pf-t--global--spacer--lg);
+  border-radius: var(--pf-t--global--border--radius--medium);
+  background-color: var(--pf-t--global--background--color--secondary--default);
+}
+
+.details-page__sidebar-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pf-t--global--spacer--sm);
+  padding-block-end: var(--pf-t--global--spacer--sm);
+  border-block-end: var(--pf-t--global--border--width--regular) solid
+    var(--pf-t--global--border--color--default);
+}
+
+.details-page__sidebar-title.pf-v6-c-title {
+  margin: 0;
+  color: var(--pf-t--global--text--color--subtle);
+  font-size: var(--pf-t--global--font--size--body--lg);
+  font-weight: var(--pf-t--global--font--weight--heading--bold);
+  line-height: var(--pf-t--global--font--line-height--heading);
+}
+
+.details-page__sidebar-action.pf-v6-c-button {
+  padding-inline-start: 0;
+  white-space: nowrap;
+}
+
+.details-page__sidebar-description.pf-v6-c-content--p {
+  margin: 0;
+  color: var(--pf-t--global--text--color--subtle);
+  font-size: var(--pf-t--global--font--size--body--sm);
+  line-height: 1.35;
+}
+
+/* DescriptionList terms inside the sidebar card */
+.details-page__sidebar .pf-v6-c-description-list__term {
+  font-size: var(--pf-t--global--font--size--body--sm);
+  font-weight: var(--pf-t--global--font--weight--body--default);
+}
+
+/* ── DescriptionList overview — subdued term labels ─────────── */
+
+.details-page__overview .pf-v6-c-description-list__term {
+  font-size: var(--pf-t--global--font--size--body--sm);
+  font-weight: var(--pf-t--global--font--weight--body--default);
+}

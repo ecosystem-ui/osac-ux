@@ -87,10 +87,11 @@ describe('VolumeTable', () => {
     expect(screen.getByText('premium-ssd')).toBeInTheDocument();
   });
 
-  it('shows the empty state when no volumes are provided', () => {
+  it('renders an empty table body when no volumes are provided', () => {
     renderTable([]);
 
-    expect(screen.getByText('No volumes found')).toBeInTheDocument();
+    expect(screen.getByRole('grid', { name: 'Volumes' })).toBeInTheDocument();
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 
   it('navigates to the detail route when the name link is clicked', async () => {

@@ -62,15 +62,15 @@ const TenantListPage = () => {
         <Toolbar>
           <ToolbarContent>
             <ToolbarGroup>
-              <ToolbarItem>
-                <SearchInput
-                  placeholder={t('Search tenants by name…')}
-                  value={search}
-                  onChange={(_e, v) => setSearch(v)}
-                  onClear={() => setSearch('')}
-                  aria-label={t('Search tenants')}
-                />
-              </ToolbarItem>
+                <ToolbarItem>
+                  <SearchInput
+                    placeholder={t('Search tenants')}
+                    value={search}
+                    onChange={(_e, v) => setSearch(v)}
+                    onClear={() => setSearch('')}
+                    aria-label={t('Search tenants')}
+                  />
+                </ToolbarItem>
             </ToolbarGroup>
             <ToolbarGroup align={{ default: 'alignEnd' }}>
               <ToolbarItem>

@@ -31,18 +31,18 @@ describe('VolumeActionsMenu', () => {
     expect(screen.getByRole('menuitem', { name: 'Delete' })).not.toBeDisabled();
   });
 
-  it('enables Delete for a CREATING volume', async () => {
-    const { user } = renderMenu(makeVolume(VolumeState.CREATING));
-    await openMenu(user);
-
-    expect(screen.getByRole('menuitem', { name: 'Delete' })).not.toBeDisabled();
-  });
-
   it('enables Delete for a FAILED volume', async () => {
     const { user } = renderMenu(makeVolume(VolumeState.FAILED));
     await openMenu(user);
 
     expect(screen.getByRole('menuitem', { name: 'Delete' })).not.toBeDisabled();
+  });
+
+  it('shows Delete as disabled for a CREATING volume', async () => {
+    const { user } = renderMenu(makeVolume(VolumeState.CREATING));
+    await openMenu(user);
+
+    expect(screen.getByRole('menuitem', { name: 'Delete' })).toBeDisabled();
   });
 
   it('shows Delete as disabled for a DELETING volume', async () => {
@@ -52,18 +52,18 @@ describe('VolumeActionsMenu', () => {
     expect(screen.getByRole('menuitem', { name: 'Delete' })).toBeDisabled();
   });
 
-  it('enables Delete for a DELETED volume', async () => {
+  it('shows Delete as disabled for a DELETED volume', async () => {
     const { user } = renderMenu(makeVolume(VolumeState.DELETED));
     await openMenu(user);
 
-    expect(screen.getByRole('menuitem', { name: 'Delete' })).not.toBeDisabled();
+    expect(screen.getByRole('menuitem', { name: 'Delete' })).toBeDisabled();
   });
 
-  it('enables Delete for an UNSPECIFIED volume', async () => {
+  it('shows Delete as disabled for an UNSPECIFIED volume', async () => {
     const { user } = renderMenu(makeVolume(VolumeState.UNSPECIFIED));
     await openMenu(user);
 
-    expect(screen.getByRole('menuitem', { name: 'Delete' })).not.toBeDisabled();
+    expect(screen.getByRole('menuitem', { name: 'Delete' })).toBeDisabled();
   });
 
   it('opens the delete confirmation modal when Delete is clicked', async () => {
@@ -83,5 +83,14 @@ describe('VolumeActionsMenu', () => {
     await openMenu(user);
 
     expect(screen.queryByRole('menuitem', { name: 'Edit' })).not.toBeInTheDocument();
+  });
+
+  it('renders "Actions" label when showLabel is true', () => {
+    renderWithProviders(
+      <VolumeActionsMenu volume={makeVolume(VolumeState.AVAILABLE)} showLabel />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Actions for test-volume' })).toBeInTheDocument();
+    expect(screen.getByText('Actions')).toBeInTheDocument();
   });
 });

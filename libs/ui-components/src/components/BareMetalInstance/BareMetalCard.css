@@ -1,0 +1,92 @@
+.baremetal-card {
+  width: 100%;
+  height: auto;
+  align-self: start;
+  border: var(--pf-t--global--border--width--regular) solid
+    var(--pf-t--global--border--color--default);
+  border-radius: var(--pf-t--global--border--radius--large);
+  transition: box-shadow 0.18s ease;
+}
+
+.baremetal-card:hover {
+  z-index: 1;
+  box-shadow: var(--pf-t--global--box-shadow--md);
+}
+
+.baremetal-card__header {
+  --pf-v6-c-card__actions--MarginBlockStart: 0;
+  align-items: center;
+  padding-block-start: var(--pf-t--global--spacer--xl);
+  padding-block-end: 0;
+}
+
+.baremetal-card__header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pf-t--global--spacer--sm);
+}
+
+.baremetal-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  flex-shrink: 0;
+  border-radius: var(--pf-t--global--border--radius--medium);
+  background-color: var(--pf-t--global--background--color--secondary--default);
+  color: var(--pf-t--global--text--color--regular);
+}
+
+.baremetal-card__icon svg {
+  width: var(--pf-t--global--icon--size--lg);
+  height: var(--pf-t--global--icon--size--lg);
+}
+
+.baremetal-card__name {
+  padding-block-start: var(--pf-t--global--spacer--md);
+}
+
+.baremetal-card__name .pf-v6-u-font-size-md {
+  font-size: var(--pf-t--global--font--size--heading--lg);
+}
+
+.baremetal-card__secondary-cell {
+  margin-block-start: var(--pf-t--global--spacer--xs);
+  color: var(--pf-t--global--text--color--subtle);
+}
+
+.baremetal-card__specs-list,
+.baremetal-card__footer-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pf-t--global--spacer--sm);
+  margin: 0;
+}
+
+.baremetal-card__spec-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--pf-t--global--spacer--md);
+}
+
+.baremetal-card__spec-label,
+.baremetal-card__footer-label {
+  color: var(--pf-t--global--text--color--subtle);
+  font-size: var(--pf-t--global--font--size--body--sm);
+  font-weight: var(--pf-t--global--font--weight--body--regular);
+}
+
+.baremetal-card__spec-value,
+.baremetal-card__footer-value {
+  margin: 0;
+  font-size: var(--pf-t--global--font--size--body--md);
+  text-align: end;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .baremetal-card {
+    transition: none;
+  }
+}

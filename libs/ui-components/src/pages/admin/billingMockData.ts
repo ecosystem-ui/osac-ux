@@ -1,3 +1,7 @@
+// MISSING: No billing account API in @osac/types yet.
+// BillingAccount shape and fixture data are predicted from the M360 integration described in
+// the OSAC architecture docs. Replace with generated types once the Billing service is available.
+
 export type BillingAccountStatus = 'Active' | 'Inactive' | 'Pending';
 export type BillingApprovalStatus = 'Approved' | 'Pending' | 'Rejected';
 
@@ -11,8 +15,7 @@ export interface BillingAccount {
   tenantId?: string;
 }
 
-/** Predicted provider billing model until billing accounts are exposed by the API. */
-export const predictedBillingAccounts: BillingAccount[] = [
+export const MISSING_billingAccounts: BillingAccount[] = [
   {
     id: 'billing-acme-enterprise',
     accountName: 'acme-enterprise-billing',

@@ -1,0 +1,5 @@
+.hierarchical-select__label {
+  padding-inline-start: calc(
+    var(--hierarchical-select-depth, 0) * var(--pf-t--global--spacer--lg)
+  );
+}

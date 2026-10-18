@@ -4,29 +4,29 @@ import PlusCircleIcon from '@patternfly/react-icons/dist/esm/icons/plus-circle-i
 
 import { useTranslation } from '@osac/ui-components/hooks/useTranslation';
 
-import './TenantDetailsPage.css';
+import '../shared/details-page.css';
 
 const TenantRolesSection = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="tenant-details-roles">
+    <div className="details-page__sidebar">
       <Flex
-        className="tenant-details-roles__header"
+        className="details-page__sidebar-header"
         alignItems={{ default: 'alignItemsCenter' }}
         justifyContent={{ default: 'justifyContentSpaceBetween' }}
         spaceItems={{ default: 'spaceItemsSm' }}
         flexWrap={{ default: 'wrap' }}
       >
         <FlexItem>
-          <Title headingLevel="h2" size="md" className="tenant-details-roles__title">
+          <Title headingLevel="h2" size="md" className="details-page__sidebar-title">
             {t('Roles')}
           </Title>
         </FlexItem>
         <FlexItem>
           <Button
             variant="link"
-            className="tenant-details-roles__action"
+            className="details-page__sidebar-action"
             isInline
             icon={<PlusCircleIcon />}
             component={(props) => <Link {...props} to="/tenant/role-binding/create" />}
@@ -35,7 +35,7 @@ const TenantRolesSection = () => {
           </Button>
         </FlexItem>
       </Flex>
-      <Content component="p" className="tenant-details-roles__description">
+      <Content component="p" className="details-page__sidebar-description">
         {t('Assign a tenant administrator, reader, or user for this tenant.')}
       </Content>
     </div>

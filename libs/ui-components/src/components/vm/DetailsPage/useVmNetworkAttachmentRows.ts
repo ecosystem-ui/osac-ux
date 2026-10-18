@@ -3,18 +3,23 @@ import { useMemo } from 'react';
 import type { ComputeInstance } from '@osac/types';
 
 import {
-  formatResourceIdForReview,
-  formatResourceIdsForReview,
+  resourceDisplayName,
   useSecurityGroups,
   useSubnets,
   useVirtualNetworks,
 } from '../../../api/v1/networking';
 
-export type VmNetworkAttachmentRow = {
-  virtualNetwork: string;
-  subnet: string;
-  securityGroups: string;
-};
+export interface VmNetworkResource {
+  id: string;
+  name: string;
+}
+
+export interface VmNetworkAttachmentRow {
+  virtualNetwork: VmNetworkResource;
+  subnet: VmNetworkResource;
+  virtualNetworkId: string;
+  securityGroups: VmNetworkResource[];
+}
 
 export const useVmNetworkAttachmentRows = (vm: ComputeInstance): VmNetworkAttachmentRow[] => {
   const { data: virtualNetworks = [] } = useVirtualNetworks();
@@ -26,13 +31,22 @@ export const useVmNetworkAttachmentRows = (vm: ComputeInstance): VmNetworkAttach
     return attachments.map((attachment) => {
       const subnet = subnets.find((item) => item.id === attachment.subnet?.id);
       const virtualNetworkId = subnet?.spec?.virtualNetwork?.id ?? '';
+      const virtualNetwork = virtualNetworks.find((item) => item.id === virtualNetworkId);
+      const subnetId = attachment.subnet?.id ?? '';
       return {
-        virtualNetwork: formatResourceIdForReview(virtualNetworkId, virtualNetworks),
-        subnet: formatResourceIdForReview(attachment.subnet?.id ?? '', subnets),
-        securityGroups: formatResourceIdsForReview(
-          attachment.securityGroups?.map(({ id }) => id) ?? [],
-          securityGroups,
-        ),
+        virtualNetwork: {
+          id: virtualNetworkId,
+          name: resourceDisplayName(virtualNetwork?.metadata, virtualNetworkId),
+        },
+        subnet: {
+          id: subnetId,
+          name: resourceDisplayName(subnet?.metadata, subnetId),
+        },
+        virtualNetworkId,
+        securityGroups: (attachment.securityGroups ?? []).map(({ id }) => {
+          const securityGroup = securityGroups.find((item) => item.id === id);
+          return { id, name: resourceDisplayName(securityGroup?.metadata, id) };
+        }),
       };
     });
   }, [vm.spec?.networkAttachments, subnets, virtualNetworks, securityGroups]);

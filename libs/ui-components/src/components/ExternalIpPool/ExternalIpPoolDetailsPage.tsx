@@ -3,9 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Divider, Flex, FlexItem, PageSection, Stack, StackItem } from '@patternfly/react-core';
 
 import { ExternalIPPools } from '@osac/types/private';
-import DeleteResourceButton from '@osac/ui-components/components/Resource/DeleteResourceButton';
 
 import ExternalIpPoolDeleteConfirmModal from './ExternalIpPoolDeleteConfirmModal';
+import ExternalIpPoolDetailsActionsMenu from './ExternalIpPoolDetailsActionsMenu';
 import ExternalIpPoolDetailsPageContent from './ExternalIpPoolDetailsPageContent';
 import { useGetResource } from '../../api/use-resource';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -31,7 +31,7 @@ export const ExternalIpPoolDetailsPage = () => {
       parentTo={POOLS_LIST_PATH}
       refetch={refetch}
       resourceLabel={t('external IP pool')}
-      cardCount={3}
+      cardCount={2}
     >
       {pool && (
         <>
@@ -56,11 +56,18 @@ export const ExternalIpPoolDetailsPage = () => {
                       parentTo={POOLS_LIST_PATH}
                       parentLabel={t('External IP pools')}
                       resourceName={pool.metadata?.name || pool.id}
-                      description={pool.metadata?.description}
+                      titleSize="3xl"
+                      description={
+                        pool.metadata?.description ??
+                        t('Routable address pool for tenant edge exposure.')
+                      }
                     />
                   </FlexItem>
                   <FlexItem>
-                    <DeleteResourceButton onClick={() => setDeleteOpen(true)} />
+                    <ExternalIpPoolDetailsActionsMenu
+                      poolName={pool.metadata?.name || pool.id}
+                      onDelete={() => setDeleteOpen(true)}
+                    />
                   </FlexItem>
                 </Flex>
               </StackItem>

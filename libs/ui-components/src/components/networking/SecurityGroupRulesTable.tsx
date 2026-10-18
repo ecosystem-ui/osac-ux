@@ -1,12 +1,15 @@
 import { Button } from '@patternfly/react-core';
+import PlusCircleIcon from '@patternfly/react-icons/dist/esm/icons/plus-circle-icon';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import type { TFunction } from 'i18next';
 
 import { Protocol, type SecurityRule } from '@osac/types';
-import DeleteResourceButton from '@osac/ui-components/components/Resource/DeleteResourceButton';
 
+import SecurityGroupRuleActionsMenu from './SecurityGroupRuleActionsMenu';
 import { useTranslation } from '../../hooks/useTranslation';
 import { SubtleContent } from '../SubtleContent/SubtleContent';
+
+import './SecurityGroupRulesTable.css';
 
 interface SecurityGroupRulesTableProps {
   rules: SecurityRule[];
@@ -62,19 +65,35 @@ export const SecurityGroupRulesTable = ({
             ? t('No inbound rules yet. Add one to allow incoming traffic.')
             : t('No outbound rules yet. Add one to allow outgoing traffic.')}
         </SubtleContent>
-        <Button variant="primary" onClick={onAddRule} style={{ marginTop: '1rem' }}>
-          {t('Add rule')}
-        </Button>
+        <div className="security-group-rules-table__toolbar security-group-rules-table__toolbar--empty">
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<PlusCircleIcon />}
+            className="security-group-rules-table__add-button"
+            onClick={onAddRule}
+          >
+            {t('Add rule')}
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
     <div>
-      <Button variant="primary" onClick={onAddRule} style={{ marginBottom: '1rem' }}>
-        {t('Add rule')}
-      </Button>
-      <Table aria-label={`${direction} rules`} variant="compact" borders>
+      <div className="security-group-rules-table__toolbar security-group-rules-table__toolbar--table">
+        <Button
+          variant="secondary"
+          size="sm"
+          icon={<PlusCircleIcon />}
+          className="security-group-rules-table__add-button"
+          onClick={onAddRule}
+        >
+          {t('Add rule')}
+        </Button>
+      </div>
+      <Table aria-label={`${direction} rules`} variant="compact">
         <Thead>
           <Tr>
             <Th>{t('Protocol')}</Th>
@@ -90,11 +109,10 @@ export const SecurityGroupRulesTable = ({
               <Td dataLabel={t('Port Range')}>{formatPortRange(rule.portFrom, rule.portTo)}</Td>
               <Td dataLabel={cidrLabel}>{formatCidr(rule.ipv4Cidr)}</Td>
               <Td dataLabel={t('Actions')}>
-                <Button variant="link" isInline onClick={() => onEditRule(index)}>
-                  {t('Edit')}
-                </Button>
-                {' | '}
-                <DeleteResourceButton variant="link" isInline onClick={() => onDeleteRule(index)} />
+                <SecurityGroupRuleActionsMenu
+                  onEdit={() => onEditRule(index)}
+                  onDelete={() => onDeleteRule(index)}
+                />
               </Td>
             </Tr>
           ))}
