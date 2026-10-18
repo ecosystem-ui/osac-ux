@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Alert, AlertActionLink, Button, Flex, Modal } from '@patternfly/react-core';
 import DownloadIcon from '@patternfly/react-icons/dist/esm/icons/download-icon';
+import ExternalLinkAltIcon from '@patternfly/react-icons/dist/esm/icons/external-link-alt-icon';
 import KeyIcon from '@patternfly/react-icons/dist/esm/icons/key-icon';
 
 import { type Cluster, ClusterState } from '@osac/types';
@@ -10,19 +11,22 @@ import { getErrorMessage } from '@osac/ui-components/utils/error';
 
 import ClusterPasswordModal from './ClusterPasswordModal';
 import { useDownloadKubeconfig } from '../../../api/v1/cluster';
+import { useFetchAiGridUrl } from '../../../api/v1/maas';
 import { useTranslation } from '../../../hooks/useTranslation';
 import ClusterDeleteConfirmModal from '../ClusterDeleteConfirmModal';
 
 interface ClusterDetailsActionButtonsProps {
   cluster: Cluster;
+  isRhoaiInstalled?: boolean;
 }
 
-const ClusterDetailsActionButtons = ({ cluster }: ClusterDetailsActionButtonsProps) => {
+const ClusterDetailsActionButtons = ({ cluster, isRhoaiInstalled = false }: ClusterDetailsActionButtonsProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
   const { download, isPending, error, setError } = useDownloadKubeconfig();
+  const { mutate: fetchAiGridUrl, isPending: aiGridPending } = useFetchAiGridUrl();
 
   const isReady = cluster.status?.state === ClusterState.READY;
   const canDelete = cluster.status?.state !== ClusterState.DELETING;
@@ -88,6 +92,21 @@ const ClusterDetailsActionButtons = ({ cluster }: ClusterDetailsActionButtonsPro
         >
           {t('View password')}
         </Button>
+        {isRhoaiInstalled && (
+          <Button
+            variant="secondary"
+            icon={<ExternalLinkAltIcon />}
+            isDisabled={!isReady || aiGridPending}
+            isLoading={aiGridPending}
+            onClick={() =>
+              fetchAiGridUrl(cluster.id, {
+                onSuccess: ({ url }) => window.open(url, '_blank', 'noopener,noreferrer'),
+              })
+            }
+          >
+            {t('Open AI Grid')}
+          </Button>
+        )}
         <DeleteResourceButton
           showIcon
           canDelete={canDelete}

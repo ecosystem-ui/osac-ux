@@ -23,10 +23,11 @@ import {
 } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
-import { ExternalIPAttachmentEndpoint } from '@osac/types';
+import { AddOnOperatorInstallState, ExternalIPAttachmentEndpoint } from '@osac/types';
 import type { Cluster, ExternalIPAttachment } from '@osac/types';
 
 import AttachExternalIpModal from './AttachExternalIpModal';
+import { ClusterAiGridTab } from './ClusterAiGridTab';
 import ClusterDetailsActionButtons from './ClusterDetailsActionButtons';
 import ClusterExternalIpCard from './ClusterExternalIpCard';
 import DetachExternalIpModal from './DetachExternalIpModal';
@@ -157,6 +158,11 @@ const ClusterDetailsPageContent = ({ cluster }: ClusterDetailViewProps) => {
   const subnet = subnets.find((item) => item.id === cluster.spec?.networkAttachment?.subnet?.id);
   const virtualNetworkId = subnet?.spec?.virtualNetwork?.id;
 
+  const isRhoaiInstalled =
+    cluster.status?.addOnOperators.some(
+      (op) => op.name === 'rhoai' && op.state === AddOnOperatorInstallState.INSTALLED,
+    ) ?? false;
+
   return (
     <div className="cluster-details-page">
       {/* ------------------------------------------------------------------ */}
@@ -184,7 +190,7 @@ const ClusterDetailsPageContent = ({ cluster }: ClusterDetailViewProps) => {
                 />
               </FlexItem>
               <FlexItem>
-                <ClusterDetailsActionButtons cluster={cluster} />
+                <ClusterDetailsActionButtons cluster={cluster} isRhoaiInstalled={isRhoaiInstalled} />
               </FlexItem>
             </Flex>
           </StackItem>
@@ -399,6 +405,18 @@ const ClusterDetailsPageContent = ({ cluster }: ClusterDetailViewProps) => {
                   </StackItem>
                 </Stack>
               </StackItem>
+
+              {/* AI Grid — only shown when RHOAI add-on is installed */}
+              {isRhoaiInstalled && (
+                <>
+                  <StackItem>
+                    <Divider />
+                  </StackItem>
+                  <StackItem>
+                    <ClusterAiGridTab cluster={cluster} />
+                  </StackItem>
+                </>
+              )}
             </Stack>
           </GridItem>
 
