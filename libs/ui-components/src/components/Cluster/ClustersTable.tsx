@@ -43,6 +43,29 @@ export const ClustersTable = ({ clusters }: ClustersTableProps) => {
   const { t } = useTranslation();
   const { clusterVersionByName, isClusterVersionsLoading } = useClusterVersionLookup(clusters);
 
+  // Only fetch the versions these clusters reference (by spec.version.name),
+  // in one List call — scales as the catalog grows and paginates.
+  const versionNames = useMemo(
+    () => [
+      ...new Set(
+        clusters
+          .map((cluster) => cluster.spec?.version?.name)
+          .filter((name): name is string => !!name),
+      ),
+    ],
+    [clusters],
+  );
+  const { data: clusterVersions = [], isLoading: isClusterVersionsLoading } = useClusterVersions(
+    { filter: clusterVersionNamesFilter(versionNames) },
+    { enabled: versionNames.length > 0 },
+  );
+
+  // Clusters reference versions by spec.version.name, so key the catalog by name.
+  const clusterVersionByName = useMemo(
+    () => new Map(clusterVersions.map((cv) => [cv.metadata?.name, cv])),
+    [clusterVersions],
+  );
+
   return (
     <Table aria-label={t('Clusters')} variant="compact">
       <Thead>
