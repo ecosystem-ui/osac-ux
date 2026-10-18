@@ -20,4 +20,4 @@ repos:
       files: \.(yaml|yml)$
       types: [file, yaml]
       entry: yamllint --strict
-      exclude: ^deploy/chart/templates/
+      exclude: ^(charts/.*/templates/|pnpm-lock\.yaml|artifacts\.lock\.yaml)
