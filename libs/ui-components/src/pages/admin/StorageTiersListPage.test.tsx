@@ -67,8 +67,8 @@ describe('StorageTiersListPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('fast')).toBeInTheDocument();
+      expect(screen.getByText('Fast NVMe')).toBeInTheDocument();
     });
-    expect(screen.getByText('Fast NVMe')).toBeInTheDocument();
     expect(screen.getByText('NFS')).toBeInTheDocument();
   });
 
@@ -77,8 +77,8 @@ describe('StorageTiersListPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('mixed')).toBeInTheDocument();
+      expect(screen.getByText('Bulk HDD, missing-backend')).toBeInTheDocument();
     });
-    expect(screen.getByText('Bulk HDD, missing-backend')).toBeInTheDocument();
     expect(screen.getByText('Block')).toBeInTheDocument();
   });
 

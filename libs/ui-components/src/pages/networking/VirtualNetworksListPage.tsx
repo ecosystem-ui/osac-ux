@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import {
-  Content,
   FormSelect,
   FormSelectOption,
   Gallery,
@@ -11,11 +10,9 @@ import {
   ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
-import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
 import { VirtualNetworkState } from '@osac/types';
 import CreateButton from '@osac/ui-components/components/Primitives/CreateButton.tsx';
-import ResourceNameField from '@osac/ui-components/components/Resource/ResourceNameField.tsx';
 import { SEARCH_PARAM, usePageFilter } from '@osac/ui-components/hooks/use-page-filter.ts';
 
 import VirtualNetworkCard from './VirtualNetworkCard';
@@ -26,9 +23,10 @@ import {
   useVirtualNetworks,
 } from '../../api/v1/networking';
 import { VirtualNetworkCreateModal } from '../../components/networking/VirtualNetworkCreateModal';
-import { VirtualNetworkStatusLabel } from '../../components/networking/VirtualNetworkStatusLabel';
+import { VirtualNetworksTable } from '../../components/networking/VirtualNetworksTable';
 import ListPage from '../../components/Page/ListPage';
 import ListPageBody from '../../components/Page/ListPageBody';
+import ProjectFilter from '../../components/Page/ProjectFilter';
 import type { ViewType } from '../../components/Primitives/ViewSwitcher';
 import {
   DEFAULT_VIEW_TYPE,
@@ -110,11 +108,14 @@ export const VirtualNetworksListPage = () => {
     return matchesStatus && matchesSearch;
   });
 
+  const pageError = error ?? natGatewaysError ?? securityGroupsError;
+
   return (
     <>
       <ListPage
         title={t('Virtual networks')}
         description={t('Manage virtual networks for your compute instances.')}
+        error={pageError}
         actions={
           <CreateButton onClick={() => setIsCreateModalOpen(true)}>
             {t('Create virtual network')}
@@ -123,11 +124,14 @@ export const VirtualNetworksListPage = () => {
       >
         <ListPageBody
           isLoading={isLoading || isLoadingNatGateways || isLoadingSecurityGroups}
-          error={error ?? natGatewaysError ?? securityGroupsError}
+          error={pageError}
         >
           <Toolbar>
             <ToolbarContent>
               <ToolbarGroup>
+                <ToolbarItem>
+                  <ProjectFilter />
+                </ToolbarItem>
                 <ToolbarItem>
                   <FormSelect
                     id="virtual-networks-status-filter"
@@ -153,10 +157,11 @@ export const VirtualNetworksListPage = () => {
                 </ToolbarItem>
                 <ToolbarItem>
                   <SearchInput
-                    placeholder={t('Search virtual networks by name…')}
+                    placeholder={t('Search virtual networks')}
                     value={search}
                     onChange={(_e, v) => setSearch(v)}
                     onClear={() => setSearch('')}
+                    aria-label={t('Search virtual networks')}
                   />
                 </ToolbarItem>
               </ToolbarGroup>
@@ -169,7 +174,7 @@ export const VirtualNetworksListPage = () => {
           </Toolbar>
           {filteredVNs.length === 0 ? (
             <SubtleContent component="p">
-              {search
+              {search || selectedStatus !== 'all'
                 ? t('No virtual networks match your search.')
                 : t('No virtual networks yet. Create one to get started.')}
             </SubtleContent>
@@ -196,63 +201,12 @@ export const VirtualNetworksListPage = () => {
               })}
             </Gallery>
           ) : (
-            <Table aria-label={t('Virtual networks')} variant="compact" borders>
-              <Thead>
-                <Tr>
-                  <Th>{t('Name')}</Th>
-                  <Th>{t('Status')}</Th>
-                  <Th>{t('IPv4 CIDR')}</Th>
-                  <Th>{t('IPv6 CIDR')}</Th>
-                  <Th>{t('Subnets')}</Th>
-                  <Th>{t('Security groups')}</Th>
-                  <Th>{t('NAT gateway')}</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {filteredVNs.map((vn) => {
-                  const subnetCount = subnetCountByVN[vn.id] || 0;
-                  const natGatewayWithAddress = natGatewaysByVirtualNetworkId[vn.id];
-                  const natGateway = natGatewayWithAddress?.natGateway;
-                  const address = natGatewayWithAddress?.address;
-
-                  return (
-                    <Tr key={vn.id}>
-                      <Td dataLabel={t('Name')}>
-                        <ResourceNameField
-                          resource={vn}
-                          detailsUrl={`/networking/virtual-networks/${vn.id}`}
-                        />
-                      </Td>
-                      <Td dataLabel={t('Status')}>
-                        <VirtualNetworkStatusLabel state={vn.status?.state} />
-                      </Td>
-                      <Td dataLabel={t('IPv4 CIDR')}>
-                        <code>{vn.spec?.ipv4Cidr ?? '—'}</code>
-                      </Td>
-                      <Td dataLabel={t('IPv6 CIDR')}>
-                        <code>{vn.spec?.ipv6Cidr ?? '—'}</code>
-                      </Td>
-                      <Td dataLabel={t('Subnets')}>{subnetCount}</Td>
-                      <Td dataLabel={t('Security groups')}>{securityGroupCountByVN[vn.id] || 0}</Td>
-                      <Td dataLabel={t('NAT gateway')}>
-                        {natGateway ? (
-                          <>
-                            <Content component="p">
-                              {natGateway.metadata?.name ?? natGateway.id}
-                            </Content>
-                            <Content component="p">
-                              <code>{address ?? '—'}</code>
-                            </Content>
-                          </>
-                        ) : (
-                          <Content component="p">—</Content>
-                        )}
-                      </Td>
-                    </Tr>
-                  );
-                })}
-              </Tbody>
-            </Table>
+            <VirtualNetworksTable
+              virtualNetworks={filteredVNs}
+              subnetCountByVN={subnetCountByVN}
+              securityGroupCountByVN={securityGroupCountByVN}
+              natGatewaysByVirtualNetworkId={natGatewaysByVirtualNetworkId}
+            />
           )}
         </ListPageBody>
       </ListPage>

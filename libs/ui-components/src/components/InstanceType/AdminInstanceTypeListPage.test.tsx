@@ -130,11 +130,8 @@ describe('AdminInstanceTypeListPage', () => {
 
     renderPage();
 
-    expect(screen.getByText('No instance types yet.')).toBeInTheDocument();
-    expect(
-      screen.getByText('Create an instance type to start defining provider-managed sizes.'),
-    ).toBeInTheDocument();
-    expect(screen.getByRole('grid', { name: 'Instance types' })).toBeInTheDocument();
+    expect(screen.getByText(/No instance types yet/i)).toBeInTheDocument();
+    expect(screen.queryByRole('grid', { name: 'Instance types' })).not.toBeInTheDocument();
   });
 
   it('uses the page-level error state when the query fails', () => {
@@ -229,6 +226,6 @@ describe('AdminInstanceTypeListPage', () => {
       expect(screen.queryByText('instance-type-obsolete-1')).not.toBeInTheDocument(),
     );
     expect(deleteCalled).toBe(true);
-    expect(screen.getByText('No instance types yet.')).toBeInTheDocument();
+    expect(screen.getByText(/No instance types yet/i)).toBeInTheDocument();
   });
 });

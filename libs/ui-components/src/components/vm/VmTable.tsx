@@ -1,15 +1,18 @@
 import { useMemo } from 'react';
+import { Flex, FlexItem } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { Link } from 'react-router-dom';
 
 import type { ComputeInstance, InstanceType } from '@osac/types';
 import { ComputeInstanceState } from '@osac/types';
-import ResourceNameField from '@osac/ui-components/components/Resource/ResourceNameField.tsx';
 
 import { VmActionsMenu } from './VmActionsMenu';
 import { VmInstanceTypeLabel } from './VmInstanceTypeLabel';
 import { useTranslation } from '../../hooks/useTranslation';
 import { VmStatusLabel } from '../../VmStatusLabel';
 import { Timestamp } from '../Primitives/Timestamp';
+
+import './VmTable.css';
 
 interface VmTableProps {
   vms: ComputeInstance[];
@@ -46,6 +49,7 @@ export const VmTable = ({
         {vms.map((vm) => {
           const state = vm.status?.state;
           const locked = state === ComputeInstanceState.DELETING;
+          const name = vm.metadata?.name || vm.id;
           const instanceTypeId = vm.spec?.instanceType?.id;
           const instanceType = instanceTypeId ? instanceTypeById.get(instanceTypeId) : undefined;
           const internalIp = vm.status?.internalIpAddress;
@@ -54,10 +58,20 @@ export const VmTable = ({
           return (
             <Tr key={vm.id}>
               <Td dataLabel={t('Name')}>
-                <ResourceNameField
-                  resource={vm}
-                  detailsUrl={locked ? undefined : `/vms/${encodeURIComponent(vm.id)}`}
-                />
+                <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsXs' }}>
+                  <FlexItem>
+                    {locked ? (
+                      <span className="vms-table__name-link">{name}</span>
+                    ) : (
+                      <Link
+                        to={`/vms/${encodeURIComponent(vm.id)}`}
+                        className="vms-table__name-link"
+                      >
+                        {name}
+                      </Link>
+                    )}
+                  </FlexItem>
+                </Flex>
               </Td>
               <Td dataLabel={t('Status')}>
                 <VmStatusLabel state={state} />

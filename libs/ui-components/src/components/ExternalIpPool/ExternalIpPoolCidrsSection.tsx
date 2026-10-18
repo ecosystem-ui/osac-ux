@@ -5,18 +5,21 @@ import {
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
+  Flex,
   Stack,
   StackItem,
   Title,
 } from '@patternfly/react-core';
+import NetworkWiredIcon from '@patternfly/react-icons/dist/esm/icons/network-wired-icon';
 
 import { IPFamily } from '@osac/types/private';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { SubtleContent } from '../SubtleContent/SubtleContent';
 
+import '../shared/details-page.css';
+
 const CIDR_PREVIEW_COUNT = 1;
-const FIELD_LABEL_CLASS = 'pf-v6-u-font-size-sm pf-v6-u-font-weight-normal';
 
 interface ExternalIpPoolCidrsSectionProps {
   cidrs: string[];
@@ -32,17 +35,24 @@ const ExternalIpPoolCidrsSection = ({ cidrs, ipFamily }: ExternalIpPoolCidrsSect
   return (
     <Stack hasGutter>
       <StackItem>
-        <Title headingLevel="h2" size="lg">
-          {t('CIDR')}
-        </Title>
+        <Flex alignItems={{ default: 'alignItemsCenter' }} spaceItems={{ default: 'spaceItemsSm' }}>
+          <NetworkWiredIcon aria-hidden />
+          <Title headingLevel="h2" size="lg">
+            {t('CIDR')}
+          </Title>
+        </Flex>
       </StackItem>
       <StackItem>
         {cidrs.length === 0 ? (
           <SubtleContent component="p">{t('No CIDRs')}</SubtleContent>
         ) : (
-          <DescriptionList isCompact aria-label={t('External IP pool CIDR')}>
+          <DescriptionList
+            isCompact
+            className="details-page__overview"
+            aria-label={t('External IP pool CIDR')}
+          >
             <DescriptionListGroup>
-              <DescriptionListTerm className={FIELD_LABEL_CLASS}>
+              <DescriptionListTerm>
                 {ipFamily === IPFamily.IP_FAMILY_IPV6 ? t('IPv6') : t('IPv4')}
               </DescriptionListTerm>
               <DescriptionListDescription>

@@ -1,11 +1,16 @@
 import { screen, waitFor, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ExternalIP, NATGateway, Subnet, VirtualNetwork } from '@osac/types';
 import { ExternalIPState, SubnetState, VirtualNetworkState } from '@osac/types';
 
 import { VIRTUAL_NETWORKS_VIEW_KEY, VirtualNetworksListPage } from './VirtualNetworksListPage';
+import { SessionProvider } from '../../hooks/use-session';
 import { renderWithProviders } from '../../test-utils/TestProviders';
+
+vi.mock('../../api/v1/project', () => ({
+  useAllProjects: () => ({ data: [], isLoading: false, error: null }),
+}));
 
 const virtualNetworks = [
   {
@@ -56,17 +61,22 @@ const renderPage = (overrides?: {
   natGateways?: NATGateway[];
   onNatGatewayList?: (req: unknown) => void;
 }) =>
-  renderWithProviders(<VirtualNetworksListPage />, {
-    apiFixtures: {
-      virtualNetworks: overrides?.virtualNetworks ?? virtualNetworks,
-      subnets,
-      natGateways: overrides?.natGateways ?? natGateways,
-      externalIps,
+  renderWithProviders(
+    <SessionProvider role="tenant-user" username="test-user" tenantId="test-tenant">
+      <VirtualNetworksListPage />
+    </SessionProvider>,
+    {
+      apiFixtures: {
+        virtualNetworks: overrides?.virtualNetworks ?? virtualNetworks,
+        subnets,
+        natGateways: overrides?.natGateways ?? natGateways,
+        externalIps,
+      },
+      transportOverrides: {
+        onNatGatewayList: overrides?.onNatGatewayList,
+      },
     },
-    transportOverrides: {
-      onNatGatewayList: overrides?.onNatGatewayList,
-    },
-  });
+  );
 
 describe('VirtualNetworksListPage', () => {
   beforeEach(() => {

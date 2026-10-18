@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { Content, Flex, FlexItem, Label, PageSection, Stack, Title } from '@patternfly/react-core';
 
+import './ListPage.css';
+
 type ListPageProps = {
   title: string;
   description?: string;
@@ -8,6 +10,7 @@ type ListPageProps = {
   actions?: React.ReactNode;
   breadcrumb?: React.ReactNode;
   error?: unknown;
+  className?: string;
   children: React.ReactNode;
 };
 
@@ -18,9 +21,13 @@ const ListPage: React.FC<ListPageProps> = ({
   actions,
   breadcrumb,
   error,
+  className,
   children,
 }) => (
-  <PageSection hasBodyWrapper={false}>
+  <PageSection
+    hasBodyWrapper={false}
+    className={className ? `osac-list-page ${className}` : 'osac-list-page'}
+  >
     <Stack>
       <Flex
         gap={{ default: 'gapMd' }}

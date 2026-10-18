@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import {
   Button,
+  Divider,
   Flex,
   FlexItem,
   FormGroup,
@@ -16,9 +17,12 @@ import {
   StackItem,
   Title,
 } from '@patternfly/react-core';
-import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import BrainIcon from '@patternfly/react-icons/dist/esm/icons/brain-icon';
+import CatalogIcon from '@patternfly/react-icons/dist/esm/icons/catalog-icon';
+import KeyIcon from '@patternfly/react-icons/dist/esm/icons/key-icon';
 import PlusCircleIcon from '@patternfly/react-icons/dist/esm/icons/plus-circle-icon';
 import TrashIcon from '@patternfly/react-icons/dist/esm/icons/trash-icon';
+import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
 import type { Cluster } from '@osac/types';
 
@@ -55,7 +59,9 @@ const CreateKeyModal = ({ clusterId, onClose }: CreateKeyModalProps) => {
   const selectedSub = subscriptions.find((s) => s.id === selectedSubId);
 
   const handleCreate = () => {
-    if (!selectedSubId) return;
+    if (!selectedSubId) {
+      return;
+    }
     createKey({ clusterId, subscriptionId: selectedSubId }, { onSuccess: onClose });
   };
 
@@ -82,7 +88,9 @@ const CreateKeyModal = ({ clusterId, onClose }: CreateKeyModalProps) => {
                     isDisabled={isLoading}
                     aria-expanded={isSelectOpen}
                   >
-                    {isLoading ? t('Loading…') : (selectedSub?.spec.name ?? t('Select subscription'))}
+                    {isLoading
+                      ? t('Loading…')
+                      : (selectedSub?.spec.name ?? t('Select subscription'))}
                   </Button>
                 )}
               >
@@ -156,9 +164,15 @@ export const ClusterAiGridTab = ({ cluster }: ClusterAiGridTabProps) => {
         <StackItem>
           <Stack hasGutter>
             <StackItem>
-              <Title headingLevel="h2" size="lg">
-                {t('Models')}
-              </Title>
+              <Flex
+                alignItems={{ default: 'alignItemsCenter' }}
+                spaceItems={{ default: 'spaceItemsSm' }}
+              >
+                <BrainIcon aria-hidden />
+                <Title headingLevel="h2" size="lg">
+                  {t('Models')}
+                </Title>
+              </Flex>
             </StackItem>
             <StackItem>
               <Table aria-label={t('Available models')} variant="compact">
@@ -191,13 +205,23 @@ export const ClusterAiGridTab = ({ cluster }: ClusterAiGridTabProps) => {
           </Stack>
         </StackItem>
 
+        <StackItem>
+          <Divider className="cluster-ai-grid__section-divider" />
+        </StackItem>
+
         {/* ── Subscriptions ────────────────────────────────────────────────── */}
         <StackItem>
           <Stack hasGutter>
             <StackItem>
-              <Title headingLevel="h2" size="lg">
-                {t('Subscriptions')}
-              </Title>
+              <Flex
+                alignItems={{ default: 'alignItemsCenter' }}
+                spaceItems={{ default: 'spaceItemsSm' }}
+              >
+                <CatalogIcon aria-hidden />
+                <Title headingLevel="h2" size="lg">
+                  {t('Subscriptions')}
+                </Title>
+              </Flex>
             </StackItem>
             <StackItem>
               <Table aria-label={t('Subscriptions')} variant="compact">
@@ -230,9 +254,7 @@ export const ClusterAiGridTab = ({ cluster }: ClusterAiGridTabProps) => {
                         <Td dataLabel={t('Token limit (tokens/day)')}>
                           {sub.spec.tokensPerDay?.toLocaleString() ?? '—'}
                         </Td>
-                        <Td dataLabel={t('Active keys')}>
-                          {sub.status?.activeKeyCount ?? 0}
-                        </Td>
+                        <Td dataLabel={t('Active keys')}>{sub.status?.activeKeyCount ?? 0}</Td>
                       </Tr>
                     ))
                   )}
@@ -240,6 +262,10 @@ export const ClusterAiGridTab = ({ cluster }: ClusterAiGridTabProps) => {
               </Table>
             </StackItem>
           </Stack>
+        </StackItem>
+
+        <StackItem>
+          <Divider className="cluster-ai-grid__section-divider" />
         </StackItem>
 
         {/* ── API Keys ────────────────────────────────────────────────────── */}
@@ -251,9 +277,15 @@ export const ClusterAiGridTab = ({ cluster }: ClusterAiGridTabProps) => {
                 alignItems={{ default: 'alignItemsCenter' }}
               >
                 <FlexItem>
-                  <Title headingLevel="h2" size="lg">
-                    {t('API keys')}
-                  </Title>
+                  <Flex
+                    alignItems={{ default: 'alignItemsCenter' }}
+                    spaceItems={{ default: 'spaceItemsSm' }}
+                  >
+                    <KeyIcon aria-hidden />
+                    <Title headingLevel="h2" size="lg">
+                      {t('API keys')}
+                    </Title>
+                  </Flex>
                 </FlexItem>
                 <FlexItem>
                   <Button
@@ -282,7 +314,9 @@ export const ClusterAiGridTab = ({ cluster }: ClusterAiGridTabProps) => {
                     skeletonRow(4)
                   ) : apiKeys.length === 0 ? (
                     <Tr>
-                      <Td colSpan={4}>{t('No API keys. Create one to start using this cluster.')}</Td>
+                      <Td colSpan={4}>
+                        {t('No API keys. Create one to start using this cluster.')}
+                      </Td>
                     </Tr>
                   ) : (
                     apiKeys.map((key) => (

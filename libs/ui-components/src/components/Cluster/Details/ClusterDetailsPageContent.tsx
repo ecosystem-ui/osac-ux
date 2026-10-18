@@ -21,9 +21,14 @@ import {
   StackItem,
   Title,
 } from '@patternfly/react-core';
+import CheckCircleIcon from '@patternfly/react-icons/dist/esm/icons/check-circle-icon';
+import HistoryIcon from '@patternfly/react-icons/dist/esm/icons/history-icon';
+import InfoAltIcon from '@patternfly/react-icons/dist/esm/icons/info-alt-icon';
+import NetworkWiredIcon from '@patternfly/react-icons/dist/esm/icons/network-wired-icon';
+import ServerIcon from '@patternfly/react-icons/dist/esm/icons/server-icon';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
-import { AddOnOperatorInstallState, ExternalIPAttachmentEndpoint } from '@osac/types';
+import { ExternalIPAttachmentEndpoint } from '@osac/types';
 import type { Cluster, ExternalIPAttachment } from '@osac/types';
 
 import AttachExternalIpModal from './AttachExternalIpModal';
@@ -39,6 +44,7 @@ import ExternalLink from '../../Primitives/ExternalLink';
 import { Timestamp } from '../../Primitives/Timestamp';
 import { ResourceConditionsTable } from '../../Resource/ResourceConditionsTable';
 import { ResourceDetailHeader } from '../../Resource/ResourceDetailHeader';
+import { isRhoaiInstalled } from '../ClusterRhoaiLabel';
 import { ClusterStatusLabel } from '../ClusterStatusLabel';
 import ClusterVersionLifecycleLabel from '../ClusterVersionLifecycleLabel';
 
@@ -158,10 +164,7 @@ const ClusterDetailsPageContent = ({ cluster }: ClusterDetailViewProps) => {
   const subnet = subnets.find((item) => item.id === cluster.spec?.networkAttachment?.subnet?.id);
   const virtualNetworkId = subnet?.spec?.virtualNetwork?.id;
 
-  const isRhoaiInstalled =
-    cluster.status?.addOnOperators.some(
-      (op) => op.name === 'rhoai' && op.state === AddOnOperatorInstallState.INSTALLED,
-    ) ?? false;
+  const rhoaiInstalled = isRhoaiInstalled(cluster);
 
   return (
     <div className="cluster-details-page">
@@ -190,12 +193,12 @@ const ClusterDetailsPageContent = ({ cluster }: ClusterDetailViewProps) => {
                 />
               </FlexItem>
               <FlexItem>
-                <ClusterDetailsActionButtons cluster={cluster} isRhoaiInstalled={isRhoaiInstalled} />
+                <ClusterDetailsActionButtons cluster={cluster} isRhoaiInstalled={rhoaiInstalled} />
               </FlexItem>
             </Flex>
           </StackItem>
           <StackItem>
-            <Divider />
+            <Divider className="cluster-details-page__section-divider" />
           </StackItem>
         </Stack>
       </PageSection>
@@ -207,16 +210,22 @@ const ClusterDetailsPageContent = ({ cluster }: ClusterDetailViewProps) => {
         <Grid hasGutter className="details-page__content-grid">
           {/* Main column */}
           <GridItem md={8} className="details-page__column">
-            <Stack hasGutter>
+            <Stack hasGutter className="cluster-details-page__main-stack">
               {/* Overview + Lifecycle — 2-column row */}
               <StackItem>
                 <Grid hasGutter className="cluster-details-page__overview-grid">
                   <GridItem span={6}>
                     <Stack hasGutter>
                       <StackItem>
-                        <Title headingLevel="h2" size="lg">
-                          {t('Overview')}
-                        </Title>
+                        <Flex
+                          alignItems={{ default: 'alignItemsCenter' }}
+                          spaceItems={{ default: 'spaceItemsSm' }}
+                        >
+                          <InfoAltIcon aria-hidden />
+                          <Title headingLevel="h2" size="lg">
+                            {t('Overview')}
+                          </Title>
+                        </Flex>
                       </StackItem>
                       <StackItem>
                         <DescriptionList
@@ -224,12 +233,6 @@ const ClusterDetailsPageContent = ({ cluster }: ClusterDetailViewProps) => {
                           className="details-page__overview"
                           aria-label={t('Cluster overview')}
                         >
-                          <DescriptionListGroup>
-                            <DescriptionListTerm>{t('Status')}</DescriptionListTerm>
-                            <DescriptionListDescription>
-                              <ClusterStatusLabel state={cluster.status?.state} />
-                            </DescriptionListDescription>
-                          </DescriptionListGroup>
                           <DescriptionListGroup>
                             <DescriptionListTerm>{t('Catalog item')}</DescriptionListTerm>
                             <DescriptionListDescription>
@@ -256,9 +259,15 @@ const ClusterDetailsPageContent = ({ cluster }: ClusterDetailViewProps) => {
                   <GridItem span={6}>
                     <Stack hasGutter>
                       <StackItem>
-                        <Title headingLevel="h2" size="lg">
-                          {t('Lifecycle')}
-                        </Title>
+                        <Flex
+                          alignItems={{ default: 'alignItemsCenter' }}
+                          spaceItems={{ default: 'spaceItemsSm' }}
+                        >
+                          <HistoryIcon aria-hidden />
+                          <Title headingLevel="h2" size="lg">
+                            {t('Lifecycle')}
+                          </Title>
+                        </Flex>
                       </StackItem>
                       <StackItem>
                         <DescriptionList
@@ -292,16 +301,22 @@ const ClusterDetailsPageContent = ({ cluster }: ClusterDetailViewProps) => {
               </StackItem>
 
               <StackItem>
-                <Divider />
+                <Divider className="cluster-details-page__section-divider" />
               </StackItem>
 
               {/* Networking */}
               <StackItem>
                 <Stack hasGutter>
                   <StackItem>
-                    <Title headingLevel="h2" size="lg">
-                      {t('Networking')}
-                    </Title>
+                    <Flex
+                      alignItems={{ default: 'alignItemsCenter' }}
+                      spaceItems={{ default: 'spaceItemsSm' }}
+                    >
+                      <NetworkWiredIcon aria-hidden />
+                      <Title headingLevel="h2" size="lg">
+                        {t('Networking')}
+                      </Title>
+                    </Flex>
                   </StackItem>
                   <StackItem>
                     {cluster.spec?.networkAttachment ? (
@@ -351,13 +366,23 @@ const ClusterDetailsPageContent = ({ cluster }: ClusterDetailViewProps) => {
                 </Stack>
               </StackItem>
 
+              <StackItem>
+                <Divider className="cluster-details-page__section-divider" />
+              </StackItem>
+
               {/* Node sets */}
               <StackItem>
                 <Stack hasGutter>
                   <StackItem>
-                    <Title headingLevel="h2" size="lg">
-                      {t('Node sets')}
-                    </Title>
+                    <Flex
+                      alignItems={{ default: 'alignItemsCenter' }}
+                      spaceItems={{ default: 'spaceItemsSm' }}
+                    >
+                      <ServerIcon aria-hidden />
+                      <Title headingLevel="h2" size="lg">
+                        {t('Node sets')}
+                      </Title>
+                    </Flex>
                   </StackItem>
                   <StackItem>
                     {nodeSetEntries.length > 0 ? (
@@ -388,13 +413,35 @@ const ClusterDetailsPageContent = ({ cluster }: ClusterDetailViewProps) => {
                 </Stack>
               </StackItem>
 
+              {/* AI Grid — only shown when RHOAI add-on is installed */}
+              {rhoaiInstalled && (
+                <>
+                  <StackItem>
+                    <Divider className="cluster-details-page__section-divider" />
+                  </StackItem>
+                  <StackItem>
+                    <ClusterAiGridTab cluster={cluster} />
+                  </StackItem>
+                </>
+              )}
+
+              <StackItem>
+                <Divider className="cluster-details-page__section-divider" />
+              </StackItem>
+
               {/* Conditions */}
               <StackItem>
                 <Stack hasGutter>
                   <StackItem>
-                    <Title headingLevel="h2" size="lg">
-                      {t('Conditions')}
-                    </Title>
+                    <Flex
+                      alignItems={{ default: 'alignItemsCenter' }}
+                      spaceItems={{ default: 'spaceItemsSm' }}
+                    >
+                      <CheckCircleIcon aria-hidden />
+                      <Title headingLevel="h2" size="lg">
+                        {t('Conditions')}
+                      </Title>
+                    </Flex>
                   </StackItem>
                   <StackItem>
                     <ResourceConditionsTable
@@ -405,18 +452,6 @@ const ClusterDetailsPageContent = ({ cluster }: ClusterDetailViewProps) => {
                   </StackItem>
                 </Stack>
               </StackItem>
-
-              {/* AI Grid — only shown when RHOAI add-on is installed */}
-              {isRhoaiInstalled && (
-                <>
-                  <StackItem>
-                    <Divider />
-                  </StackItem>
-                  <StackItem>
-                    <ClusterAiGridTab cluster={cluster} />
-                  </StackItem>
-                </>
-              )}
             </Stack>
           </GridItem>
 

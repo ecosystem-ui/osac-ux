@@ -8,3 +8,7 @@
   align-items: center;
   gap: var(--pf-t--global--spacer--sm);
 }
+
+.cluster-ai-grid__section-divider {
+  margin-block: var(--pf-t--global--spacer--md);
+}

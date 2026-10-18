@@ -23,6 +23,7 @@ import { SEARCH_PARAM, useArrayPageFilter, usePageFilter } from '../../hooks/use
 import { useTranslation } from '../../hooks/useTranslation';
 import ListPage from '../Page/ListPage';
 import ListPageBody from '../Page/ListPageBody';
+import { SubtleContent } from '../SubtleContent/SubtleContent';
 
 const ALL_OPTION_VALUE = '__all__';
 
@@ -291,7 +292,15 @@ const DiskImageListPage = () => {
             </ToolbarGroup>
           </ToolbarContent>
         </Toolbar>
-        <DiskImageTable diskImages={diskImages} tenants={tenants} />
+        {diskImages.length === 0 ? (
+          <SubtleContent component="p">
+            {search
+              ? t('No disk images match your search.')
+              : t('No disk images yet. Create one to get started.')}
+          </SubtleContent>
+        ) : (
+          <DiskImageTable diskImages={diskImages} tenants={tenants} />
+        )}
       </ListPageBody>
     </ListPage>
   );

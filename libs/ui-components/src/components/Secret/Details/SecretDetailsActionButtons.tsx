@@ -17,6 +17,7 @@ const SecretDetailsActionButtons = ({ secret }: SecretDetailsActionButtonsProps)
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const secretName = secret.metadata?.name || secret.id;
 
   return (
     <>
@@ -38,7 +39,7 @@ const SecretDetailsActionButtons = ({ secret }: SecretDetailsActionButtonsProps)
             variant="secondary"
             isExpanded={isOpen}
             onClick={() => setIsOpen((open) => !open)}
-            aria-label={t('Actions')}
+            aria-label={t('Actions for {{name}}', { name: secretName })}
           >
             {t('Actions')}
           </MenuToggle>

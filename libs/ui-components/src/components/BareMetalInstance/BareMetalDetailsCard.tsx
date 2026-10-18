@@ -3,10 +3,12 @@ import {
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
+  Flex,
   Stack,
   StackItem,
   Title,
 } from '@patternfly/react-core';
+import InfoAltIcon from '@patternfly/react-icons/dist/esm/icons/info-alt-icon';
 
 import type { BareMetalInstance } from '@osac/types';
 
@@ -26,9 +28,12 @@ const BareMetalDetailsCard = ({ instance }: Props) => {
   return (
     <Stack hasGutter>
       <StackItem>
-        <Title headingLevel="h2" size="lg">
-          {t('Details')}
-        </Title>
+        <Flex alignItems={{ default: 'alignItemsCenter' }} spaceItems={{ default: 'spaceItemsSm' }}>
+          <InfoAltIcon aria-hidden />
+          <Title headingLevel="h2" size="lg">
+            {t('Overview')}
+          </Title>
+        </Flex>
       </StackItem>
       <StackItem>
         <DescriptionList isCompact className="details-page__overview">

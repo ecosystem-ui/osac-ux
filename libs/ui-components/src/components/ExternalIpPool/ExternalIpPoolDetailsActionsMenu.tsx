@@ -5,10 +5,14 @@ import { useTranslation } from '../../hooks/useTranslation';
 import DeleteResourceButton from '../Resource/DeleteResourceButton';
 
 interface ExternalIpPoolDetailsActionsMenuProps {
+  poolName: string;
   onDelete: () => void;
 }
 
-const ExternalIpPoolDetailsActionsMenu = ({ onDelete }: ExternalIpPoolDetailsActionsMenuProps) => {
+const ExternalIpPoolDetailsActionsMenu = ({
+  poolName,
+  onDelete,
+}: ExternalIpPoolDetailsActionsMenuProps) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
@@ -21,7 +25,7 @@ const ExternalIpPoolDetailsActionsMenu = ({ onDelete }: ExternalIpPoolDetailsAct
           ref={ref}
           variant="secondary"
           onClick={() => setOpen((isOpen) => !isOpen)}
-          aria-label={t('Actions')}
+          aria-label={t('Actions for {{name}}', { name: poolName })}
         >
           {t('Actions')}
         </MenuToggle>

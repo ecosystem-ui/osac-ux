@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom';
-import { Content } from '@patternfly/react-core';
+import { Content, Flex, FlexItem } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { Link } from 'react-router-dom';
 
 import { type Tenant } from '@osac/types/private';
 import { Timestamp } from '@osac/ui-components/components/Primitives/Timestamp';
@@ -17,55 +17,64 @@ interface TenantTableProps {
 
 const TenantTable = ({ tenants }: TenantTableProps) => {
   const { t } = useTranslation();
-  const nameLabel = t('Name');
-  const statusLabel = t('Status');
-  const domainLabel = t('Primary domain');
-  const billingAccountLabel = t('Billing account');
-  const registeredLabel = t('Registered');
-  const actionsLabel = t('Actions');
 
   return (
-    <Table aria-label={t('Tenants')} borders={false} className="tenant-table" variant="compact">
+    <Table aria-label={t('Tenants')} variant="compact">
       <Thead>
         <Tr>
-          <Th>{nameLabel}</Th>
-          <Th>{statusLabel}</Th>
-          <Th>{domainLabel}</Th>
-          <Th>{billingAccountLabel}</Th>
-          <Th>{registeredLabel}</Th>
-          <Th aria-label={actionsLabel} />
+          <Th>{t('Name')}</Th>
+          <Th>{t('Status')}</Th>
+          <Th>{t('Primary domain')}</Th>
+          <Th>{t('Billing account')}</Th>
+          <Th>{t('Registered')}</Th>
+          <Th aria-label={t('Actions')} />
         </Tr>
       </Thead>
       <Tbody>
-        {tenants.map((tenant) => (
-          <Tr key={tenant.id}>
-            <Td dataLabel={nameLabel}>
-              <Link className="tenant-table__name-link" to={`/admin/tenants/${tenant.id}`}>
-                {tenant.metadata?.name ?? tenant.id}
-              </Link>
-            </Td>
-            <Td dataLabel={statusLabel}>
-              <TenantStatusLabel state={tenant.status?.state} />
-            </Td>
-            <Td dataLabel={domainLabel}>{tenant.spec?.domains?.[0] ?? '—'}</Td>
-            <Td dataLabel={billingAccountLabel}>
-              <Content component="p" className="tenant-table__billing-account-primary">
-                {tenant.metadata?.annotations?.['osac.io/billing-account'] ?? '—'}
-              </Content>
-              {tenant.metadata?.annotations?.['osac.io/billing-account-id'] ? (
-                <Content component="p" className="tenant-table__billing-account-secondary">
-                  <code>{tenant.metadata.annotations['osac.io/billing-account-id']}</code>
-                </Content>
-              ) : null}
-            </Td>
-            <Td dataLabel={registeredLabel}>
-              <Timestamp value={tenant.metadata?.creationTimestamp} format="Time" />
-            </Td>
-            <Td dataLabel={actionsLabel} isActionCell>
-              <TenantActionsMenu tenant={tenant} />
-            </Td>
-          </Tr>
-        ))}
+        {tenants.map((tenant) => {
+          const name = tenant.metadata?.name ?? tenant.id;
+          const billingAccount = tenant.metadata?.annotations?.['osac.io/billing-account'];
+          const billingAccountId = tenant.metadata?.annotations?.['osac.io/billing-account-id'];
+
+          return (
+            <Tr key={tenant.id}>
+              <Td dataLabel={t('Name')}>
+                <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsXs' }}>
+                  <FlexItem>
+                    <Link
+                      className="tenants-table__name-link"
+                      to={`/admin/tenants/${encodeURIComponent(tenant.id)}`}
+                    >
+                      {name}
+                    </Link>
+                  </FlexItem>
+                </Flex>
+              </Td>
+              <Td dataLabel={t('Status')}>
+                <TenantStatusLabel state={tenant.status?.state} />
+              </Td>
+              <Td dataLabel={t('Primary domain')}>{tenant.spec?.domains?.[0] ?? '—'}</Td>
+              <Td dataLabel={t('Billing account')}>
+                <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsXs' }}>
+                  <FlexItem>{billingAccount ?? '—'}</FlexItem>
+                  {billingAccountId ? (
+                    <FlexItem>
+                      <Content component="small" className="tenants-table__meta">
+                        {billingAccountId}
+                      </Content>
+                    </FlexItem>
+                  ) : null}
+                </Flex>
+              </Td>
+              <Td dataLabel={t('Registered')}>
+                <Timestamp value={tenant.metadata?.creationTimestamp} format="Time" />
+              </Td>
+              <Td dataLabel={t('Actions')} isActionCell>
+                <TenantActionsMenu tenant={tenant} />
+              </Td>
+            </Tr>
+          );
+        })}
       </Tbody>
     </Table>
   );

@@ -1,17 +1,19 @@
-.external-ips-table__name-meta {
-  color: var(--pf-t--global--text--color--subtle);
-  font-size: var(--pf-t--global--font--size--body--sm);
-  line-height: var(--pf-t--global--font--line-height--body);
-}
-
 .external-ips-table__name-link {
   color: var(--pf-t--global--text--color--link--default);
   font-weight: var(--pf-t--global--font--weight--body--bold);
+  text-decoration: none;
 }
 
 .external-ips-table__name-link:hover,
 .external-ips-table__name-link:focus {
   color: var(--pf-t--global--text--color--link--hover);
+  text-decoration: underline;
+}
+
+.external-ips-table__name-meta {
+  color: var(--pf-t--global--text--color--subtle);
+  font-size: var(--pf-t--global--font--size--body--sm);
+  line-height: var(--pf-t--global--font--line-height--body);
 }
 
 .external-ips-table__meta {

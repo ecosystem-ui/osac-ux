@@ -97,7 +97,7 @@ describe('SecurityGroupDetailPage', () => {
     renderPage();
 
     expect(
-      screen.getByText('Details', { selector: '.pf-v6-c-card__title-text' }),
+      screen.getByText('Overview', { selector: '.pf-v6-c-card__title-text' }),
     ).toBeInTheDocument();
     expect(
       screen.getByText('Inbound Rules', { selector: '.pf-v6-c-card__title-text' }),

@@ -64,7 +64,10 @@ export const ExternalIpPoolDetailsPage = () => {
                     />
                   </FlexItem>
                   <FlexItem>
-                    <ExternalIpPoolDetailsActionsMenu onDelete={() => setDeleteOpen(true)} />
+                    <ExternalIpPoolDetailsActionsMenu
+                      poolName={pool.metadata?.name || pool.id}
+                      onDelete={() => setDeleteOpen(true)}
+                    />
                   </FlexItem>
                 </Flex>
               </StackItem>

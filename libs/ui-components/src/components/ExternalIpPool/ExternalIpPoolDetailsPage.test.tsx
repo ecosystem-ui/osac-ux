@@ -162,10 +162,10 @@ describe('ExternalIpPoolDetailsPage', () => {
       expect(screen.getByRole('heading', { name: 'prod-v4' })).toBeInTheDocument();
     });
 
-    expect(screen.getByRole('button', { name: 'Actions' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Actions for prod-v4' })).toBeInTheDocument();
     expect(screen.queryByRole('menuitem', { name: 'Delete' })).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Actions' }));
+    await user.click(screen.getByRole('button', { name: 'Actions for prod-v4' }));
     expect(screen.getByRole('menuitem', { name: 'Delete' })).toBeInTheDocument();
   });
 
@@ -178,7 +178,7 @@ describe('ExternalIpPoolDetailsPage', () => {
       expect(screen.getByRole('heading', { name: 'prod-v4' })).toBeInTheDocument();
     });
 
-    await user.click(screen.getByRole('button', { name: 'Actions' }));
+    await user.click(screen.getByRole('button', { name: 'Actions for prod-v4' }));
     await user.click(screen.getByRole('menuitem', { name: 'Delete' }));
     await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: /^Delete$/i }));
 

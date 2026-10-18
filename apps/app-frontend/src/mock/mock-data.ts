@@ -541,6 +541,7 @@ const clusters: Cluster[] = [
       addOnOperators: [
         { name: 'logging', namespace: 'openshift-logging' },
         { name: 'monitoring', namespace: 'openshift-monitoring' },
+        { name: 'rhoai', namespace: 'redhat-ods-applications' },
       ],
     },
     status: {
@@ -576,6 +577,7 @@ const clusters: Cluster[] = [
       addOnOperators: [
         { name: 'logging', state: AddOnOperatorInstallState.INSTALLED, message: '' },
         { name: 'monitoring', state: AddOnOperatorInstallState.INSTALLED, message: '' },
+        { name: 'rhoai', state: AddOnOperatorInstallState.INSTALLED, message: '' },
       ],
     },
   } as unknown as Cluster,
@@ -1434,8 +1436,8 @@ const privateExternalIpPools: ExternalIPPool[] = [
     status: {
       state: ExternalIPPoolState.EXTERNAL_IP_POOL_STATE_READY,
       total: 62n,
-      allocated: 0n,
-      available: 62n,
+      allocated: 2n,
+      available: 60n,
       hub: 'hub-east-1',
     },
   } as unknown as ExternalIPPool,

@@ -1,12 +1,23 @@
-.storage-resource-link {
+.storage-backends-table__name-link,
+.storage-tiers-table__name-link {
   color: var(--pf-t--global--text--color--link--default);
-  font-size: var(--pf-t--global--font--size--body--sm);
-  font-weight: var(--pf-t--global--font--weight--body--default);
+  font-weight: var(--pf-t--global--font--weight--body--bold);
   text-decoration: none;
 }
 
-.storage-resource-link:hover,
-.storage-resource-link:focus {
+.storage-backends-table__name-link:hover,
+.storage-backends-table__name-link:focus,
+.storage-tiers-table__name-link:hover,
+.storage-tiers-table__name-link:focus {
   color: var(--pf-t--global--text--color--link--hover);
-  text-decoration: none;
+  text-decoration: underline;
+}
+
+.storage-backends-table__name-meta,
+.storage-backends-table__meta,
+.storage-tiers-table__name-meta,
+.storage-tiers-table__meta {
+  color: var(--pf-t--global--text--color--subtle);
+  font-size: var(--pf-t--global--font--size--body--sm);
+  line-height: var(--pf-t--global--font--line-height--body);
 }

@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
-import { Skeleton } from '@patternfly/react-core';
+import { Flex, FlexItem, Skeleton } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { Link } from 'react-router-dom';
 
 import { type Cluster, ClusterState } from '@osac/types';
-import ResourceNameField from '@osac/ui-components/components/Resource/ResourceNameField.tsx';
 
 import ClusterActionsMenu from './ClusterActionsMenu';
 import ClusterRhoaiLabel from './ClusterRhoaiLabel';
@@ -71,16 +71,25 @@ export const ClustersTable = ({ clusters }: ClustersTableProps) => {
           return (
             <Tr key={cluster.id}>
               <Td dataLabel={t('Name')}>
-                <div>
-                  <ResourceNameField
-                    resource={cluster}
-                    detailsUrl={locked ? undefined : `/clusters/${encodeURIComponent(cluster.id)}`}
-                    nameLinkClassName="clusters-table__name-link"
-                  />
-                  <div>
+                <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsXs' }}>
+                  <FlexItem>
+                    {locked ? (
+                      <span className="clusters-table__name-link">
+                        {cluster.metadata?.name || cluster.id}
+                      </span>
+                    ) : (
+                      <Link
+                        to={`/clusters/${encodeURIComponent(cluster.id)}`}
+                        className="clusters-table__name-link"
+                      >
+                        {cluster.metadata?.name || cluster.id}
+                      </Link>
+                    )}
+                  </FlexItem>
+                  <FlexItem>
                     <ClusterRhoaiLabel cluster={cluster} />
-                  </div>
-                </div>
+                  </FlexItem>
+                </Flex>
               </Td>
               <Td dataLabel={t('Status')}>
                 <ClusterStatusLabel state={cluster.status?.state} />

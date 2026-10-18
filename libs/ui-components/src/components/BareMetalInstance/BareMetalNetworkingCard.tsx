@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Alert, Label, Spinner, Stack, StackItem, Title } from '@patternfly/react-core';
+import { Alert, Flex, Label, Spinner, Stack, StackItem, Title } from '@patternfly/react-core';
+import NetworkWiredIcon from '@patternfly/react-icons/dist/esm/icons/network-wired-icon';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
 import { ExternalIPAttachments } from '@osac/types';
@@ -98,9 +99,12 @@ const BareMetalNetworkingCard = ({ instance }: Props) => {
   return (
     <Stack hasGutter>
       <StackItem>
-        <Title headingLevel="h2" size="lg">
-          {t('Networking')}
-        </Title>
+        <Flex alignItems={{ default: 'alignItemsCenter' }} spaceItems={{ default: 'spaceItemsSm' }}>
+          <NetworkWiredIcon aria-hidden />
+          <Title headingLevel="h2" size="lg">
+            {t('Networking')}
+          </Title>
+        </Flex>
       </StackItem>
       <StackItem>
         {isLoading ? (

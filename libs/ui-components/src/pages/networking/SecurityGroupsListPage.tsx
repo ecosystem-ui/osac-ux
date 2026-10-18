@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import {
   SearchInput,
   Toolbar,
@@ -7,21 +6,16 @@ import {
   ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
-import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
 import CreateButton from '@osac/ui-components/components/Primitives/CreateButton.tsx';
-import ResourceNameField from '@osac/ui-components/components/Resource/ResourceNameField.tsx';
 import { SEARCH_PARAM, usePageFilter } from '@osac/ui-components/hooks/use-page-filter.ts';
 
-import {
-  resourceDisplayName,
-  useSecurityGroups,
-  useVirtualNetworks,
-} from '../../api/v1/networking';
+import { useSecurityGroups, useVirtualNetworks } from '../../api/v1/networking';
 import { SecurityGroupCreateModal } from '../../components/networking/SecurityGroupCreateModal';
-import { SecurityGroupStatusLabel } from '../../components/networking/SecurityGroupStatusLabel';
+import { SecurityGroupsTable } from '../../components/networking/SecurityGroupsTable';
 import ListPage from '../../components/Page/ListPage';
 import ListPageBody from '../../components/Page/ListPageBody';
+import ProjectFilter from '../../components/Page/ProjectFilter';
 import { SubtleContent } from '../../components/SubtleContent/SubtleContent';
 import { useTranslation } from '../../hooks/useTranslation';
 
@@ -55,11 +49,15 @@ export const SecurityGroupsListPage = () => {
             <ToolbarContent>
               <ToolbarGroup>
                 <ToolbarItem>
+                  <ProjectFilter />
+                </ToolbarItem>
+                <ToolbarItem>
                   <SearchInput
-                    placeholder={t('Search security groups by name…')}
+                    placeholder={t('Search security groups')}
                     value={search}
                     onChange={(_e, v) => setSearch(v)}
                     onClear={() => setSearch('')}
+                    aria-label={t('Search security groups')}
                   />
                 </ToolbarItem>
               </ToolbarGroup>
@@ -72,49 +70,10 @@ export const SecurityGroupsListPage = () => {
                 : t('No security groups yet. Create one to get started.')}
             </SubtleContent>
           ) : (
-            <Table aria-label="Security groups" variant="compact" borders>
-              <Thead>
-                <Tr>
-                  <Th>{t('Name')}</Th>
-                  <Th>{t('Status')}</Th>
-                  <Th>{t('Virtual Network')}</Th>
-                  <Th>{t('Inbound Rules')}</Th>
-                  <Th>{t('Outbound Rules')}</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {filteredSGs.map((sg) => {
-                  const vnId = sg.spec?.virtualNetwork?.id ?? '';
-                  const vn = virtualNetworks.find((v) => v.id === vnId);
-                  const vnName = resourceDisplayName(vn?.metadata, vnId);
-                  const ingressCount = sg.spec?.ingress?.length ?? 0;
-                  const egressCount = sg.spec?.egress?.length ?? 0;
-
-                  return (
-                    <Tr key={sg.id}>
-                      <Td dataLabel="Name">
-                        <ResourceNameField
-                          resource={sg}
-                          detailsUrl={`/networking/security-groups/${sg.id}`}
-                        />
-                      </Td>
-                      <Td dataLabel="Status">
-                        <SecurityGroupStatusLabel state={sg.status?.state} />
-                      </Td>
-                      <Td dataLabel="Virtual Network">
-                        {vnId ? (
-                          <Link to={`/networking/virtual-networks/${vnId}`}>{vnName}</Link>
-                        ) : (
-                          vnName
-                        )}
-                      </Td>
-                      <Td dataLabel="Inbound Rules">{ingressCount}</Td>
-                      <Td dataLabel="Outbound Rules">{egressCount}</Td>
-                    </Tr>
-                  );
-                })}
-              </Tbody>
-            </Table>
+            <SecurityGroupsTable
+              securityGroups={filteredSGs}
+              virtualNetworks={virtualNetworks}
+            />
           )}
         </ListPageBody>
       </ListPage>

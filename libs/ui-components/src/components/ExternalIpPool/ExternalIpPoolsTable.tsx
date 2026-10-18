@@ -1,7 +1,8 @@
+import { Content, Flex, FlexItem } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { Link } from 'react-router-dom';
 
 import type { ExternalIPPool } from '@osac/types/private';
-import ResourceNameField from '@osac/ui-components/components/Resource/ResourceNameField.tsx';
 
 import ExternalIpPoolActionsMenu from './ExternalIpPoolActionsMenu';
 import ExternalIpPoolStatusLabel from './ExternalIpPoolStatusLabel';
@@ -48,33 +49,43 @@ export const ExternalIpPoolsTable = ({ pools }: ExternalIpPoolsTableProps) => {
         </Tr>
       </Thead>
       <Tbody>
-        {pools.map((pool) => (
-          <Tr key={pool.id}>
-            <Td dataLabel={t('Name')}>
-              <div className="external-ip-pools-table__name">
-                <ResourceNameField
-                  resource={pool}
-                  detailsUrl={`/admin/infrastructure/external-ip-pools/${encodeURIComponent(pool.id)}`}
-                />
-                <span className="external-ip-pools-table__name-meta">
-                  {t('{{inUse}} in use · {{available}} available', {
-                    inUse: pool.status?.allocated?.toString() ?? '0',
-                    available: pool.status?.available?.toString() ?? '0',
-                  })}
-                </span>
-              </div>
-            </Td>
-            <Td dataLabel={t('Status')}>
-              <ExternalIpPoolStatusLabel state={pool.status?.state} />
-            </Td>
-            <Td dataLabel={t('CIDRs')}>{formatCidrs(pool.spec?.cidrs)}</Td>
-            <Td dataLabel={t('Tenant')}>{pool.metadata?.tenant || '—'}</Td>
-            <Td dataLabel={t('Capacity')}>{formatCapacity(pool)}</Td>
-            <Td dataLabel={t('Actions')} isActionCell>
-              <ExternalIpPoolActionsMenu pool={pool} />
-            </Td>
-          </Tr>
-        ))}
+        {pools.map((pool) => {
+          const name = pool.metadata?.name || pool.id;
+
+          return (
+            <Tr key={pool.id}>
+              <Td dataLabel={t('Name')}>
+                <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsXs' }}>
+                  <FlexItem>
+                    <Link
+                      to={`/admin/infrastructure/external-ip-pools/${encodeURIComponent(pool.id)}`}
+                      className="external-ip-pools-table__name-link"
+                    >
+                      {name}
+                    </Link>
+                  </FlexItem>
+                  <FlexItem>
+                    <Content component="small" className="external-ip-pools-table__name-meta">
+                      {t('{{inUse}} in use · {{available}} available', {
+                        inUse: pool.status?.allocated?.toString() ?? '0',
+                        available: pool.status?.available?.toString() ?? '0',
+                      })}
+                    </Content>
+                  </FlexItem>
+                </Flex>
+              </Td>
+              <Td dataLabel={t('Status')}>
+                <ExternalIpPoolStatusLabel state={pool.status?.state} />
+              </Td>
+              <Td dataLabel={t('CIDRs')}>{formatCidrs(pool.spec?.cidrs)}</Td>
+              <Td dataLabel={t('Tenant')}>{pool.metadata?.tenant || '—'}</Td>
+              <Td dataLabel={t('Capacity')}>{formatCapacity(pool)}</Td>
+              <Td dataLabel={t('Actions')} isActionCell>
+                <ExternalIpPoolActionsMenu pool={pool} />
+              </Td>
+            </Tr>
+          );
+        })}
       </Tbody>
     </Table>
   );

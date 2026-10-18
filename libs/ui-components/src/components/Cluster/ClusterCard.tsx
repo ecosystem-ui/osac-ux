@@ -15,6 +15,7 @@ import { ClusterState } from '@osac/types';
 import type { Cluster, ClusterVersion } from '@osac/types';
 
 import ClusterActionsMenu from './ClusterActionsMenu';
+import ClusterRhoaiLabel from './ClusterRhoaiLabel';
 import { ClusterStatusLabel } from './ClusterStatusLabel';
 import { useTranslation } from '../../hooks/useTranslation';
 import { Timestamp } from '../Primitives/Timestamp';
@@ -49,6 +50,7 @@ const ClusterCard = ({ cluster, clusterVersion }: ClusterCardProps) => {
         actions={{
           actions: (
             <div className="cluster-card__header-actions">
+              <ClusterRhoaiLabel cluster={cluster} />
               <ClusterStatusLabel state={cluster.status?.state} />
               {!isDeleting && <ClusterActionsMenu cluster={cluster} />}
             </div>
@@ -60,70 +62,69 @@ const ClusterCard = ({ cluster, clusterVersion }: ClusterCardProps) => {
         </span>
       </CardHeader>
       <CardBody>
-          <Stack hasGutter>
-            <StackItem className="cluster-card__name">
-              <ResourceNameField
-                resource={cluster}
-                detailsUrl={isDeleting ? undefined : `/clusters/${encodeURIComponent(cluster.id)}`}
-              />
-              <Content component="small" className="cluster-card__secondary-cell">
-                {cluster.spec?.catalogItem?.name ?? t('OpenShift cluster')}
-              </Content>
-            </StackItem>
-            <StackItem>
-              <dl className="cluster-card__specs-list">
-                <div className="cluster-card__spec-row">
-                  <dt className="cluster-card__spec-label">{t('Cluster version')}</dt>
-                  <dd className="cluster-card__spec-value">
-                    {version ? (
-                      <span className="cluster-card__spec-value-with-icon">
-                        <ContainerNodeIcon />
-                        {version}
-                      </span>
-                    ) : (
-                      '—'
-                    )}
-                  </dd>
-                </div>
-                <div className="cluster-card__spec-row">
-                  <dt className="cluster-card__spec-label">{t('Node sets')}</dt>
-                  <dd className="cluster-card__spec-value">
-                    {nodeSetSummary.pools > 0
-                      ? t('{{pools}} pools · {{nodes}} nodes', nodeSetSummary)
-                      : '—'}
-                  </dd>
-                </div>
-              </dl>
-            </StackItem>
-            <Divider />
-            <StackItem>
+        <Stack hasGutter>
+          <StackItem className="cluster-card__name">
+            <ResourceNameField
+              resource={cluster}
+              detailsUrl={isDeleting ? undefined : `/clusters/${encodeURIComponent(cluster.id)}`}
+            />
+            <Content component="small" className="cluster-card__secondary-cell">
+              {cluster.spec?.catalogItem?.name ?? t('OpenShift cluster')}
+            </Content>
+          </StackItem>
+          <StackItem>
             <dl className="cluster-card__specs-list">
-
-                <div className="cluster-card__spec-row">
-                    <dt className="cluster-card__footer-label">{t('Project')}</dt>
-                  <dd className="cluster-card__footer-value">
-                    {cluster.metadata?.project || t('Default')}
-                  </dd>
-                </div>
-                <div className="cluster-card__spec-row">
-                      <dt className="cluster-card__footer-label">{t('Created')}</dt>
-                  <dd className="cluster-card__footer-value">
-                    <Timestamp value={cluster.metadata?.creationTimestamp} />
-                  </dd>
-                </div>
-              </dl>
-              <div className="cluster-card__console">
-                  <Button
-                    variant="primary"
-                    isBlock
-                    isDisabled={isDeleting}
-                    className="cluster-card__console-button"
-                  >
-                    {t('Console')}
-                  </Button>
-                </div>
-            </StackItem>
-          </Stack>
+              <div className="cluster-card__spec-row">
+                <dt className="cluster-card__spec-label">{t('Cluster version')}</dt>
+                <dd className="cluster-card__spec-value">
+                  {version ? (
+                    <span className="cluster-card__spec-value-with-icon">
+                      <ContainerNodeIcon />
+                      {version}
+                    </span>
+                  ) : (
+                    '—'
+                  )}
+                </dd>
+              </div>
+              <div className="cluster-card__spec-row">
+                <dt className="cluster-card__spec-label">{t('Node sets')}</dt>
+                <dd className="cluster-card__spec-value">
+                  {nodeSetSummary.pools > 0
+                    ? t('{{pools}} pools · {{nodes}} nodes', nodeSetSummary)
+                    : '—'}
+                </dd>
+              </div>
+            </dl>
+          </StackItem>
+          <Divider />
+          <StackItem>
+            <dl className="cluster-card__specs-list">
+              <div className="cluster-card__spec-row">
+                <dt className="cluster-card__footer-label">{t('Project')}</dt>
+                <dd className="cluster-card__footer-value">
+                  {cluster.metadata?.project || t('Default')}
+                </dd>
+              </div>
+              <div className="cluster-card__spec-row">
+                <dt className="cluster-card__footer-label">{t('Created')}</dt>
+                <dd className="cluster-card__footer-value">
+                  <Timestamp value={cluster.metadata?.creationTimestamp} />
+                </dd>
+              </div>
+            </dl>
+            <div className="cluster-card__console">
+              <Button
+                variant="primary"
+                isBlock
+                isDisabled={isDeleting}
+                className="cluster-card__console-button"
+              >
+                {t('Console')}
+              </Button>
+            </div>
+          </StackItem>
+        </Stack>
       </CardBody>
     </Card>
   );

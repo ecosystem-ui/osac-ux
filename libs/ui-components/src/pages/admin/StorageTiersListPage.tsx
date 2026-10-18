@@ -1,9 +1,21 @@
 import { useMemo } from 'react';
-import { Alert, Flex, FlexItem, Stack, StackItem } from '@patternfly/react-core';
-import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import {
+  Alert,
+  Flex,
+  FlexItem,
+  SearchInput,
+  Stack,
+  StackItem,
+  Toolbar,
+  ToolbarContent,
+  ToolbarGroup,
+  ToolbarItem,
+} from '@patternfly/react-core';
 
+import type { StorageTier } from '@osac/types/private';
+import { cel } from '@osac/ui-components/api/cel';
 import CreateButton from '@osac/ui-components/components/Primitives/CreateButton.tsx';
-import ResourceNameField from '@osac/ui-components/components/Resource/ResourceNameField.tsx';
+import { SEARCH_PARAM, usePageFilter } from '@osac/ui-components/hooks/use-page-filter.ts';
 
 import {
   storageBackendIdsFilter,
@@ -11,19 +23,26 @@ import {
 } from '../../api/v1/private/storage-backends';
 import { usePrivateStorageTiers } from '../../api/v1/private/storage-tiers';
 import ListPageBody from '../../components/Page/ListPageBody';
-import StorageTierActionsMenu from '../../components/Storage/StorageTierActionsMenu';
-import {
-  protocolLabel,
-  uniqueBackendIds,
-} from '../../components/Storage/storageTierBackendResolution';
-import { StorageTierStatusLabel } from '../../components/Storage/StorageTierStatusLabel';
+import { StorageTiersTable } from '../../components/Storage/StorageTiersTable';
+import { uniqueBackendIds } from '../../components/Storage/storageTierBackendResolution';
 import { SubtleContent } from '../../components/SubtleContent/SubtleContent';
 import { useTranslation } from '../../hooks/useTranslation';
 
 export const StorageTiersListPage = () => {
   const { t } = useTranslation();
+  const [search, setSearch] = usePageFilter(SEARCH_PARAM);
 
-  const { data: tiers = [], isLoading, error } = usePrivateStorageTiers();
+  const filter = useMemo(
+    () =>
+      search
+        ? cel<StorageTier>((f) => f.field('metadata.name').contains(search.trim()))
+        : undefined,
+    [search],
+  );
+
+  const { data: tiers = [], isLoading, error } = usePrivateStorageTiers(
+    filter ? { filter } : undefined,
+  );
 
   const backendIds = useMemo(() => uniqueBackendIds(tiers), [tiers]);
 
@@ -36,8 +55,6 @@ export const StorageTiersListPage = () => {
     () => new Map(backends.map((backend) => [backend.id, backend])),
     [backends],
   );
-
-  const protocolLabels = protocolLabel(t);
 
   return (
     <Stack hasGutter>
@@ -63,57 +80,29 @@ export const StorageTiersListPage = () => {
               </StackItem>
             )}
             <StackItem>
+              <Toolbar>
+                <ToolbarContent>
+                  <ToolbarGroup>
+                    <ToolbarItem>
+                      <SearchInput
+                        placeholder={t('Search storage tiers')}
+                        value={search}
+                        onChange={(_e, v) => setSearch(v)}
+                        onClear={() => setSearch('')}
+                        aria-label={t('Search storage tiers')}
+                      />
+                    </ToolbarItem>
+                  </ToolbarGroup>
+                </ToolbarContent>
+              </Toolbar>
               {tiers.length === 0 ? (
                 <SubtleContent component="p">
-                  {t('No storage tiers yet. Create one to get started.')}
+                  {search
+                    ? t('No storage tiers match your search.')
+                    : t('No storage tiers yet. Create one to get started.')}
                 </SubtleContent>
               ) : (
-                <Table aria-label={t('Storage tiers')} variant="compact">
-                  <Thead>
-                    <Tr>
-                      <Th>{t('Name')}</Th>
-                      <Th>{t('Status')}</Th>
-                      <Th>{t('Backends')}</Th>
-                      <Th>{t('Protocol')}</Th>
-                      <Th aria-label={t('Actions')} />
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {tiers.map((tier) => {
-                      const backendAssociations = tier.spec?.backends ?? [];
-                      return (
-                        <Tr key={tier.id}>
-                          <Td dataLabel={t('Name')}>
-                            <ResourceNameField
-                              resource={tier}
-                              detailsUrl={`/admin/infrastructure/storage/tiers/${tier.id}`}
-                            />
-                          </Td>
-                          <Td dataLabel={t('Status')}>
-                            <StorageTierStatusLabel state={tier.status?.state} />
-                          </Td>
-                          <Td dataLabel={t('Backends')}>
-                            {backendAssociations
-                              .map(
-                                (association) =>
-                                  backendsById.get(association.backendId)?.metadata?.name ??
-                                  association.backendId,
-                              )
-                              .join(', ')}
-                          </Td>
-                          <Td dataLabel={t('Protocol')}>
-                            {tier.spec?.protocol !== undefined
-                              ? protocolLabels[tier.spec.protocol]
-                              : '—'}
-                          </Td>
-                          <Td dataLabel={t('Actions')} isActionCell>
-                            <StorageTierActionsMenu tier={tier} />
-                          </Td>
-                        </Tr>
-                      );
-                    })}
-                  </Tbody>
-                </Table>
+                <StorageTiersTable tiers={tiers} backendsById={backendsById} />
               )}
             </StackItem>
           </Stack>

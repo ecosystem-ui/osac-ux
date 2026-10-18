@@ -5,8 +5,6 @@ import {
   Select,
   SelectList,
   SelectOption,
-  Stack,
-  StackItem,
   Toolbar,
   ToolbarContent,
   ToolbarGroup,
@@ -21,6 +19,7 @@ import ListPage from '@osac/ui-components/components/Page/ListPage';
 import ListPageBody from '@osac/ui-components/components/Page/ListPageBody';
 import ProjectFilter from '@osac/ui-components/components/Page/ProjectFilter';
 import CreateButton from '@osac/ui-components/components/Primitives/CreateButton';
+import { SubtleContent } from '@osac/ui-components/components/SubtleContent/SubtleContent';
 import { VolumeTable } from '@osac/ui-components/components/Volume/VolumeTable';
 import {
   SEARCH_PARAM,
@@ -130,65 +129,67 @@ export const VolumesListPage = () => {
       actions={<CreateButton to="/storage/volumes/create">{t('Create volume')}</CreateButton>}
     >
       <ListPageBody isLoading={isLoading} error={error}>
-        <Stack hasGutter>
-          <StackItem>
-            <Toolbar>
-              <ToolbarContent>
-                <ToolbarGroup>
-                  <ToolbarItem>
-                    <ProjectFilter />
-                  </ToolbarItem>
-                </ToolbarGroup>
-                <ToolbarItem>
-                  <Select
-                    isOpen={isStateSelectOpen}
-                    onOpenChange={() => setIsStateSelectOpen((o) => !o)}
-                    onSelect={(_event, value) => {
-                      if (typeof value === 'string' && isVolumeStateFilterValue(value)) {
-                        toggleStateFilter(value);
-                      }
-                    }}
-                    toggle={(toggleRef) => (
-                      <MenuToggle
-                        ref={toggleRef}
-                        onClick={() => setIsStateSelectOpen((o) => !o)}
-                        isExpanded={isStateSelectOpen}
+        <Toolbar>
+          <ToolbarContent>
+            <ToolbarGroup>
+              <ToolbarItem>
+                <ProjectFilter />
+              </ToolbarItem>
+              <ToolbarItem>
+                <Select
+                  isOpen={isStateSelectOpen}
+                  onOpenChange={() => setIsStateSelectOpen((o) => !o)}
+                  onSelect={(_event, value) => {
+                    if (typeof value === 'string' && isVolumeStateFilterValue(value)) {
+                      toggleStateFilter(value);
+                    }
+                  }}
+                  toggle={(toggleRef) => (
+                    <MenuToggle
+                      ref={toggleRef}
+                      onClick={() => setIsStateSelectOpen((o) => !o)}
+                      isExpanded={isStateSelectOpen}
+                    >
+                      {stateToggleLabel}
+                    </MenuToggle>
+                  )}
+                  shouldFocusToggleOnSelect
+                >
+                  <SelectList>
+                    {FILTERABLE_STATE_OPTIONS.map(({ value, enumValue }) => (
+                      <SelectOption
+                        key={value}
+                        value={value}
+                        hasCheckbox
+                        isSelected={stateFilters.includes(value)}
                       >
-                        {stateToggleLabel}
-                      </MenuToggle>
-                    )}
-                    shouldFocusToggleOnSelect
-                  >
-                    <SelectList>
-                      {FILTERABLE_STATE_OPTIONS.map(({ value, enumValue }) => (
-                        <SelectOption
-                          key={value}
-                          value={value}
-                          hasCheckbox
-                          isSelected={stateFilters.includes(value)}
-                        >
-                          {stateLabels[enumValue]}
-                        </SelectOption>
-                      ))}
-                    </SelectList>
-                  </Select>
-                </ToolbarItem>
-                <ToolbarItem>
-                  <SearchInput
-                    placeholder={t('Search volumes by name…')}
-                    value={nameSearch}
-                    onChange={(_event, value) => setNameSearch(value)}
-                    onClear={() => setNameSearch('')}
-                    aria-label={t('Filter volumes by name')}
-                  />
-                </ToolbarItem>
-              </ToolbarContent>
-            </Toolbar>
-          </StackItem>
-          <StackItem>
-            <VolumeTable volumes={volumes} />
-          </StackItem>
-        </Stack>
+                        {stateLabels[enumValue]}
+                      </SelectOption>
+                    ))}
+                  </SelectList>
+                </Select>
+              </ToolbarItem>
+              <ToolbarItem>
+                <SearchInput
+                  placeholder={t('Search volumes')}
+                  value={nameSearch}
+                  onChange={(_event, value) => setNameSearch(value)}
+                  onClear={() => setNameSearch('')}
+                  aria-label={t('Search volumes')}
+                />
+              </ToolbarItem>
+            </ToolbarGroup>
+          </ToolbarContent>
+        </Toolbar>
+        {volumes.length === 0 ? (
+          <SubtleContent component="p">
+            {nameSearch || stateFilters.length > 0 || projectFilter
+              ? t('No volumes match your search.')
+              : t('No volumes yet. Create one to get started.')}
+          </SubtleContent>
+        ) : (
+          <VolumeTable volumes={volumes} />
+        )}
       </ListPageBody>
     </ListPage>
   );

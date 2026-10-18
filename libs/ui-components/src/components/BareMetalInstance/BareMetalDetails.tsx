@@ -9,6 +9,7 @@ import {
   StackItem,
   Title,
 } from '@patternfly/react-core';
+import CheckCircleIcon from '@patternfly/react-icons/dist/esm/icons/check-circle-icon';
 
 import type { BareMetalInstance } from '@osac/types';
 import { BareMetalInstanceState } from '@osac/types';
@@ -97,9 +98,15 @@ const BareMetalDetails = ({ instance }: Props) => {
               <StackItem>
                 <Stack hasGutter>
                   <StackItem>
-                    <Title headingLevel="h2" size="lg">
-                      {t('Conditions')}
-                    </Title>
+                    <Flex
+                      alignItems={{ default: 'alignItemsCenter' }}
+                      spaceItems={{ default: 'spaceItemsSm' }}
+                    >
+                      <CheckCircleIcon aria-hidden />
+                      <Title headingLevel="h2" size="lg">
+                        {t('Conditions')}
+                      </Title>
+                    </Flex>
                   </StackItem>
                   <StackItem>
                     <ResourceConditionsTable

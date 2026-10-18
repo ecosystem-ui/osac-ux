@@ -108,8 +108,10 @@ describe('AdminBareMetalInstanceTypeListPage', () => {
 
     renderPage();
 
-    expect(screen.getByText('No bare metal instance types yet.')).toBeInTheDocument();
-    expect(screen.getByRole('grid', { name: 'Bare metal instance types' })).toBeInTheDocument();
+    expect(screen.getByText(/No bare metal instance types yet/i)).toBeInTheDocument();
+    expect(
+      screen.queryByRole('grid', { name: 'Bare metal instance types' }),
+    ).not.toBeInTheDocument();
   });
 
   it('uses the page-level error state when the query fails', () => {
@@ -156,7 +158,7 @@ describe('AdminBareMetalInstanceTypeListPage', () => {
 
     await waitFor(() => expect(screen.queryByText('bm-type-gpu-1')).not.toBeInTheDocument());
     expect(deleteCalled).toBe(true);
-    expect(screen.getByText('No bare metal instance types yet.')).toBeInTheDocument();
+    expect(screen.getByText(/No bare metal instance types yet/i)).toBeInTheDocument();
   });
 
   it('shows an inline error alert when the delete request fails', async () => {

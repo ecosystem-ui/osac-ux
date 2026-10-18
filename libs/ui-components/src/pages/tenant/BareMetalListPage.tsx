@@ -1,5 +1,4 @@
 import {
-  Alert,
   FormSelect,
   FormSelectOption,
   SearchInput,
@@ -24,6 +23,7 @@ import {
   isViewType,
 } from '@osac/ui-components/components/Primitives/ViewSwitcher';
 import ViewSwitcher from '@osac/ui-components/components/Primitives/ViewSwitcher';
+import { SubtleContent } from '@osac/ui-components/components/SubtleContent/SubtleContent';
 import { SEARCH_PARAM, usePageFilter } from '@osac/ui-components/hooks/use-page-filter';
 import { useUserPreferences } from '@osac/ui-components/hooks/use-user-preferences';
 import { useTranslation } from '@osac/ui-components/hooks/useTranslation';
@@ -130,11 +130,11 @@ export const BareMetalListPage = () => {
           </ToolbarContent>
         </Toolbar>
         {filteredInstances.length === 0 ? (
-          <Alert variant="info" isInline title={t('No bare metal instances found')}>
+          <SubtleContent component="p">
             {search || selectedStatus !== 'all'
-              ? t('No bare metal instances match your filters.')
-              : t('No bare metal instances yet.')}
-          </Alert>
+              ? t('No bare metal instances match your search.')
+              : t('No bare metal instances yet. Create one to get started.')}
+          </SubtleContent>
         ) : viewType === 'cards' ? (
           <BareMetalCards instances={filteredInstances} />
         ) : (

@@ -128,11 +128,11 @@ export const ExternalIpPoolsListPage = () => {
               </ToolbarItem>
               <ToolbarItem>
                 <SearchInput
-                  placeholder={t('Search external networks')}
+                  placeholder={t('Search external IP pools')}
                   value={search}
                   onChange={(_event, value) => setSearch(value)}
                   onClear={() => setSearch('')}
-                  aria-label={t('Search external networks')}
+                  aria-label={t('Search external IP pools')}
                 />
               </ToolbarItem>
             </ToolbarGroup>
@@ -145,9 +145,9 @@ export const ExternalIpPoolsListPage = () => {
         </Toolbar>
         {filteredPools.length === 0 ? (
           <SubtleContent component="p">
-            {pools.length === 0
-              ? t('No external IP pools yet. Create one to get started.')
-              : t('No external IP pools match your filters.')}
+            {search || selectedStatus !== 'all'
+              ? t('No external IP pools match your search.')
+              : t('No external IP pools yet. Create one to get started.')}
           </SubtleContent>
         ) : viewType === 'cards' ? (
           <Gallery

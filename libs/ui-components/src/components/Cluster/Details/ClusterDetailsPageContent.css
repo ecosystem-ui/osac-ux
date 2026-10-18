@@ -34,6 +34,18 @@
   grid-column: auto;
 }
 
+.cluster-details-page__main-stack {
+  row-gap: var(--pf-t--global--spacer--2xl);
+}
+
+.cluster-details-page__main-stack.pf-m-gutter {
+  row-gap: var(--pf-t--global--spacer--2xl);
+}
+
+.cluster-details-page__section-divider {
+  margin-block: var(--pf-t--global--spacer--md);
+}
+
 /* -----------------------------------------------------------------------
  * Rail column cards → see shared/details-page.css (.details-page__rail-card)
  * ----------------------------------------------------------------------- */

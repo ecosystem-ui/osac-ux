@@ -21,6 +21,9 @@ import {
   StackItem,
   Title,
 } from '@patternfly/react-core';
+import ArrowCircleDownIcon from '@patternfly/react-icons/dist/esm/icons/arrow-circle-down-icon';
+import ArrowCircleUpIcon from '@patternfly/react-icons/dist/esm/icons/arrow-circle-up-icon';
+import InfoAltIcon from '@patternfly/react-icons/dist/esm/icons/info-alt-icon';
 
 import { type SecurityGroup, SecurityGroupSchema, SecurityGroupState } from '@osac/types';
 import DeleteResourceButton from '@osac/ui-components/components/Resource/DeleteResourceButton';
@@ -168,9 +171,15 @@ export const SecurityGroupDetailPage = () => {
               <GridItem md={8}>
                 <Stack hasGutter>
                   <StackItem>
-                    <Title headingLevel="h2" size="lg">
-                      {t('Details')}
-                    </Title>
+                    <Flex
+                      alignItems={{ default: 'alignItemsCenter' }}
+                      spaceItems={{ default: 'spaceItemsSm' }}
+                    >
+                      <InfoAltIcon aria-hidden />
+                      <Title headingLevel="h2" size="lg">
+                        {t('Overview')}
+                      </Title>
+                    </Flex>
                   </StackItem>
                   <StackItem>
                     <DescriptionList
@@ -216,9 +225,15 @@ export const SecurityGroupDetailPage = () => {
                   </StackItem>
 
                   <StackItem>
-                    <Title headingLevel="h2" size="lg">
-                      {t('Inbound rules')}
-                    </Title>
+                    <Flex
+                      alignItems={{ default: 'alignItemsCenter' }}
+                      spaceItems={{ default: 'spaceItemsSm' }}
+                    >
+                      <ArrowCircleDownIcon aria-hidden />
+                      <Title headingLevel="h2" size="lg">
+                        {t('Inbound rules')}
+                      </Title>
+                    </Flex>
                   </StackItem>
                   <StackItem>
                     <SecurityGroupRulesTable
@@ -237,9 +252,15 @@ export const SecurityGroupDetailPage = () => {
                   </StackItem>
 
                   <StackItem>
-                    <Title headingLevel="h2" size="lg">
-                      {t('Outbound rules')}
-                    </Title>
+                    <Flex
+                      alignItems={{ default: 'alignItemsCenter' }}
+                      spaceItems={{ default: 'spaceItemsSm' }}
+                    >
+                      <ArrowCircleUpIcon aria-hidden />
+                      <Title headingLevel="h2" size="lg">
+                        {t('Outbound rules')}
+                      </Title>
+                    </Flex>
                   </StackItem>
                   <StackItem>
                     <SecurityGroupRulesTable

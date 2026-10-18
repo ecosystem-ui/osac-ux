@@ -1,11 +1,13 @@
 .clusters-table__name-link {
   color: var(--pf-t--global--text--color--link--default);
   font-weight: var(--pf-t--global--font--weight--body--bold);
+  text-decoration: none;
 }
 
 .clusters-table__name-link:hover,
 .clusters-table__name-link:focus {
   color: var(--pf-t--global--text--color--link--hover);
+  text-decoration: underline;
 }
 
 .clusters-table__name-meta {

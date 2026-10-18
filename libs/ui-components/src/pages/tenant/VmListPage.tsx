@@ -110,40 +110,40 @@ export const VmListPage = () => {
                   <ToolbarItem>
                     <ProjectFilter />
                   </ToolbarItem>
+                  <ToolbarItem>
+                    <ToggleGroup aria-label={t('Filter virtual machines by status')}>
+                      {statusFilterOptions.map((option) => (
+                        <ToggleGroupItem
+                          key={option.value}
+                          text={
+                            <Flex
+                              spaceItems={{ default: 'spaceItemsSm' }}
+                              flexWrap={{ default: 'nowrap' }}
+                            >
+                              <FlexItem>{option.label}</FlexItem>
+                              <FlexItem>
+                                <Label isCompact>{statusCounts[option.value]}</Label>
+                              </FlexItem>
+                            </Flex>
+                          }
+                          buttonId={`vm-filter-status-${option.value}`}
+                          isSelected={statusFilters.includes(option.value)}
+                          onChange={() => setStatusFilters(option.value)}
+                        />
+                      ))}
+                    </ToggleGroup>
+                  </ToolbarItem>
+                  <ToolbarItem>
+                    <SearchInput
+                      placeholder={t('Search virtual machines')}
+                      value={search}
+                      onChange={(_event, value) => setSearch(value)}
+                      onClear={() => setSearch('')}
+                      aria-label={t('Search virtual machines')}
+                      isDisabled={isLoading || !!error}
+                    />
+                  </ToolbarItem>
                 </ToolbarGroup>
-                <ToolbarItem>
-                  <ToggleGroup aria-label={t('Filter virtual machines by status')}>
-                    {statusFilterOptions.map((option) => (
-                      <ToggleGroupItem
-                        key={option.value}
-                        text={
-                          <Flex
-                            spaceItems={{ default: 'spaceItemsSm' }}
-                            flexWrap={{ default: 'nowrap' }}
-                          >
-                            <FlexItem>{option.label}</FlexItem>
-                            <FlexItem>
-                              <Label isCompact>{statusCounts[option.value]}</Label>
-                            </FlexItem>
-                          </Flex>
-                        }
-                        buttonId={`vm-filter-status-${option.value}`}
-                        isSelected={statusFilters.includes(option.value)}
-                        onChange={() => setStatusFilters(option.value)}
-                      />
-                    ))}
-                  </ToggleGroup>
-                </ToolbarItem>
-                <ToolbarItem>
-                  <SearchInput
-                    placeholder={t('Search VMs by name…')}
-                    value={search}
-                    onChange={(_event, value) => setSearch(value)}
-                    onClear={() => setSearch('')}
-                    aria-label={t('Filter virtual machines by name')}
-                    isDisabled={isLoading || !!error}
-                  />
-                </ToolbarItem>
               </ToolbarContent>
             </Toolbar>
           </StackItem>
@@ -159,8 +159,8 @@ export const VmListPage = () => {
               <SubtleContent component="p">
                 {statusFilters.length === 0
                   ? t('Choose one or more statuses above to filter virtual machines.')
-                  : vms?.length
-                    ? t('No virtual machines match your filters.')
+                  : search || vms.length > 0
+                    ? t('No virtual machines match your search.')
                     : t('No virtual machines yet. Create one to get started.')}
               </SubtleContent>
             ) : (
