@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import {
-  Alert,
   MenuToggle,
   SearchInput,
   Select,
@@ -31,6 +30,7 @@ import { useTranslation } from '../../hooks/useTranslation';
 import ListPage from '../Page/ListPage';
 import ListPageBody from '../Page/ListPageBody';
 import ProjectFilter from '../Page/ProjectFilter';
+import { SubtleContent } from '../SubtleContent/SubtleContent';
 
 import './ClustersPage.css';
 
@@ -151,11 +151,11 @@ export const ClustersPage = () => {
           </ToolbarContent>
         </Toolbar>
         {filteredClusters.length === 0 ? (
-          <Alert variant="info" isInline title="No clusters found">
+          <SubtleContent component="p">
             {search || selectedStatus !== 'all'
-              ? t('No clusters match your filters.')
-              : t('No clusters are provisioned for your organization yet.')}
-          </Alert>
+              ? t('No clusters match your search.')
+              : t('No clusters yet. Create one to get started.')}
+          </SubtleContent>
         ) : viewType === 'cards' ? (
           <ClustersCards clusters={filteredClusters} />
         ) : (

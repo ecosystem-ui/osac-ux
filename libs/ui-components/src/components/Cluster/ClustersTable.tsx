@@ -6,12 +6,15 @@ import { type Cluster, ClusterState } from '@osac/types';
 import ResourceNameField from '@osac/ui-components/components/Resource/ResourceNameField.tsx';
 
 import ClusterActionsMenu from './ClusterActionsMenu';
+import ClusterRhoaiLabel from './ClusterRhoaiLabel';
 import { ClusterStatusLabel } from './ClusterStatusLabel';
 import ClusterVersionLifecycleLabel from './ClusterVersionLifecycleLabel';
 import { clusterVersionNamesFilter, useClusterVersions } from '../../api/v1/cluster-versions';
 import { useTranslation } from '../../hooks/useTranslation';
 import ExternalLink from '../Primitives/ExternalLink';
 import { Timestamp } from '../Primitives/Timestamp';
+
+import './ClustersTable.css';
 
 interface ClustersTableProps {
   clusters: Cluster[];
@@ -43,29 +46,6 @@ export const ClustersTable = ({ clusters }: ClustersTableProps) => {
   const { t } = useTranslation();
   const { clusterVersionByName, isClusterVersionsLoading } = useClusterVersionLookup(clusters);
 
-  // Only fetch the versions these clusters reference (by spec.version.name),
-  // in one List call — scales as the catalog grows and paginates.
-  const versionNames = useMemo(
-    () => [
-      ...new Set(
-        clusters
-          .map((cluster) => cluster.spec?.version?.name)
-          .filter((name): name is string => !!name),
-      ),
-    ],
-    [clusters],
-  );
-  const { data: clusterVersions = [], isLoading: isClusterVersionsLoading } = useClusterVersions(
-    { filter: clusterVersionNamesFilter(versionNames) },
-    { enabled: versionNames.length > 0 },
-  );
-
-  // Clusters reference versions by spec.version.name, so key the catalog by name.
-  const clusterVersionByName = useMemo(
-    () => new Map(clusterVersions.map((cv) => [cv.metadata?.name, cv])),
-    [clusterVersions],
-  );
-
   return (
     <Table aria-label={t('Clusters')} variant="compact">
       <Thead>
@@ -91,10 +71,16 @@ export const ClustersTable = ({ clusters }: ClustersTableProps) => {
           return (
             <Tr key={cluster.id}>
               <Td dataLabel={t('Name')}>
-                <ResourceNameField
-                  resource={cluster}
-                  detailsUrl={locked ? undefined : `/clusters/${encodeURIComponent(cluster.id)}`}
-                />
+                <div>
+                  <ResourceNameField
+                    resource={cluster}
+                    detailsUrl={locked ? undefined : `/clusters/${encodeURIComponent(cluster.id)}`}
+                    nameLinkClassName="clusters-table__name-link"
+                  />
+                  <div>
+                    <ClusterRhoaiLabel cluster={cluster} />
+                  </div>
+                </div>
               </Td>
               <Td dataLabel={t('Status')}>
                 <ClusterStatusLabel state={cluster.status?.state} />
